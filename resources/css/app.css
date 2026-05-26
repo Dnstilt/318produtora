@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body.antialiased {
+    margin: 0;
+}
+
+@font-face {
+    font-family: 'Patua One';
+    src: url('/fonts/patua_one_regular.ttf') format('truetype');
+    font-weight: 400;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Outfit';
+    src: url('/fonts/outfit_regular.ttf') format('truetype');
+    font-weight: 400;
+    font-display: swap;
+}

@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
+
+class FooterPhoto extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'photo_avif',
+        'photo_webp',
+        'photo_jpg',
+        'order',
+    ];
+
+    protected $casts = [
+        'updated_at' => 'datetime',
+    ];
+
+    public $timestamps = false;
+
+    protected static function booted(): void
+    {
+        static::saving(function (self $model): void {
+            $model->updated_at = Carbon::now();
+        });
+    }
+}
