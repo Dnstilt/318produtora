@@ -19,6 +19,17 @@ Route::middleware(['auth', 'can:viewAdmin'])->prefix('admin')->group(function ()
 
     Route::put('/social-links/{id}', [AdminController::class, 'updateSocialLink']);
     Route::put('/pages/{slug}', [AdminController::class, 'updatePage']);
+
+    Route::get('/_debug/php-limits', function () {
+        abort_unless(app()->environment('local'), 404);
+
+        return response()->json([
+            'upload_max_filesize' => ini_get('upload_max_filesize'),
+            'post_max_size' => ini_get('post_max_size'),
+            'memory_limit' => ini_get('memory_limit'),
+            'php_ini_loaded' => php_ini_loaded_file(),
+        ]);
+    });
 });
 
 require __DIR__.'/auth.php';

@@ -7,6 +7,7 @@ use FFMpeg\Format\Video\WebM;
 use FFMpeg\Format\Video\X264;
 use FFMpeg\Media\Video;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 use Spatie\ImageOptimizer\OptimizerChainFactory;
@@ -25,11 +26,24 @@ class MediaConversionService
         $mobileWebm = $outputDir.'/'.$slug.'-mobile.webm';
         $mobileMp4 = $outputDir.'/'.$slug.'-mobile.mp4';
 
+        $ffmpegBinary = (string) config('services.ffmpeg.ffmpeg', 'ffmpeg');
+        $ffprobeBinary = (string) config('services.ffmpeg.ffprobe', 'ffprobe');
+
+        $normalizedFfmpeg = str_contains($ffmpegBinary, '\\') ? str_replace('\\', '/', $ffmpegBinary) : $ffmpegBinary;
+        $normalizedFfprobe = str_contains($ffprobeBinary, '\\') ? str_replace('\\', '/', $ffprobeBinary) : $ffprobeBinary;
+
+        Log::info('ffmpeg.binaries', [
+            'ffmpeg' => $normalizedFfmpeg,
+            'ffprobe' => $normalizedFfprobe,
+            'ffmpeg_exists' => is_file($normalizedFfmpeg),
+            'ffprobe_exists' => is_file($normalizedFfprobe),
+        ]);
+
         $ffmpeg = FFMpeg::create([
-            'ffmpeg.binaries' => env('FFMPEG_BINARY', 'ffmpeg'),
-            'ffprobe.binaries' => env('FFPROBE_BINARY', 'ffprobe'),
-            'timeout' => (int) env('FFMPEG_TIMEOUT', 600),
-            'ffmpeg.threads' => (int) env('FFMPEG_THREADS', 0),
+            'ffmpeg.binaries' => $normalizedFfmpeg,
+            'ffprobe.binaries' => $normalizedFfprobe,
+            'timeout' => (int) config('services.ffmpeg.timeout', 600),
+            'ffmpeg.threads' => (int) config('services.ffmpeg.threads', 0),
         ]);
 
         $ffprobe = $ffmpeg->getFFProbe();

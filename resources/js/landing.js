@@ -8,6 +8,91 @@ import 'swiper/css/pagination';
 
 gsap.registerPlugin(ScrollTrigger);
 
+function startLandingLoading() {
+    const overlay = document.getElementById('landing-loading-overlay');
+    const logoWrapper = document.getElementById('landing-loading-logo-wrapper');
+    const progress = document.getElementById('landing-loading-progress');
+    const bar = document.getElementById('landing-loading-progress-bar');
+    const label = document.getElementById('landing-loading-progress-label');
+    const navbarLogo = document.getElementById('landing-navbar-logo');
+
+    if (!overlay || !logoWrapper || !progress || !bar || !label || !navbarLogo) {
+        overlay?.remove();
+        logoWrapper?.remove();
+        progress?.remove();
+        return Promise.resolve();
+    }
+
+    document.body.classList.add('landing-is-loading');
+
+    let pct = 0;
+    let done = false;
+
+    return new Promise((resolve) => {
+        const cleanup = () => {
+            if (done) return;
+            done = true;
+
+            overlay.style.opacity = '0';
+            progress.style.opacity = '0';
+
+            navbarLogo.classList.remove('opacity-0');
+            document.body.classList.remove('landing-is-loading');
+
+            setTimeout(() => {
+                overlay.remove();
+                logoWrapper.remove();
+                progress.remove();
+                resolve();
+            }, 550);
+        };
+
+        const goToNavbar = () => {
+            const rect = navbarLogo.getBoundingClientRect();
+            if (!rect.width || !rect.height) {
+                cleanup();
+                return;
+            }
+
+            progress.style.opacity = '0';
+
+            requestAnimationFrame(() => {
+                logoWrapper.style.top = `${rect.top}px`;
+                logoWrapper.style.left = `${rect.left}px`;
+                logoWrapper.style.width = `${rect.width}px`;
+                logoWrapper.style.height = `${rect.height}px`;
+                logoWrapper.style.transform = 'translate(0, 0)';
+            });
+
+            const onEnd = (e) => {
+                if (e.propertyName !== 'transform' && e.propertyName !== 'width') return;
+                logoWrapper.removeEventListener('transitionend', onEnd);
+                cleanup();
+            };
+
+            logoWrapper.addEventListener('transitionend', onEnd);
+        };
+
+        const tick = () => {
+            if (pct >= 100) {
+                bar.style.width = '100%';
+                label.textContent = '100%';
+                setTimeout(goToNavbar, 700);
+                return;
+            }
+
+            const step = pct < 65 ? Math.random() * 6 + 1 : Math.random() * 2.5 + 0.4;
+            pct = Math.min(pct + step, 100);
+            bar.style.width = `${pct}%`;
+            label.textContent = `${Math.floor(pct)}%`;
+            const delay = pct < 70 ? 70 + Math.random() * 55 : 110 + Math.random() * 90;
+            setTimeout(tick, delay);
+        };
+
+        setTimeout(tick, 350);
+    });
+}
+
 function isMobile() {
     return window.innerWidth < 768;
 }
@@ -200,8 +285,10 @@ function setupFooterCarousel() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    setupVideoLazyLoad();
-    setupNavActive();
-    setupScrollAnimations();
-    setupFooterCarousel();
+    startLandingLoading().then(() => {
+        setupVideoLazyLoad();
+        setupNavActive();
+        setupScrollAnimations();
+        setupFooterCarousel();
+    });
 });

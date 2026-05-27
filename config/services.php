@@ -31,4 +31,11 @@ return [
         ],
     ],
 
+    'ffmpeg' => [
+        'ffmpeg' => env('FFMPEG_BINARY', 'ffmpeg'),
+        'ffprobe' => env('FFPROBE_BINARY', 'ffprobe'),
+        'timeout' => (int) env('FFMPEG_TIMEOUT', 600),
+        'threads' => (int) env('FFMPEG_THREADS', 0),
+    ],
+
 ];

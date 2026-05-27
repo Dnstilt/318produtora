@@ -28,6 +28,9 @@ return Application::configure(basePath: dirname(__DIR__))
                 'method' => $request->method(),
                 'ip' => $request->ip(),
                 'content_length' => $request->server('CONTENT_LENGTH'),
+                'post_max_size' => ini_get('post_max_size'),
+                'upload_max_filesize' => ini_get('upload_max_filesize'),
+                'php_ini_loaded' => php_ini_loaded_file(),
             ]);
 
             return redirect()

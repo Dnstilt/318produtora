@@ -70,6 +70,11 @@ class ProcessVideoJob implements ShouldQueue
                 ),
             ]);
         } catch (Exception $e) {
+            $errorMessage = 'Falha no processamento.';
+            if ($e instanceof \FFMpeg\Exception\ExecutableNotFoundException || $e instanceof \Alchemy\BinaryDriver\Exception\ExecutableNotFoundException) {
+                $errorMessage = 'FFmpeg/FFprobe não encontrado no servidor. Instale e coloque no PATH, ou configure FFMPEG_BINARY e FFPROBE_BINARY no .env.';
+            }
+
             Log::error('Falha ao processar vídeo', [
                 'section_id' => $this->sectionId,
                 'input_path' => $this->inputPath,
@@ -78,7 +83,7 @@ class ProcessVideoJob implements ShouldQueue
 
             $sections->update($section, [
                 'processing_status' => 'error',
-                'processing_error' => 'Falha no processamento.',
+                'processing_error' => $errorMessage,
             ]);
 
             throw $e;

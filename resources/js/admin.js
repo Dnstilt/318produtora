@@ -30,21 +30,39 @@ function initEditors() {
     }
 }
 
-async function pollSectionStatuses() {
-    const statusEls = Array.from(document.querySelectorAll('.js-section-status'));
-    if (statusEls.length === 0) return;
+async function pollSectionStatuses(sectionIds) {
+    const allStatusEls = Array.from(document.querySelectorAll('.js-section-status'));
+    if (allStatusEls.length === 0) return new Map();
+
+    const byId = new Map(
+        allStatusEls
+            .map((el) => [Number(el.dataset.sectionId), el])
+            .filter(([id]) => Number.isFinite(id) && id > 0)
+    );
+
+    const idsToPoll = Array.isArray(sectionIds)
+        ? sectionIds.map((n) => Number(n)).filter((n) => Number.isFinite(n) && n > 0)
+        : Array.from(byId.keys());
+
+    const results = new Map();
 
     await Promise.all(
-        statusEls.map(async (el) => {
-            const id = el.dataset.sectionId;
+        idsToPoll.map(async (id) => {
+            const el = byId.get(id);
+            if (!el) return;
+
             try {
                 const res = await fetch(`/admin/sections/${id}/status`, { headers: { Accept: 'application/json' } });
                 if (!res.ok) return;
                 const json = await res.json();
-                el.textContent = json.status;
+                const status = (json?.status || '').toString().trim();
+                el.textContent = status;
+                results.set(id, status);
             } catch (e) {}
         })
     );
+
+    return results;
 }
 
 window.photoManager = function photoManager(initialPhotos) {
@@ -87,27 +105,38 @@ window.photoManager = function photoManager(initialPhotos) {
 window.addEventListener('DOMContentLoaded', () => {
     initEditors();
     let pollTimer = null;
-    let pollingEnabled = false;
+    const trackedSectionIds = new Set();
 
-    const readStatuses = () =>
-        Array.from(document.querySelectorAll('.js-section-status')).map((el) => (el.textContent || '').trim());
+    const readStatusesById = () => {
+        const statusEls = Array.from(document.querySelectorAll('.js-section-status'));
+        const byId = new Map();
+        for (const el of statusEls) {
+            const id = Number(el.dataset.sectionId);
+            if (!Number.isFinite(id) || id <= 0) continue;
+            byId.set(id, (el.textContent || '').trim());
+        }
+        return byId;
+    };
 
     const startPolling = () => {
         if (pollTimer) return;
-        pollingEnabled = true;
 
         const tick = async () => {
-            await pollSectionStatuses();
-
-            if (!pollingEnabled) {
+            const ids = Array.from(trackedSectionIds);
+            if (ids.length === 0) {
                 clearInterval(pollTimer);
                 pollTimer = null;
                 return;
             }
 
-            const statuses = readStatuses();
-            const shouldKeepPolling = statuses.some((s) => s === 'pending' || s === 'processing');
-            if (!shouldKeepPolling) {
+            const statuses = await pollSectionStatuses(ids);
+            for (const [id, status] of statuses.entries()) {
+                if (status !== 'pending' && status !== 'processing') {
+                    trackedSectionIds.delete(id);
+                }
+            }
+
+            if (trackedSectionIds.size === 0) {
                 clearInterval(pollTimer);
                 pollTimer = null;
             }
@@ -117,13 +146,22 @@ window.addEventListener('DOMContentLoaded', () => {
         pollTimer = setInterval(tick, 3000);
     };
 
-    const initialStatuses = readStatuses();
-    if (initialStatuses.some((s) => s === 'processing')) {
+    const initialStatusesById = readStatusesById();
+    for (const [id, status] of initialStatusesById.entries()) {
+        if (status === 'processing') {
+            trackedSectionIds.add(id);
+        }
+    }
+    if (trackedSectionIds.size > 0) {
         startPolling();
     }
 
     Array.from(document.querySelectorAll('form[action*="/admin/sections/"][action$="/video"]')).forEach((form) => {
         form.addEventListener('submit', () => {
+            const match = form.getAttribute('action')?.match(/\/admin\/sections\/(\d+)\/video$/);
+            if (match) {
+                trackedSectionIds.add(Number(match[1]));
+            }
             startPolling();
         });
     });

@@ -6,6 +6,109 @@ body.antialiased {
     margin: 0;
 }
 
+body.landing-is-loading {
+    overflow: hidden;
+}
+
+#landing-root {
+    opacity: 1;
+    transition: opacity 0.7s ease;
+}
+
+body.landing-is-loading #landing-root {
+    opacity: 0;
+}
+
+#landing-loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: #0a0a0a;
+    z-index: 1000;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+}
+
+#landing-loading-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(255, 79, 0, 0.018) 2px,
+        rgba(255, 79, 0, 0.018) 4px
+    );
+    pointer-events: none;
+}
+
+#landing-loading-logo-wrapper {
+    position: fixed;
+    z-index: 1100;
+    top: 50%;
+    left: 50%;
+    width: 260px;
+    height: 130px;
+    transform: translate(-50%, -50%);
+    will-change: top, left, width, height, transform;
+    transition:
+        top 1s cubic-bezier(.77, 0, .18, 1),
+        left 1s cubic-bezier(.77, 0, .18, 1),
+        width 1s cubic-bezier(.77, 0, .18, 1),
+        height 1s cubic-bezier(.77, 0, .18, 1),
+        transform 1s cubic-bezier(.77, 0, .18, 1);
+}
+
+#landing-loading-logo-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+#landing-loading-progress {
+    position: fixed;
+    z-index: 1100;
+    top: calc(50% + 80px);
+    left: 50%;
+    width: 260px;
+    transform: translateX(-50%);
+    will-change: top, left, width, transform, opacity;
+    transition:
+        top 1s cubic-bezier(.77, 0, .18, 1),
+        left 1s cubic-bezier(.77, 0, .18, 1),
+        width 1s cubic-bezier(.77, 0, .18, 1),
+        transform 1s cubic-bezier(.77, 0, .18, 1),
+        opacity 0.35s ease;
+}
+
+#landing-loading-progress-track {
+    width: 100%;
+    height: 3px;
+    background: #1e1e1e;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+#landing-loading-progress-bar {
+    width: 0%;
+    height: 100%;
+    background: #ff4f00;
+    border-radius: 2px;
+    transition: width 0.12s ease;
+    box-shadow: 0 0 8px #ff4f00, 0 0 18px rgba(255, 79, 0, 0.35);
+}
+
+#landing-loading-progress-label {
+    text-align: right;
+    color: #ff4f00;
+    font-size: 11px;
+    letter-spacing: 2px;
+    margin-top: 6px;
+    font-family: 'Courier New', monospace;
+    opacity: 0.75;
+}
+
 @font-face {
     font-family: 'Patua One';
     src: url('/fonts/patua_one_regular.ttf') format('truetype');
