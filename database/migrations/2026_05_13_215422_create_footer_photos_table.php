@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('photo_avif')->nullable();
             $table->string('photo_webp')->nullable();
-            $table->string('photo_jpg')->nullable();
+            $table->string('photo_jpeg')->nullable();
             $table->unsignedInteger('order')->default(0);
 
             $table->timestamp('updated_at')->nullable();

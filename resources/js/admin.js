@@ -104,8 +104,67 @@ window.photoManager = function photoManager(initialPhotos) {
 
 window.addEventListener('DOMContentLoaded', () => {
     initEditors();
+
+    const setFormSubmitting = (form) => {
+        if (form.dataset.submitting === '1') return false;
+        form.dataset.submitting = '1';
+
+        const loadingText = (form.dataset.loadingText || '').trim();
+        const submitButtons = Array.from(form.querySelectorAll('button[type="submit"], input[type="submit"]'));
+        const fileInputs = Array.from(form.querySelectorAll('input[type="file"]'));
+
+        for (const btn of submitButtons) {
+            if (!btn.dataset.originalLabel) {
+                btn.dataset.originalLabel = btn.tagName === 'INPUT' ? btn.value : btn.textContent || '';
+            }
+            btn.disabled = true;
+            if (loadingText) {
+                if (btn.tagName === 'INPUT') btn.value = loadingText;
+                else btn.textContent = loadingText;
+            }
+        }
+
+        for (const input of fileInputs) {
+            input.disabled = true;
+        }
+
+        const textareas = Array.from(form.querySelectorAll('textarea'));
+        for (const t of textareas) t.readOnly = true;
+
+        const inputs = Array.from(form.querySelectorAll('input:not([type="file"]):not([type="submit"])'));
+        for (const i of inputs) i.readOnly = true;
+
+        return true;
+    };
+
+    Array.from(document.querySelectorAll('form.js-admin-form')).forEach((form) => {
+        form.addEventListener('submit', () => {
+            setFormSubmitting(form);
+        });
+    });
+
     let pollTimer = null;
     const trackedSectionIds = new Set();
+    const videoBanner = document.getElementById('js-video-processing-banner');
+    const videoUploadForms = Array.from(document.querySelectorAll('form.js-video-upload-form'));
+
+    const setVideoUploadsEnabled = (enabled, message) => {
+        for (const form of videoUploadForms) {
+            const button = form.querySelector('button[type="submit"], input[type="submit"]');
+            const file = form.querySelector('input[type="file"]');
+            if (button) button.disabled = !enabled;
+            if (file) file.disabled = !enabled;
+        }
+
+        if (!videoBanner) return;
+        if (enabled) {
+            videoBanner.classList.add('hidden');
+            videoBanner.textContent = '';
+        } else {
+            videoBanner.classList.remove('hidden');
+            videoBanner.textContent = message || 'Processamento em andamento. Aguarde concluir para enviar outro vídeo.';
+        }
+    };
 
     const readStatusesById = () => {
         const statusEls = Array.from(document.querySelectorAll('.js-section-status'));
@@ -139,6 +198,8 @@ window.addEventListener('DOMContentLoaded', () => {
             if (trackedSectionIds.size === 0) {
                 clearInterval(pollTimer);
                 pollTimer = null;
+                setVideoUploadsEnabled(true);
+                sessionStorage.removeItem('adminActiveVideoSectionId');
             }
         };
 
@@ -152,6 +213,18 @@ window.addEventListener('DOMContentLoaded', () => {
             trackedSectionIds.add(id);
         }
     }
+
+    const activeSectionId = Number(sessionStorage.getItem('adminActiveVideoSectionId'));
+    if (Number.isFinite(activeSectionId) && activeSectionId > 0) {
+        const status = initialStatusesById.get(activeSectionId);
+        if (status === 'pending' || status === 'processing') {
+            trackedSectionIds.add(activeSectionId);
+            setVideoUploadsEnabled(false);
+        } else {
+            sessionStorage.removeItem('adminActiveVideoSectionId');
+        }
+    }
+
     if (trackedSectionIds.size > 0) {
         startPolling();
     }
@@ -160,8 +233,11 @@ window.addEventListener('DOMContentLoaded', () => {
         form.addEventListener('submit', () => {
             const match = form.getAttribute('action')?.match(/\/admin\/sections\/(\d+)\/video$/);
             if (match) {
-                trackedSectionIds.add(Number(match[1]));
+                const id = Number(match[1]);
+                trackedSectionIds.add(id);
+                sessionStorage.setItem('adminActiveVideoSectionId', String(id));
             }
+            setVideoUploadsEnabled(false);
             startPolling();
         });
     });

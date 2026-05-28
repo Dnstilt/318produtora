@@ -19,6 +19,12 @@ body.landing-is-loading #landing-root {
     opacity: 0;
 }
 
+#landing-navbar-logo {
+    max-width: none;
+    object-fit: contain;
+    display: block;
+}
+
 #landing-loading-overlay {
     position: fixed;
     inset: 0;
@@ -64,6 +70,7 @@ body.landing-is-loading #landing-root {
     height: 100%;
     object-fit: contain;
     display: block;
+    opacity: 0.80;
 }
 
 #landing-loading-progress {
@@ -106,7 +113,7 @@ body.landing-is-loading #landing-root {
     letter-spacing: 2px;
     margin-top: 6px;
     font-family: 'Courier New', monospace;
-    opacity: 0.75;
+    opacity: 0.80;
 }
 
 @font-face {
@@ -118,6 +125,12 @@ body.landing-is-loading #landing-root {
 @font-face {
     font-family: 'Outfit';
     src: url('/fonts/outfit_regular.ttf') format('truetype');
+    font-weight: 400;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'UniNeue';
+    src: url('/fonts/uni_neue.otf') format('opentype');
     font-weight: 400;
     font-display: swap;
 }

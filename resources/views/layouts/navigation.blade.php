@@ -6,7 +6,7 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ url('/admin') }}">
-                        <img src="{{ asset(config('app.logo_path')) }}" alt="318 Produtora" class="h-20 w-30 pt-4 opacity-60 text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.65)]" />
+                        <img src="{{ asset(config('app.logo_path')) }}" alt="318 Produtora" class="h-20 w-30 pt-4 opacity-70 text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.65)]" />
                     </a>
                 </div>
             </div>

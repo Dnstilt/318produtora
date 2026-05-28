@@ -57,20 +57,28 @@ function startLandingLoading() {
             progress.style.opacity = '0';
 
             requestAnimationFrame(() => {
-                logoWrapper.style.top = `${rect.top}px`;
-                logoWrapper.style.left = `${rect.left}px`;
-                logoWrapper.style.width = `${rect.width}px`;
-                logoWrapper.style.height = `${rect.height}px`;
+                logoWrapper.style.top = `${Math.round(rect.top)}px`;
+                logoWrapper.style.left = `${Math.round(rect.left)}px`;
+                logoWrapper.style.width = `${Math.round(rect.width)}px`;
+                logoWrapper.style.height = `${Math.round(rect.height)}px`;
                 logoWrapper.style.transform = 'translate(0, 0)';
             });
 
+            const remaining = new Set(['top', 'left', 'width', 'height', 'transform']);
+
             const onEnd = (e) => {
-                if (e.propertyName !== 'transform' && e.propertyName !== 'width') return;
+                remaining.delete(e.propertyName);
+                if (remaining.size > 0) return;
                 logoWrapper.removeEventListener('transitionend', onEnd);
                 cleanup();
             };
 
             logoWrapper.addEventListener('transitionend', onEnd);
+
+            setTimeout(() => {
+                logoWrapper.removeEventListener('transitionend', onEnd);
+                cleanup();
+            }, 1600);
         };
 
         const tick = () => {
@@ -170,94 +178,238 @@ function setupVideoLazyLoad() {
     });
 }
 
-function setupNavActive() {
+function setupNavActive(activeIndex) {
     const navItems = Array.from(document.querySelectorAll('.js-nav-item'));
-    const setActive = (id) => {
-        navItems.forEach((el) => {
-            const target = el.dataset.target;
-            el.classList.toggle('is-active', target === id);
-        });
-    };
+    const ids = ['publicidade', 'ooh', 'documentarios', 'natureza', 'rodape'];
+    const activeId = ids[activeIndex];
 
-    ['publicidade', 'ooh', 'documentarios', 'natureza', 'rodape'].forEach((id) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        ScrollTrigger.create({
-            trigger: el,
-            start: 'top center',
-            end: 'bottom center',
-            onEnter: () => setActive(id),
-            onEnterBack: () => setActive(id),
-        });
-    });
-
-    const links = Array.from(document.querySelectorAll('a.js-nav-item'));
-    links.forEach((a) => {
-        a.addEventListener('click', (e) => {
-            const targetId = a.getAttribute('href')?.replace('#', '');
-            const targetEl = targetId ? document.getElementById(targetId) : null;
-            if (!targetEl) return;
-            e.preventDefault();
-            targetEl.scrollIntoView({ behavior: 'smooth' });
-        });
+    navItems.forEach((el) => {
+        const target = el.dataset.target;
+        el.classList.toggle('is-active', target === activeId);
     });
 }
 
 function setupScrollAnimations() {
     const frames = Array.from(document.querySelectorAll('.js-frame'));
+    const footer = document.getElementById('rodape');
+    const wrapper = document.getElementById('frames-wrapper');
 
+    if (!wrapper || frames.length === 0) return;
+
+    // Reset scroll to top on load to avoid being stuck in the middle
+    window.scrollTo(0, 0);
+    if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+    }
+
+    // Lock native scrolling for the body
+    document.body.style.overflow = 'hidden';
+
+    // Stack all frames correctly
     frames.forEach((frame, index) => {
-        const textEl = frame.querySelector('.js-frame-text');
-        if (textEl) {
-            ScrollTrigger.create({
-                trigger: frame,
-                start: 'top top',
-                end: '+=40vh',
-                scrub: true,
-                onUpdate: (self) => {
-                    gsap.to(textEl, {
-                        opacity: self.progress,
-                        y: 30 * (1 - self.progress),
-                        duration: 0,
-                    });
-                },
-            });
-        }
-
-        const isLast = index === frames.length - 1;
-        const nextFrame = !isLast ? frames[index + 1] : document.getElementById('rodape');
-
-        if (!nextFrame) return;
-
-        const tl = gsap.timeline({
-            scrollTrigger: {
-                trigger: frame,
-                start: 'top top',
-                end: '+=100vh',
-                scrub: true,
-                pin: true,
-                pinSpacing: true,
-                anticipatePin: 1,
-            },
+        gsap.set(frame, {
+            zIndex: index + 1,
+            transformOrigin: 'center center',
+            transformPerspective: 1000,
         });
 
-        tl.to({}, { duration: 0.4 });
-
-        if (!isLast) {
-            tl.fromTo(
-                nextFrame,
-                { y: window.innerHeight },
-                { y: 0, duration: 0.6, ease: 'none' },
-                '<'
-            );
-
-            tl.to(
-                frame,
-                { rotate: -6, scale: 0.85, opacity: 0, duration: 0.6, ease: 'none' },
-                '<'
-            );
+        if (index > 0) {
+            gsap.set(frame, { yPercent: 100 });
         } else {
-            tl.to(frame, { y: -window.innerHeight, duration: 0.6, ease: 'none' }, '<');
+            gsap.set(frame, { scale: 1, opacity: 1, filter: 'none', yPercent: 0 });
+        }
+    });
+
+    let currentIndex = 0;
+    let isAnimating = false;
+    const totalSlides = frames.length + (footer ? 1 : 0);
+
+    // Initial nav active state
+    setupNavActive(currentIndex);
+
+    function goToSlide(index) {
+        if (isAnimating || index < 0 || index >= totalSlides || index === currentIndex) return;
+        
+        isAnimating = true;
+        setupNavActive(index); // Update sidebar immediately
+
+        const tl = gsap.timeline({
+            onComplete: () => {
+                isAnimating = false;
+                currentIndex = index;
+            }
+        });
+
+        // Going Down
+        if (index > currentIndex) {
+            for (let i = currentIndex; i < index; i++) {
+                const currentFrame = frames[i];
+                const nextEl = i + 1 < frames.length ? frames[i + 1] : footer;
+                const pos = i - currentIndex; // stagger position
+
+                if (currentFrame) {
+                    tl.to(currentFrame, { 
+                        scale: 0.88, 
+                        z: -220, 
+                        opacity: 0.80, 
+                        duration: 1.5, 
+                        ease: "power2.inOut" 
+                    }, pos * 1.5); // sequence them if jumping multiple slides
+                }
+
+                if (nextEl === footer) {
+                    tl.set(footer, {
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        width: '100vw',
+                        height: '100vh',
+                        zIndex: frames.length + 10,
+                        xPercent: -100,
+                        overflow: 'hidden'
+                    }, pos * 1.5);
+
+                    tl.to(footer, { 
+                        xPercent: 0, 
+                        duration: 1.5, 
+                        ease: "power2.inOut" 
+                    }, pos * 1.5);
+                    
+                    // Unlock scroll after footer comes in
+                    tl.set(document.body, { overflow: 'auto' }, (pos + 1) * 1.5);
+                    // IMPORTANT: We only clear position-related props. 
+                    // Do NOT clear xPercent/transform, otherwise it jumps back off-screen!
+                    tl.set(footer, { clearProps: 'position,top,left,width,height,zIndex,overflow' }, (pos + 1) * 1.5);
+                } else {
+                    tl.to(nextEl, { 
+                        yPercent: 0, 
+                        duration: 1.5, 
+                        ease: "power2.inOut" 
+                    }, pos * 1.5);
+                }
+            }
+        } 
+        // Going Up
+        else if (index < currentIndex) {
+            for (let i = currentIndex; i > index; i--) {
+                const currentEl = i === frames.length ? footer : frames[i];
+                const prevFrame = frames[i - 1];
+                const pos = currentIndex - i; // stagger position
+
+                if (currentEl === footer) {
+                    tl.set(document.body, { overflow: 'hidden' }, pos * 1.5);
+                    tl.set(footer, {
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        width: '100vw',
+                        height: '100vh',
+                        zIndex: frames.length + 10,
+                        xPercent: 0,
+                        overflow: 'hidden'
+                    }, pos * 1.5);
+
+                    tl.to(footer, { 
+                        xPercent: -100, 
+                        duration: 1.5, 
+                        ease: "power2.inOut" 
+                    }, pos * 1.5);
+
+                    tl.to(prevFrame, { 
+                        scale: 1, 
+                        z: 0, 
+                        opacity: 1, 
+                        duration: 1.5, 
+                        ease: "power2.inOut" 
+                    }, pos * 1.5);
+                } else {
+                    tl.to(currentEl, { 
+                        yPercent: 100, 
+                        duration: 1.5, 
+                        ease: "power2.inOut" 
+                    }, pos * 1.5);
+
+                    tl.to(prevFrame, { 
+                        scale: 1, 
+                        z: 0, 
+                        opacity: 1, 
+                        duration: 1.5, 
+                        ease: "power2.inOut" 
+                    }, pos * 1.5);
+                }
+            }
+        }
+    }
+
+    // Handle Navbar Clicks manually since native scroll is locked
+    const navLinks = Array.from(document.querySelectorAll('a.js-nav-item'));
+    const ids = ['publicidade', 'ooh', 'documentarios', 'natureza', 'rodape'];
+    navLinks.forEach((a) => {
+        a.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = a.getAttribute('href')?.replace('#', '');
+            const targetIndex = ids.indexOf(targetId);
+            if (targetIndex !== -1 && targetIndex !== currentIndex) {
+                // If they are in the footer, jump to top first if needed, or just let goToSlide handle it
+                if (currentIndex === totalSlides - 1 && targetIndex !== totalSlides - 1) {
+                    window.scrollTo(0, 0); // Reset native scroll before animating out of footer
+                }
+                goToSlide(targetIndex);
+            }
+        });
+    });
+
+    // Wheel event listener for Desktop
+    window.addEventListener('wheel', (e) => {
+        if (currentIndex === totalSlides - 1) {
+            if (window.scrollY <= 0 && e.deltaY < 0) {
+                e.preventDefault();
+                goToSlide(currentIndex - 1);
+            }
+            return; 
+        }
+
+        e.preventDefault();
+
+        if (e.deltaY > 0) {
+            goToSlide(currentIndex + 1);
+        } else if (e.deltaY < 0) {
+            goToSlide(currentIndex - 1);
+        }
+    }, { passive: false });
+
+    // Touch event listeners for Mobile
+    let touchStartY = 0;
+    window.addEventListener('touchstart', (e) => {
+        touchStartY = e.changedTouches[0].clientY;
+    }, { passive: false });
+
+    window.addEventListener('touchmove', (e) => {
+        if (currentIndex === totalSlides - 1) {
+            if (window.scrollY <= 0) {
+                const touchEndY = e.changedTouches[0].clientY;
+                if (touchEndY > touchStartY) {
+                    e.preventDefault();
+                    goToSlide(currentIndex - 1);
+                }
+            }
+            return;
+        }
+        e.preventDefault();
+    }, { passive: false });
+
+    window.addEventListener('touchend', (e) => {
+        if (currentIndex === totalSlides - 1) return;
+
+        const touchEndY = e.changedTouches[0].clientY;
+        const distance = touchStartY - touchEndY;
+
+        if (Math.abs(distance) > 30) {
+            if (distance > 0) {
+                goToSlide(currentIndex + 1);
+            } else {
+                goToSlide(currentIndex - 1);
+            }
         }
     });
 }

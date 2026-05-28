@@ -10,7 +10,9 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 use Spatie\ImageOptimizer\OptimizerChainFactory;
+use Intervention\Image\Format;
 
 class MediaConversionService
 {
@@ -21,10 +23,10 @@ class MediaConversionService
         $outputDir = 'videos';
         $disk->makeDirectory($outputDir);
 
-        $desktopWebm = $outputDir.'/'.$slug.'-desktop.webm';
-        $desktopMp4 = $outputDir.'/'.$slug.'-desktop.mp4';
-        $mobileWebm = $outputDir.'/'.$slug.'-mobile.webm';
-        $mobileMp4 = $outputDir.'/'.$slug.'-mobile.mp4';
+        $desktopWebm = $outputDir . '/' . $slug . '-desktop.webm';
+        $desktopMp4 = $outputDir . '/' . $slug . '-desktop.mp4';
+        $mobileWebm = $outputDir . '/' . $slug . '-mobile.webm';
+        $mobileMp4 = $outputDir . '/' . $slug . '-mobile.mp4';
 
         $ffmpegBinary = (string) config('services.ffmpeg.ffmpeg', 'ffmpeg');
         $ffprobeBinary = (string) config('services.ffmpeg.ffprobe', 'ffprobe');
@@ -83,18 +85,40 @@ class MediaConversionService
         $jpgPath = $outputDir.'/'.$photoId.'.jpg';
 
         $driver = env('INTERVENTION_IMAGE_DRIVER', 'gd');
-        $manager = ImageManager::usingDriver($driver);
+        
+        // Em Intervention Image 3, os drivers são instanciados explicitamente
+        if ($driver === 'imagick') {
+            $manager = new ImageManager(new \Intervention\Image\Drivers\Imagick\Driver());
+        } else {
+            $manager = new ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+        }
 
-        $image = $manager->decode($file->getPathname())->orient()->cover(1200, 800);
+        $image = $manager->read($file->getPathname())->cover(1200, 800);
 
-        $disk->put($avifPath, (string) $image->encodeUsingFileExtension('avif', 75));
-        $disk->put($webpPath, (string) $image->encodeUsingFileExtension('webp', 82));
-        $disk->put($jpgPath, (string) $image->encodeUsingFileExtension('jpg', 85));
+        try {
+            $disk->put($avifPath, (string) $image->toAvif(75));
+        } catch (\Throwable $e) {
+            Log::warning('GD Extension não suporta AVIF neste servidor, pulando formato AVIF.', ['error' => $e->getMessage()]);
+            $avifPath = null;
+        }
 
-        $optimizer = OptimizerChainFactory::create();
-        $optimizer->optimize($disk->path($avifPath));
-        $optimizer->optimize($disk->path($webpPath));
-        $optimizer->optimize($disk->path($jpgPath));
+        try {
+            $disk->put($webpPath, (string) $image->toWebp(82));
+        } catch (\Throwable $e) {
+            Log::warning('GD Extension não suporta WEBP neste servidor, pulando formato WEBP.', ['error' => $e->getMessage()]);
+            $webpPath = null;
+        }
+
+        $disk->put($jpgPath, (string) $image->toJpeg(85));
+
+        try {
+            $optimizer = OptimizerChainFactory::create();
+            if ($avifPath) $optimizer->optimize($disk->path($avifPath));
+            if ($webpPath) $optimizer->optimize($disk->path($webpPath));
+            $optimizer->optimize($disk->path($jpgPath));
+        } catch (\Throwable $e) {
+            Log::warning('Spatie Optimizer falhou ao otimizar a imagem, mas as imagens foram salvas.', ['error' => $e->getMessage()]);
+        }
 
         return [
             'photo_avif' => $avifPath,
@@ -108,13 +132,17 @@ class MediaConversionService
         $format = (new WebM())->setVideoCodec('libvpx-vp9')->setKiloBitrate($kiloBitrate);
         $format->setAdditionalParameters([
             '-an',
-            '-pix_fmt', 'yuv420p',
-            '-deadline', 'good',
-            '-cpu-used', '4',
-            '-row-mt', '1',
+            '-pix_fmt',
+            'yuv420p',
+            '-deadline',
+            'good',
+            '-cpu-used',
+            '4',
+            '-row-mt',
+            '1',
         ]);
 
-        $video->filters()->custom('scale='.$width.':'.$height.':force_original_aspect_ratio=increase,crop='.$width.':'.$height);
+        $video->filters()->custom('scale=' . $width . ':' . $height . ':force_original_aspect_ratio=increase,crop=' . $width . ':' . $height);
         $video->save($format, $outputPath);
     }
 
@@ -123,13 +151,17 @@ class MediaConversionService
         $format = (new X264())->setKiloBitrate($kiloBitrate);
         $format->setAdditionalParameters([
             '-an',
-            '-pix_fmt', 'yuv420p',
-            '-movflags', '+faststart',
-            '-preset', 'medium',
-            '-profile:v', 'high',
+            '-pix_fmt',
+            'yuv420p',
+            '-movflags',
+            '+faststart',
+            '-preset',
+            'medium',
+            '-profile:v',
+            'high',
         ]);
 
-        $video->filters()->custom('scale='.$width.':'.$height.':force_original_aspect_ratio=increase,crop='.$width.':'.$height);
+        $video->filters()->custom('scale=' . $width . ':' . $height . ':force_original_aspect_ratio=increase,crop=' . $width . ':' . $height);
         $video->save($format, $outputPath);
     }
 }

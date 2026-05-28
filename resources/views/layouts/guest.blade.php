@@ -18,7 +18,7 @@
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
             <div>
                 <a href="/">
-                    <img src="{{ asset(config('app.logo_path')) }}" alt="318 Produtora" class="h-20 w-30 fill-current opacity-60 text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.65)]" />
+                    <img src="{{ asset(config('app.logo_path')) }}" alt="318 Produtora" class="h-20 w-30 fill-current opacity-70 text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.65)]" />
                 </a>
             </div>
 

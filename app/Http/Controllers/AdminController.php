@@ -71,7 +71,7 @@ class AdminController extends Controller
                 'section_id' => $id,
                 'exception' => $e,
             ]);
-            throw $e;
+            return back()->with('error', 'Não foi possível salvar o texto desta seção. Tente novamente.');
         }
     }
 
@@ -106,7 +106,7 @@ class AdminController extends Controller
                 'section_id' => $id,
                 'exception' => $e,
             ]);
-            throw $e;
+            return back()->with('error', 'Não foi possível receber o vídeo. Verifique o arquivo e tente novamente.');
         }
     }
 
@@ -138,7 +138,7 @@ class AdminController extends Controller
                     'user_id' => $request->user()?->id,
                     'exception' => $e,
                 ]);
-                throw $e;
+                return response()->json(['ok' => false, 'message' => 'Não foi possível reordenar as fotos.'], 500);
             }
         }
 
@@ -166,7 +166,7 @@ class AdminController extends Controller
                 'user_id' => $request->user()?->id,
                 'exception' => $e,
             ]);
-            throw $e;
+            return back()->with('error', 'Não foi possível adicionar a foto. Tente novamente.');
         }
     }
 
@@ -196,7 +196,7 @@ class AdminController extends Controller
                 'photo_id' => $id,
                 'exception' => $e,
             ]);
-            throw $e;
+            return back()->with('error', 'Não foi possível remover a foto. Tente novamente.');
         }
     }
 
@@ -230,7 +230,7 @@ class AdminController extends Controller
                 'social_link_id' => $id,
                 'exception' => $e,
             ]);
-            throw $e;
+            return back()->with('error', 'Não foi possível salvar este link. Verifique a URL e tente novamente.');
         }
     }
 
@@ -266,7 +266,7 @@ class AdminController extends Controller
                 'slug' => $slug,
                 'exception' => $e,
             ]);
-            throw $e;
+            return back()->with('error', 'Não foi possível salvar a página. Tente novamente.');
         }
     }
 }

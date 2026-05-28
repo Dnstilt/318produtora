@@ -12,7 +12,7 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                patua: ['"Patua One"', ...defaultTheme.fontFamily.serif],
+                patua: ['"UniNeue"', ...defaultTheme.fontFamily.serif],
             },
         },
     },

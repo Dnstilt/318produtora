@@ -20,6 +20,7 @@
 
             <section class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Seções de Vídeo</h3>
+                <div id="js-video-processing-banner" class="mt-3 hidden rounded-md bg-amber-50 px-4 py-3 text-amber-900"></div>
                 <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
                     @foreach ($sections as $section)
                         <div class="rounded-md border border-gray-200 p-4 dark:border-gray-700">
@@ -34,6 +35,20 @@
                                     </span>
                                 </div>
                             </div>
+                            <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Atualizado em: {{ $section->updated_at?->format('Y-m-d H:i:s') ?? '—' }} · Texto: {{ mb_strlen((string) $section->description_text) }} caracteres
+                            </div>
+                            <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Vídeos:
+                                @if ($section->video_mp4_desktop || $section->video_webm_desktop || $section->video_mp4_mobile || $section->video_webm_mobile)
+                                    {{ $section->video_mp4_desktop ? basename($section->video_mp4_desktop) : '—' }},
+                                    {{ $section->video_webm_desktop ? basename($section->video_webm_desktop) : '—' }},
+                                    {{ $section->video_mp4_mobile ? basename($section->video_mp4_mobile) : '—' }},
+                                    {{ $section->video_webm_mobile ? basename($section->video_webm_mobile) : '—' }}
+                                @else
+                                    —
+                                @endif
+                            </div>
 
                             @if ($section->processing_status === 'error' && $section->processing_error)
                                 <div class="mt-2 text-sm text-red-600">
@@ -41,7 +56,7 @@
                                 </div>
                             @endif
 
-                            <form class="mt-4 space-y-3" method="POST" action="{{ url('/admin/sections/'.$section->id) }}">
+                            <form class="mt-4 space-y-3 js-admin-form" method="POST" action="{{ url('/admin/sections/'.$section->id) }}" data-loading-text="Salvando...">
                                 @csrf
                                 @method('PUT')
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">
@@ -60,7 +75,7 @@
                                 </button>
                             </form>
 
-                            <form class="mt-5 space-y-3" method="POST" action="{{ url('/admin/sections/'.$section->id.'/video') }}" enctype="multipart/form-data">
+                            <form class="mt-5 space-y-3 js-admin-form js-video-upload-form" method="POST" action="{{ url('/admin/sections/'.$section->id.'/video') }}" enctype="multipart/form-data" data-loading-text="Enviando...">
                                 @csrf
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">
                                     Upload do vídeo original
@@ -93,7 +108,7 @@
             <section class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800" x-data="photoManager({{ $photosPayload->toJson() }})">
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Fotos do Carrossel</h3>
-                    <form method="POST" action="{{ url('/admin/photos') }}" enctype="multipart/form-data" class="flex items-center gap-3">
+                    <form method="POST" action="{{ url('/admin/photos') }}" enctype="multipart/form-data" class="flex items-center gap-3 js-admin-form" data-loading-text="Adicionando...">
                         @csrf
                         <input type="file" name="photo" required class="block w-full text-sm text-gray-700 dark:text-gray-200">
                         <button type="submit" class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500">
@@ -120,7 +135,7 @@
                             </div>
                             <div class="mt-2 flex items-center justify-between gap-2">
                                 <div class="text-xs text-gray-600 dark:text-gray-300">#<span x-text="photo.id"></span></div>
-                                <form method="POST" :action="'/admin/photos/' + photo.id" @submit="onDeleteSubmit(photo.id)">
+                                <form method="POST" :action="'/admin/photos/' + photo.id" class="js-admin-form" data-loading-text="Excluindo..." @submit="onDeleteSubmit(photo.id)">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-xs font-semibold text-red-600 hover:underline">Excluir</button>
@@ -135,7 +150,7 @@
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Links das Redes Sociais</h3>
                 <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
                     @foreach ($socialLinks as $link)
-                        <form method="POST" action="{{ url('/admin/social-links/'.$link->id) }}" class="rounded-md border border-gray-200 p-4 dark:border-gray-700">
+                        <form method="POST" action="{{ url('/admin/social-links/'.$link->id) }}" class="rounded-md border border-gray-200 p-4 dark:border-gray-700 js-admin-form" data-loading-text="Salvando...">
                             @csrf
                             @method('PUT')
                             <div class="text-sm font-semibold text-gray-800 dark:text-gray-100">
@@ -162,7 +177,7 @@
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Páginas Estáticas</h3>
 
                 <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    <form method="POST" action="{{ url('/admin/pages/termos') }}" class="rounded-md border border-gray-200 p-4 dark:border-gray-700">
+                    <form method="POST" action="{{ url('/admin/pages/termos') }}" class="rounded-md border border-gray-200 p-4 dark:border-gray-700 js-admin-form" data-loading-text="Salvando...">
                         @csrf
                         @method('PUT')
                         <div class="text-sm font-semibold text-gray-800 dark:text-gray-100">Termos de Uso</div>
@@ -172,7 +187,7 @@
                         </button>
                     </form>
 
-                    <form method="POST" action="{{ url('/admin/pages/privacidade') }}" class="rounded-md border border-gray-200 p-4 dark:border-gray-700">
+                    <form method="POST" action="{{ url('/admin/pages/privacidade') }}" class="rounded-md border border-gray-200 p-4 dark:border-gray-700 js-admin-form" data-loading-text="Salvando...">
                         @csrf
                         @method('PUT')
                         <div class="text-sm font-semibold text-gray-800 dark:text-gray-100">Política de Privacidade</div>

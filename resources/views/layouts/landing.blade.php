@@ -14,7 +14,7 @@
             height: 40px;
             display: flex;
             align-items: center;
-            opacity: 0.45;
+            opacity: 0.90;
             transition: opacity 200ms ease-out;
             overflow: visible;
             /* não cortar o label */
@@ -54,7 +54,7 @@
         }
 
         .nav-item:hover .nav-label {
-            opacity: 0.75;
+            opacity: 1;
         }
     </style>
 </head>
