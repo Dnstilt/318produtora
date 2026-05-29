@@ -9,6 +9,7 @@ class UpdateSectionRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'title' => ['nullable', 'string', 'max:255'],
             'description_text' => ['nullable', 'string', 'max:5000'],
         ];
     }

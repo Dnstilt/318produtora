@@ -138,7 +138,7 @@ body.landing-is-loading #landing-root {
 }
 @font-face {
     font-family: 'PragExtObl';
-    src: url('/fonts/pragmatica_Ext_Bold_Obl.otf') format('opentype');
+    src: url('/fonts/pragmatica-extended-medium.ttf') format('truetype');
     font-weight: 400;
     font-display: swap;
 }

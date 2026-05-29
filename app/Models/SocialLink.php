@@ -11,10 +11,9 @@ class SocialLink extends Model
     use HasFactory;
 
     public const PLATFORM_INSTAGRAM = 'instagram';
-    public const PLATFORM_FACEBOOK = 'facebook';
+    public const PLATFORM_VIMEO = 'vimeo';
     public const PLATFORM_YOUTUBE = 'youtube';
-    public const PLATFORM_LINKEDIN = 'linkedin';
-    public const PLATFORM_TIKTOK = 'tiktok';
+    public const PLATFORM_WHATSAPP = 'whatsapp';
 
     protected $fillable = [
         'platform',

@@ -59,17 +59,33 @@
                         <form class="mt-4 space-y-3 js-admin-form" method="POST" action="{{ url('/admin/sections/'.$section->id) }}" data-loading-text="Salvando...">
                             @csrf
                             @method('PUT')
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                                Texto descritivo
-                            </label>
-                            <textarea
-                                name="description_text"
-                                rows="4"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">{{ old('description_text', $section->description_text) }}</textarea>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                                    Título
+                                </label>
+                                <input
+                                    type="text"
+                                    name="title"
+                                    value="{{ old('title', $section->title) }}"
+                                    class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                                >
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                                    Texto descritivo
+                                </label>
+                                <textarea
+                                    name="description_text"
+                                    rows="4"
+                                    class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">{{ old('description_text', $section->description_text) }}</textarea>
+                            </div>
+
                             <button
                                 type="submit"
                                 class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500">
-                                Salvar texto
+                                Salvar textos
                             </button>
                         </form>
 

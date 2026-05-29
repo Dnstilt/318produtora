@@ -59,7 +59,7 @@ class AdminController extends Controller
             $this->authorize('update', $section);
 
             $validated = $request->validated();
-            $this->sections->updateDescription($id, (string) ($validated['description_text'] ?? ''));
+            $this->sections->updateContent($id, $validated['title'] ?? null, (string) ($validated['description_text'] ?? ''));
 
             Log::info('admin.section.update.success', [
                 'user_id' => $request->user()?->id,

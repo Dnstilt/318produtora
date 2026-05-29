@@ -17,6 +17,7 @@ class Section extends Model
 
     protected $fillable = [
         'slug',
+        'title',
         'description_text',
         'video_webm_desktop',
         'video_mp4_desktop',

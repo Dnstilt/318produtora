@@ -58,10 +58,9 @@ class SocialLinkService
     {
         return [
             SocialLink::PLATFORM_INSTAGRAM,
-            SocialLink::PLATFORM_FACEBOOK,
+            SocialLink::PLATFORM_VIMEO,
             SocialLink::PLATFORM_YOUTUBE,
-            SocialLink::PLATFORM_LINKEDIN,
-            SocialLink::PLATFORM_TIKTOK,
+            SocialLink::PLATFORM_WHATSAPP,
         ];
     }
 }

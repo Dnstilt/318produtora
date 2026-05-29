@@ -31,17 +31,19 @@ class SectionService
         return $this->sections->all()->all();
     }
 
-    public function updateDescription(int $id, string $descriptionText): Section
+    public function updateContent(int $id, ?string $title, string $descriptionText): Section
     {
         $section = $this->requireSection($id);
 
-        Log::info('sections.update_description', [
+        Log::info('sections.update_content', [
             'section_id' => $id,
             'slug' => $section->slug,
+            'title_length' => strlen((string) $title),
             'content_length' => strlen($descriptionText),
         ]);
 
         return $this->sections->update($section, [
+            'title' => $title,
             'description_text' => $descriptionText,
         ]);
     }
