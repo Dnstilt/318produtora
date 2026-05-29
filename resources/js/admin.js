@@ -58,7 +58,7 @@ async function pollSectionStatuses(sectionIds) {
                 const status = (json?.status || '').toString().trim();
                 el.textContent = status;
                 results.set(id, status);
-            } catch (e) {}
+            } catch (e) { }
         })
     );
 
@@ -96,7 +96,20 @@ window.photoManager = function photoManager(initialPhotos) {
                 body: JSON.stringify({ orders: this.photos.map((p) => p.id) }),
             });
         },
-        onDeleteSubmit(id) {
+        onDeleteSubmit(event, id) {
+            if (!window.confirm('Você quer mesmo excluir essa foto?')) {
+                event.preventDefault();
+                event.stopPropagation();
+                // Restore form submitting state since it was blocked
+                const form = event.target;
+                form.dataset.submitting = '0';
+                const submitButtons = Array.from(form.querySelectorAll('button[type="submit"]'));
+                for (const btn of submitButtons) {
+                    btn.disabled = false;
+                    btn.textContent = btn.dataset.originalLabel || 'Excluir';
+                }
+                return false;
+            }
             this.photos = this.photos.filter((p) => p.id !== id);
         },
     };
@@ -122,10 +135,6 @@ window.addEventListener('DOMContentLoaded', () => {
                 if (btn.tagName === 'INPUT') btn.value = loadingText;
                 else btn.textContent = loadingText;
             }
-        }
-
-        for (const input of fileInputs) {
-            input.disabled = true;
         }
 
         const textareas = Array.from(form.querySelectorAll('textarea'));

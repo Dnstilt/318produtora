@@ -26,6 +26,7 @@ class HtmlSanitizerService
             'strong',
             'b',
             'em',
+            'span',
             'i',
             'u',
             'ul',

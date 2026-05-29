@@ -48,14 +48,14 @@ class FooterPhotoService
             'paths' => [
                 'avif' => $photo->photo_avif ? basename($photo->photo_avif) : null,
                 'webp' => $photo->photo_webp ? basename($photo->photo_webp) : null,
-                'jpg' => $photo->photo_jpeg ? basename($photo->photo_jpeg) : null,
+                'jpg' => $photo->photo_jpg ? basename($photo->photo_jpg) : null,
             ],
         ]);
 
         Storage::disk('public')->delete([
             $photo->photo_avif,
             $photo->photo_webp,
-            $photo->photo_jpeg,
+            $photo->photo_jpg,
         ]);
 
         $this->photos->delete($photo);

@@ -9,10 +9,10 @@ use FFMpeg\Media\Video;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
-use Spatie\ImageOptimizer\OptimizerChainFactory;
+use Intervention\Image\ImageManager;
 use Intervention\Image\Format;
+use Spatie\ImageOptimizer\OptimizerChainFactory;
 
 class MediaConversionService
 {
@@ -76,6 +76,8 @@ class MediaConversionService
 
     public function convertFooterPhoto(UploadedFile $file, int $photoId): array
     {
+        Log::info('convertFooterPhoto: Iniciando processo', ['photoId' => $photoId, 'path' => $file->getPathname()]);
+
         $disk = Storage::disk('public');
         $outputDir = 'photos';
         $disk->makeDirectory($outputDir);
@@ -84,34 +86,45 @@ class MediaConversionService
         $webpPath = $outputDir.'/'.$photoId.'.webp';
         $jpgPath = $outputDir.'/'.$photoId.'.jpg';
 
-        $driver = env('INTERVENTION_IMAGE_DRIVER', 'gd');
+        $manager = new ImageManager(new Driver());
         
-        // Em Intervention Image 3, os drivers são instanciados explicitamente
-        if ($driver === 'imagick') {
-            $manager = new ImageManager(new \Intervention\Image\Drivers\Imagick\Driver());
-        } else {
-            $manager = new ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+        try {
+            Log::info('convertFooterPhoto: Lendo a imagem com read()');
+            $image = $manager->decodepath($file);
+            
+            Log::info('convertFooterPhoto: Aplicando cover(1200, 800)');
+            $image->cover(1200, 800);
+        } catch (\Throwable $e) {
+            Log::error('convertFooterPhoto: Erro na leitura ou cover da imagem', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            throw $e;
         }
 
-        $image = $manager->read($file->getPathname())->cover(1200, 800);
-
         try {
-            $disk->put($avifPath, (string) $image->toAvif(75));
+            Log::info('convertFooterPhoto: Tentando converter para AVIF');
+            $disk->put($avifPath, (string) $image->encodeUsingFormat(Format::AVIF, 75));
         } catch (\Throwable $e) {
             Log::warning('GD Extension não suporta AVIF neste servidor, pulando formato AVIF.', ['error' => $e->getMessage()]);
             $avifPath = null;
         }
 
         try {
-            $disk->put($webpPath, (string) $image->toWebp(82));
+            Log::info('convertFooterPhoto: Tentando converter para WEBP');
+            $disk->put($webpPath, (string) $image->encodeUsingFormat(Format::WEBP, 82));
         } catch (\Throwable $e) {
             Log::warning('GD Extension não suporta WEBP neste servidor, pulando formato WEBP.', ['error' => $e->getMessage()]);
             $webpPath = null;
         }
 
-        $disk->put($jpgPath, (string) $image->toJpeg(85));
+        try {
+            Log::info('convertFooterPhoto: Tentando converter para JPEG');
+            $disk->put($jpgPath, (string) $image->encodeUsingFormat(Format::JPEG, 85));
+        } catch (\Throwable $e) {
+            Log::error('convertFooterPhoto: Erro ao converter para JPEG', ['error' => $e->getMessage()]);
+            throw $e;
+        }
 
         try {
+            Log::info('convertFooterPhoto: Iniciando Spatie Optimizer');
             $optimizer = OptimizerChainFactory::create();
             if ($avifPath) $optimizer->optimize($disk->path($avifPath));
             if ($webpPath) $optimizer->optimize($disk->path($webpPath));
@@ -119,6 +132,8 @@ class MediaConversionService
         } catch (\Throwable $e) {
             Log::warning('Spatie Optimizer falhou ao otimizar a imagem, mas as imagens foram salvas.', ['error' => $e->getMessage()]);
         }
+
+        Log::info('convertFooterPhoto: Finalizado com sucesso');
 
         return [
             'photo_avif' => $avifPath,

@@ -1,7 +1,7 @@
 import { gsap } from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import Swiper from 'swiper';
-import { Autoplay, Navigation, Pagination } from 'swiper/modules';
+import { Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -275,11 +275,8 @@ function setupScrollAnimations() {
                         ease: "power2.inOut" 
                     }, pos * 1.5);
                     
-                    // Unlock scroll after footer comes in
-                    tl.set(document.body, { overflow: 'auto' }, (pos + 1) * 1.5);
-                    // IMPORTANT: We only clear position-related props. 
-                    // Do NOT clear xPercent/transform, otherwise it jumps back off-screen!
-                    tl.set(footer, { clearProps: 'position,top,left,width,height,zIndex,overflow' }, (pos + 1) * 1.5);
+                    // Make footer scrollable internally, leave it fixed
+                    tl.set(footer, { overflowY: 'auto', overflowX: 'hidden' }, (pos + 1) * 1.5);
                 } else {
                     tl.to(nextEl, { 
                         yPercent: 0, 
@@ -297,17 +294,7 @@ function setupScrollAnimations() {
                 const pos = currentIndex - i; // stagger position
 
                 if (currentEl === footer) {
-                    tl.set(document.body, { overflow: 'hidden' }, pos * 1.5);
-                    tl.set(footer, {
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        width: '100vw',
-                        height: '100vh',
-                        zIndex: frames.length + 10,
-                        xPercent: 0,
-                        overflow: 'hidden'
-                    }, pos * 1.5);
+                    tl.set(footer, { overflow: 'hidden' }, pos * 1.5);
 
                     tl.to(footer, { 
                         xPercent: -100, 
@@ -362,7 +349,7 @@ function setupScrollAnimations() {
     // Wheel event listener for Desktop
     window.addEventListener('wheel', (e) => {
         if (currentIndex === totalSlides - 1) {
-            if (window.scrollY <= 0 && e.deltaY < 0) {
+            if (footer && footer.scrollTop <= 0 && e.deltaY < 0) {
                 e.preventDefault();
                 goToSlide(currentIndex - 1);
             }
@@ -386,7 +373,7 @@ function setupScrollAnimations() {
 
     window.addEventListener('touchmove', (e) => {
         if (currentIndex === totalSlides - 1) {
-            if (window.scrollY <= 0) {
+            if (footer && footer.scrollTop <= 0) {
                 const touchEndY = e.changedTouches[0].clientY;
                 if (touchEndY > touchStartY) {
                     e.preventDefault();
@@ -419,28 +406,30 @@ function setupFooterCarousel() {
     if (!el) return;
 
     new Swiper(el, {
-        modules: [Autoplay, Pagination, Navigation],
+        modules: [Pagination, Navigation],
         loop: true,
-        autoplay: { delay: 2500, disableOnInteraction: false },
+        centeredSlides: true,
         pagination: { el: el.querySelector('.swiper-pagination'), clickable: true },
         navigation: {
             nextEl: el.querySelector('.swiper-button-next'),
             prevEl: el.querySelector('.swiper-button-prev'),
         },
         slidesPerView: 1,
-        spaceBetween: 12,
+        spaceBetween: 24,
         breakpoints: {
             640: { slidesPerView: 2 },
-            1024: { slidesPerView: 3 },
+            1024: { slidesPerView: 2.5 },
         },
     });
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    startLandingLoading().then(() => {
-        setupVideoLazyLoad();
-        setupNavActive();
-        setupScrollAnimations();
-        setupFooterCarousel();
-    });
+    // Setup everything immediately so the DOM is ready and styled correctly
+    setupVideoLazyLoad();
+    setupNavActive(0);
+    setupScrollAnimations();
+    setupFooterCarousel();
+
+    // Start the loading screen animation
+    startLandingLoading();
 });

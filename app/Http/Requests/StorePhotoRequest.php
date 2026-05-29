@@ -16,7 +16,7 @@ class StorePhotoRequest extends FormRequest
         }
 
         return [
-            'photo' => ['required', 'image', 'max:20480'],
+            'photo' => ['required', 'image', 'max:51200'], // Aumentado para 50MB
         ];
     }
 }

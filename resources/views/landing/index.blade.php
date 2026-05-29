@@ -4,11 +4,11 @@
     <div id="landing-root">
         <div class="fixed left-0 top-0 z-50 h-screen w-[90px] px-3 py-6 xl:w-[130px]">
             <div class="flex flex-col gap-6">
-                <a href="#publicidade" class="block items-center justify-center opacity-80">
+                <a href="#publicidade" class="block items-center justify-center opacity-80 hover:opacity-100 transition-opacity">
                     <img id="landing-navbar-logo" src="{{ asset(config('app.logo_path')) }}" alt="318 Produtora" class="h-[56px] w-[80px] opacity-0 drop-shadow-[2px_2px_3px_rgba(0,0,0,1)] sm:h-[64px] sm:w-[92px] lg:h-[72px] lg:w-[110px] xl:h-[80px] xl:w-[120px]" />
                 </a>
 
-                <nav class="font-patua flex flex-col items-start gap-3">
+                <nav class="font-UniNeue flex flex-col items-start gap-3">
                     @php
                         $nav = [
                             ['id' => 'publicidade', 'label' => 'Publicidade'],
@@ -68,7 +68,7 @@
                         ></video>
 
                     <div class="pointer-events-none absolute inset-x-0 bottom-16 flex justify-center px-6">
-                        <div class="js-frame-text w-full max-w-[850px] text-center text-[#f8f8f8] drop-shadow-[2px_2px_3px_rgba(0,0,0,1)] text-2xl md:text-4xl lg:text-5xl">
+                        <div class="js-frame-text w-full max-w-[850px] font-PragExt text-center text-[#FF4F00] drop-shadow-[2px_2px_3px_rgba(0,0,0,1)] text-2xl md:text-4xl lg:text-5xl">
                             {{ $section?->description_text }}
                         </div>
                     </div>
@@ -77,7 +77,17 @@
             </div>
 
             <footer id="rodape" class="relative min-h-screen w-screen bg-black">
-            <div class="px-6 pt-16">
+            <div class="px-6 pt-16 text-center">
+                @if($rodapeTitulo)
+                    <h1 class="text-3xl text-end md:text-5xl lg:text-6xl font-bold text-[#FF4F00] drop-shadow-[2px_2px_3px_rgba(0,0,0,1)] mb-4 font-PragExtObl">
+                        {{ $rodapeTitulo }}
+                    </h1>
+                @endif
+                @if($rodapeSubtitulo)
+                    <h4 class="text-lg md:text-xl font-PragExt text-end text-gray-300 mb-10 max-w-3xl mx-auto">
+                        {{ $rodapeSubtitulo }}
+                    </h4>
+                @endif
                 <div class="swiper js-swiper">
                     <div class="swiper-wrapper">
                         @foreach (collect($photos)->take(12) as $photo)
@@ -90,7 +100,7 @@
                                         <source srcset="{{ asset('storage/'.$photo->photo_webp) }}" type="image/webp">
                                     @endif
                                     <img
-                                        src="{{ $photo->photo_jpeg ? asset('storage/'.$photo->photo_jpeg) : '' }}"
+                                        src="{{ $photo->photo_jpg ? asset('storage/'.$photo->photo_jpg) : '' }}"
                                         alt=""
                                         class="h-[420px] w-full object-cover"
                                         loading="lazy"
@@ -107,8 +117,9 @@
             </div>
 
             <div class="mx-auto mt-12 flex max-w-5xl flex-col items-center gap-6 px-6 pb-16 text-center">
-                <x-application-logo class="h-10 w-10 fill-current text-white drop-shadow-[2px_2px_3px_rgba(0,0,0,1)]" />
-
+                <a href="#publicidade" class="block items-center justify-center opacity-80 hover:opacity-100 transition-opacity">
+                    <img id="landing-footer-logo" src="{{ asset(config('app.logo_path')) }}" alt="318 Produtora" class="h-[56px] w-[80px] drop-shadow-[2px_2px_3px_rgba(0,0,0,1)] sm:h-[64px] sm:w-[92px] lg:h-[72px] lg:w-[110px] xl:h-[80px] xl:w-[120px]" />
+                </a>
                 <div class="flex flex-wrap items-center justify-center gap-6 text-sm">
                     <a class="underline-offset-4 hover:underline" href="mailto:contato@site.com">Fale Conosco</a>
                     <a class="underline-offset-4 hover:underline" href="{{ url('/termos-de-uso') }}">Termos de Uso</a>

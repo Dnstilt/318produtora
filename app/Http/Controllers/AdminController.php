@@ -40,6 +40,8 @@ class AdminController extends Controller
             'socialLinks' => $this->socialLinks->all(),
             'pageTermos' => $this->pages->findBySlug(Page::SLUG_TERMOS),
             'pagePrivacidade' => $this->pages->findBySlug(Page::SLUG_PRIVACIDADE),
+            'pageRodapeTitulo' => $this->pages->findBySlug(Page::SLUG_RODAPE_TITULO),
+            'pageRodapeSubtitulo' => $this->pages->findBySlug(Page::SLUG_RODAPE_SUBTITULO),
         ]);
     }
 
@@ -117,6 +119,8 @@ class AdminController extends Controller
 
     public function storePhoto(StorePhotoRequest $request): RedirectResponse|JsonResponse
     {
+        Log::info('admin.photos.upload.start', ['is_json' => $request->expectsJson() || $request->isJson()]);
+        
         if ($request->expectsJson() || $request->isJson()) {
             Log::info('admin.photos.reorder.request', [
                 'user_id' => $request->user()?->id,
@@ -124,7 +128,7 @@ class AdminController extends Controller
                 'orders_count' => is_array($request->input('orders')) ? count($request->input('orders')) : null,
             ]);
 
-            try {
+            try { 
                 $this->authorize('create', FooterPhoto::class);
                 $this->photos->reorder($request->validated()['orders']);
 
@@ -150,10 +154,23 @@ class AdminController extends Controller
             'original_name' => $file?->getClientOriginalName(),
             'mime' => $file?->getClientMimeType(),
             'size' => $file?->getSize(),
+            'error' => $file?->getError(),
+            'is_valid' => $file?->isValid(),
         ]);
+
+        if (!$file || !$file->isValid()) {
+            Log::error('admin.photos.upload.invalid', [
+                'user_id' => $request->user()?->id,
+                'error_code' => $file ? $file->getError() : 'no_file',
+                'error_message' => $file ? $file->getErrorMessage() : 'Nenhum arquivo recebido',
+            ]);
+            return back()->with('error', 'Arquivo de foto inválido ou não recebido.');
+        }
 
         try {
             $this->authorize('create', FooterPhoto::class);
+            Log::info('admin.photos.upload.authorized');
+            
             $this->photos->storeUploaded($file);
 
             Log::info('admin.photos.upload.success', [
@@ -164,9 +181,10 @@ class AdminController extends Controller
         } catch (\Throwable $e) {
             Log::error('admin.photos.upload.error', [
                 'user_id' => $request->user()?->id,
-                'exception' => $e,
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
-            return back()->with('error', 'Não foi possível adicionar a foto. Tente novamente.');
+            return back()->with('error', 'Não foi possível adicionar a foto. Erro: ' . $e->getMessage());
         }
     }
 
@@ -236,7 +254,7 @@ class AdminController extends Controller
 
     public function updatePage(UpdatePageRequest $request, string $slug): RedirectResponse
     {
-        if (!in_array($slug, [Page::SLUG_TERMOS, Page::SLUG_PRIVACIDADE], true)) {
+        if (!in_array($slug, [Page::SLUG_TERMOS, Page::SLUG_PRIVACIDADE, Page::SLUG_RODAPE_TITULO, Page::SLUG_RODAPE_SUBTITULO], true)) {
             abort(404);
         }
 

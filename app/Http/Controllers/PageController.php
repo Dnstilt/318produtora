@@ -33,6 +33,8 @@ class PageController extends Controller
             ],
             'photos' => $this->photos->allOrdered(),
             'socialLinks' => $this->socialLinks->all(),
+            'rodapeTitulo' => $this->pages->findBySlug(Page::SLUG_RODAPE_TITULO)?->content ?? 'Conheça nosso trabalho',
+            'rodapeSubtitulo' => $this->pages->findBySlug(Page::SLUG_RODAPE_SUBTITULO)?->content ?? 'Entre em contato para mais informações.',
         ]);
     }
 

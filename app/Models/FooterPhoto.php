@@ -13,7 +13,7 @@ class FooterPhoto extends Model
     protected $fillable = [
         'photo_avif',
         'photo_webp',
-        'photo_jpeg',
+        'photo_jpg',
         'order',
     ];
 
