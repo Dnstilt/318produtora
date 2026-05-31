@@ -43,7 +43,7 @@ class SecurityHeaders
             $connect[] = 'ws://localhost:5173';
         }
 
-        $script = ["'self'"];
+        $script = ["'self'", "'unsafe-inline'"];
         if (app()->environment('local')) {
             $script[] = "'unsafe-eval'";
         }

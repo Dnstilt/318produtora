@@ -1,10 +1,5 @@
 import { gsap } from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
-import Swiper from 'swiper';
-import { Navigation, Pagination } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -137,7 +132,7 @@ function ensureSources(videoEl) {
     }
 
     videoEl.load();
-    videoEl.play().catch(() => {});
+    videoEl.play().catch(() => { });
 }
 
 function setupVideoLazyLoad() {
@@ -229,7 +224,7 @@ function setupScrollAnimations() {
 
     function goToSlide(index) {
         if (isAnimating || index < 0 || index >= totalSlides || index === currentIndex) return;
-        
+
         isAnimating = true;
         setupNavActive(index); // Update sidebar immediately
 
@@ -248,12 +243,12 @@ function setupScrollAnimations() {
                 const pos = i - currentIndex; // stagger position
 
                 if (currentFrame) {
-                    tl.to(currentFrame, { 
-                        scale: 0.88, 
-                        z: -220, 
-                        opacity: 0.80, 
-                        duration: 1.5, 
-                        ease: "power2.inOut" 
+                    tl.to(currentFrame, {
+                        scale: 0.88,
+                        z: -220,
+                        opacity: 0.80,
+                        duration: 1.5,
+                        ease: "power2.inOut"
                     }, pos * 1.5); // sequence them if jumping multiple slides
                 }
 
@@ -266,26 +261,41 @@ function setupScrollAnimations() {
                         height: '100vh',
                         zIndex: frames.length + 10,
                         xPercent: -100,
-                        overflow: 'hidden'
+                        overflow: 'hidden',
+                        scrollTop: 0
                     }, pos * 1.5);
 
-                    tl.to(footer, { 
-                        xPercent: 0, 
-                        duration: 1.5, 
-                        ease: "power2.inOut" 
+                    tl.to(footer, {
+                        xPercent: 0,
+                        duration: 1.5,
+                        ease: "power2.inOut"
                     }, pos * 1.5);
-                    
+
                     // Make footer scrollable internally, leave it fixed
                     tl.set(footer, { overflowY: 'auto', overflowX: 'hidden' }, (pos + 1) * 1.5);
+
+                    // Make Sidebar scroll with the footer content
+                    const sidebar = document.getElementById('sidebar-nav');
+                    if (sidebar) {
+                        footer.addEventListener('scroll', () => {
+                            if (currentIndex === totalSlides - 1) {
+                                sidebar.style.transform = `translateY(-${footer.scrollTop}px)`;
+                            }
+                        });
+                    }
                 } else {
-                    tl.to(nextEl, { 
-                        yPercent: 0, 
-                        duration: 1.5, 
-                        ease: "power2.inOut" 
+                    tl.to(nextEl, {
+                        yPercent: 0,
+                        duration: 1.5,
+                        ease: "power2.inOut"
                     }, pos * 1.5);
+                    tl.call(() => {
+                        if (nextEl !== footer) animateFrameText(nextEl);
+                        footer.scrollTop = 0;
+                    }, [], pos * 1.5 + 0.3);
                 }
             }
-        } 
+        }
         // Going Up
         else if (index < currentIndex) {
             for (let i = currentIndex; i > index; i--) {
@@ -296,33 +306,44 @@ function setupScrollAnimations() {
                 if (currentEl === footer) {
                     tl.set(footer, { overflow: 'hidden' }, pos * 1.5);
 
-                    tl.to(footer, { 
-                        xPercent: -100, 
-                        duration: 1.5, 
-                        ease: "power2.inOut" 
+                    tl.to(footer, {
+                        xPercent: -100,
+                        duration: 1.5,
+                        ease: "power2.inOut"
                     }, pos * 1.5);
 
-                    tl.to(prevFrame, { 
-                        scale: 1, 
-                        z: 0, 
-                        opacity: 1, 
-                        duration: 1.5, 
-                        ease: "power2.inOut" 
+                    // Reset sidebar
+                    const sidebar = document.getElementById('sidebar-nav');
+                    if (sidebar) tl.to(sidebar, { y: 0, duration: 1.5, ease: "power2.inOut" }, pos * 1.5);
+
+
+                    tl.to(prevFrame, {
+                        scale: 1,
+                        z: 0,
+                        opacity: 1,
+                        duration: 1.5,
+                        ease: "power2.inOut"
                     }, pos * 1.5);
+                    tl.call(() => {
+                        animateFrameText(prevFrame);
+                    }, [], pos * 1.5 + 0.3);
                 } else {
-                    tl.to(currentEl, { 
-                        yPercent: 100, 
-                        duration: 1.5, 
-                        ease: "power2.inOut" 
+                    tl.to(currentEl, {
+                        yPercent: 100,
+                        duration: 1.5,
+                        ease: "power2.inOut"
                     }, pos * 1.5);
 
-                    tl.to(prevFrame, { 
-                        scale: 1, 
-                        z: 0, 
-                        opacity: 1, 
-                        duration: 1.5, 
-                        ease: "power2.inOut" 
+                    tl.to(prevFrame, {
+                        scale: 1,
+                        z: 0,
+                        opacity: 1,
+                        duration: 1.5,
+                        ease: "power2.inOut"
                     }, pos * 1.5);
+                    tl.call(() => {
+                        animateFrameText(prevFrame);
+                    }, [], pos * 1.5 + 0.3);
                 }
             }
         }
@@ -349,11 +370,16 @@ function setupScrollAnimations() {
     // Wheel event listener for Desktop
     window.addEventListener('wheel', (e) => {
         if (currentIndex === totalSlides - 1) {
+            // Check if user is scrolling up AND at the top of the footer content
             if (footer && footer.scrollTop <= 0 && e.deltaY < 0) {
+                // Remove fixed sidebar when going back to videos
+                const sidebar = document.getElementById('sidebar-nav');
+                if (sidebar) sidebar.style.transform = '';
+
                 e.preventDefault();
                 goToSlide(currentIndex - 1);
             }
-            return; 
+            return;
         }
 
         e.preventDefault();
@@ -376,6 +402,10 @@ function setupScrollAnimations() {
             if (footer && footer.scrollTop <= 0) {
                 const touchEndY = e.changedTouches[0].clientY;
                 if (touchEndY > touchStartY) {
+                    // Remove fixed sidebar when going back to videos
+                    const sidebar = document.getElementById('sidebar-nav');
+                    if (sidebar) sidebar.style.transform = '';
+
                     e.preventDefault();
                     goToSlide(currentIndex - 1);
                 }
@@ -401,35 +431,112 @@ function setupScrollAnimations() {
     });
 }
 
-function setupFooterCarousel() {
-    const el = document.querySelector('.js-swiper');
-    if (!el) return;
+function splitFrameTexts() {
+    document.querySelectorAll('.js-frame-text').forEach((wrapper) => {
+        wrapper.querySelectorAll('h2, p').forEach((el) => {
+            const words = el.innerText.trim().split(/\s+/);
+            el.innerHTML = words
+                .map(w => `<span class="inline-block will-change-transform">${w}</span>`)
+                .join(' ');
+        });
+        // Esconde imediatamente — sem animar ainda
+        gsap.set(wrapper.querySelectorAll('span'), { opacity: 0, y: 24 });
+    });
+}
 
-    new Swiper(el, {
-        modules: [Pagination, Navigation],
-        loop: true,
-        centeredSlides: true,
-        pagination: { el: el.querySelector('.swiper-pagination'), clickable: true },
-        navigation: {
-            nextEl: el.querySelector('.swiper-button-next'),
-            prevEl: el.querySelector('.swiper-button-prev'),
-        },
-        slidesPerView: 1,
-        spaceBetween: 24,
-        breakpoints: {
-            640: { slidesPerView: 2 },
-            1024: { slidesPerView: 2.5 },
-        },
+function animateFrameText(frameEl) {
+    const spans = frameEl.querySelectorAll('.js-frame-text span');
+    if (!spans.length) return;
+    gsap.killTweensOf(spans);
+    gsap.set(spans, { opacity: 0, y: 24 });
+    gsap.to(spans, {
+        opacity: 1,
+        y: 0,
+        duration: 1.2,
+        ease: 'power2.out',
+        stagger: 0.15,
+        delay: 1,
+    });
+}
+
+function setupFooterTextReveal() {
+    const lines = document.querySelectorAll('.footer-line');
+    const footer = document.getElementById('rodape');
+
+    if (!lines.length || !footer) return;
+
+    function resetLines() {
+        lines.forEach(el => {
+            el.style.transition = 'transform 0s';
+            el.classList.remove('go');
+        });
+    }
+
+    function animateLines() {
+        lines.forEach(el => {
+            const delay = parseInt(el.dataset.delay) || 0;
+            setTimeout(() => {
+                el.style.transition = '';
+                el.classList.add('go');
+            }, delay + 300);
+        });
+    }
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                resetLines();
+                setTimeout(animateLines, 50);
+            } else {
+                resetLines();
+            }
+        });
+    }, { threshold: 0.2 });
+    observer.observe(footer);
+}
+function setupFlipLogo() {
+    const wrap = document.querySelector('.flip-logo-wrap');
+    if (!wrap) return;
+
+    const imgSrc = wrap.dataset.src;
+    const W = wrap.offsetWidth;
+    const H = wrap.offsetHeight;
+    const N = 8;
+    const sw = W / N;
+
+    ['layer-out', 'layer-in'].forEach(cls => {
+        const layer = document.createElement('div');
+        layer.className = `layer ${cls}`;
+
+        for (let i = 0; i < N; i++) {
+            const s = document.createElement('div');
+            s.className = 's';
+
+            const img = document.createElement('img');
+            img.src = imgSrc;
+            img.alt = '318 Produtora';
+            img.style.left = `-${i * sw}px`;
+            img.style.width = `${W}px`;
+            img.style.transitionDelay = `${i * 50}ms`;
+
+            s.appendChild(img);
+            layer.appendChild(s);
+        }
+
+        wrap.appendChild(layer);
     });
 }
 
 window.addEventListener('DOMContentLoaded', () => {
     // Setup everything immediately so the DOM is ready and styled correctly
+    splitFrameTexts();
     setupVideoLazyLoad();
     setupNavActive(0);
     setupScrollAnimations();
-    setupFooterCarousel();
-
+    setupFooterTextReveal();
     // Start the loading screen animation
-    startLandingLoading();
+    startLandingLoading().then(() => {
+        const firstFrame = document.querySelector('.js-frame');
+        if (firstFrame) animateFrameText(firstFrame);
+        setupFlipLogo();
+    });
 });

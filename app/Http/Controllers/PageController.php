@@ -31,7 +31,7 @@ class PageController extends Controller
                 Section::SLUG_DOCUMENTARIOS => $sections->get(Section::SLUG_DOCUMENTARIOS),
                 Section::SLUG_NATUREZA => $sections->get(Section::SLUG_NATUREZA),
             ],
-            'photos' => $this->photos->allOrdered(),
+            'photos' => collect($this->photos->allOrdered()),
             'socialLinks' => $this->socialLinks->all(),
             'rodapeTitulo' => $this->pages->findBySlug(Page::SLUG_RODAPE_TITULO)?->content ?? 'Conheça nosso trabalho',
             'rodapeSubtitulo' => $this->pages->findBySlug(Page::SLUG_RODAPE_SUBTITULO)?->content ?? 'Entre em contato para mais informações.',
