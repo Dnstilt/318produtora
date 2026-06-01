@@ -116,16 +116,6 @@ body.landing-is-loading #landing-root {
     opacity: 0.80;
 }
 
-#landing-footer-fundo {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-    z-index: 0;
-    pointer-events: none;
-}
 /* Footer Line Animation */
 .line-wrap {
     overflow: hidden;
@@ -141,63 +131,28 @@ body.landing-is-loading #landing-root {
 .line-inner.go {
     transform: translateY(0);
     transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
-}
-/* Footer Logo Animation */
-.flip-logo-wrap {
-    position: relative;
-    display: block;
-    width: 180px;
-    height: 130px;
-    cursor: pointer;
-    overflow: visible;
-}
+} 
 
-.flip-logo-wrap .layer {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: row;
-}
-
-.flip-logo-wrap .layer-out { z-index: 2; }
-.flip-logo-wrap .layer-in  { z-index: 1; }
-
-.flip-logo-wrap .s {
-    flex: 1;
-    overflow: hidden;
-    position: relative;
-    height: 100%;
-}
-
-.flip-logo-wrap .s img {
-    position: absolute;
-    top: 0;
-    height: 100%;
-    object-fit: contain;
-}
-
-.flip-logo-wrap .layer-out .s img {
-    transform: translateY(0);
-    transition: transform 0.4s cubic-bezier(0.55, 0, 1, 0.45);
-}
-
-.flip-logo-wrap .layer-in .s img {
-    transform: translateY(100%);
-    transition: transform 0.4s cubic-bezier(0, 0.55, 0.45, 1);
-}
-
-.flip-logo-wrap:hover .layer-out .s img { transform: translateY(-100%); }
-.flip-logo-wrap:hover .layer-in  .s img { transform: translateY(0); }
 
 /* Gallery CSS */
 .gallery-bg {
-    background-color: #000000;
-    background-image: url('/images/fundo-fotos.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-blend-mode: screen; /* ou: (overlay, soft-light) mais visível, (luminosity) mais sutil */
+    position: relative;
+    background-color: #0e0e0e;
 }
+.footer-bg-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    opacity: 1;
+    z-index: 0;
+    pointer-events: none;
+    display: block;
+}
+
 .gallery-section { width: 100%; padding: 2rem 0; }
 
 .gallery-grid {
@@ -217,7 +172,7 @@ body.landing-is-loading #landing-root {
 
 .gallery-item img {
   width: 100%;
-  height: auto;        /* altura automática — respeita proporção original */
+  height: auto;       
   display: block;
 }
 

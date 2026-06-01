@@ -217,12 +217,13 @@ function setupScrollAnimations() {
 
     let currentIndex = 0;
     let isAnimating = false;
+    let goToSlide = null;
     const totalSlides = frames.length + (footer ? 1 : 0);
 
     // Initial nav active state
     setupNavActive(currentIndex);
 
-    function goToSlide(index) {
+    goToSlide = function (index) {
         if (isAnimating || index < 0 || index >= totalSlides || index === currentIndex) return;
 
         isAnimating = true;
@@ -273,15 +274,26 @@ function setupScrollAnimations() {
 
                     // Make footer scrollable internally, leave it fixed
                     tl.set(footer, { overflowY: 'auto', overflowX: 'hidden' }, (pos + 1) * 1.5);
-
+                    const bgImg = footer.querySelector('.footer-bg-img');
+                    if (bgImg) {
+                        tl.call(() => {
+                            bgImg.style.position = 'fixed';
+                            bgImg.style.top = '0';
+                            bgImg.style.left = '0';
+                            bgImg.style.width = '100vw';
+                            bgImg.style.height = '100vh';
+                            bgImg.style.zIndex = '0';
+                        }, [], (pos + 1) * 1.5);
+                    }
                     // Make Sidebar scroll with the footer content
                     const sidebar = document.getElementById('sidebar-nav');
                     if (sidebar) {
-                        footer.addEventListener('scroll', () => {
-                            if (currentIndex === totalSlides - 1) {
-                                sidebar.style.transform = `translateY(-${footer.scrollTop}px)`;
-                            }
-                        });
+                        tl.to(sidebar, {
+                            opacity: 0,
+                            pointerEvents: 'none',
+                            duration: 0.5,
+                            ease: "power2.inOut"
+                        }, pos * 1.5);
                     }
                 } else {
                     tl.to(nextEl, {
@@ -305,7 +317,14 @@ function setupScrollAnimations() {
 
                 if (currentEl === footer) {
                     tl.set(footer, { overflow: 'hidden' }, pos * 1.5);
-
+                    const bgImg = footer.querySelector('.footer-bg-img');
+                    if (bgImg) {
+                        tl.call(() => {
+                            bgImg.style.position = 'absolute';
+                            bgImg.style.width = '100%';
+                            bgImg.style.height = '100%';
+                        }, [], pos * 1.5);
+                    }
                     tl.to(footer, {
                         xPercent: -100,
                         duration: 1.5,
@@ -314,7 +333,12 @@ function setupScrollAnimations() {
 
                     // Reset sidebar
                     const sidebar = document.getElementById('sidebar-nav');
-                    if (sidebar) tl.to(sidebar, { y: 0, duration: 1.5, ease: "power2.inOut" }, pos * 1.5);
+                    if (sidebar) tl.to(sidebar, {
+                        opacity: 1,
+                        pointerEvents: 'auto',
+                        duration: 0.5,
+                        ease: "power2.inOut"
+                    }, pos * 1.5);
 
 
                     tl.to(prevFrame, {
@@ -493,36 +517,14 @@ function setupFooterTextReveal() {
     }, { threshold: 0.2 });
     observer.observe(footer);
 }
-function setupFlipLogo() {
-    const wrap = document.querySelector('.flip-logo-wrap');
-    if (!wrap) return;
 
-    const imgSrc = wrap.dataset.src;
-    const W = wrap.offsetWidth;
-    const H = wrap.offsetHeight;
-    const N = 8;
-    const sw = W / N;
+function setupFooterLogoClick() {
+    const logoLink = document.querySelector('a[data-target="publicidade"][aria-label="318 Produtora"]');
+    if (!logoLink) return;
 
-    ['layer-out', 'layer-in'].forEach(cls => {
-        const layer = document.createElement('div');
-        layer.className = `layer ${cls}`;
-
-        for (let i = 0; i < N; i++) {
-            const s = document.createElement('div');
-            s.className = 's';
-
-            const img = document.createElement('img');
-            img.src = imgSrc;
-            img.alt = '318 Produtora';
-            img.style.left = `-${i * sw}px`;
-            img.style.width = `${W}px`;
-            img.style.transitionDelay = `${i * 50}ms`;
-
-            s.appendChild(img);
-            layer.appendChild(s);
-        }
-
-        wrap.appendChild(layer);
+    logoLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (goToSlide) goToSlide(0);
     });
 }
 
@@ -533,10 +535,10 @@ window.addEventListener('DOMContentLoaded', () => {
     setupNavActive(0);
     setupScrollAnimations();
     setupFooterTextReveal();
+    setupFooterLogoClick();
     // Start the loading screen animation
     startLandingLoading().then(() => {
         const firstFrame = document.querySelector('.js-frame');
         if (firstFrame) animateFrameText(firstFrame);
-        setupFlipLogo();
     });
 });
