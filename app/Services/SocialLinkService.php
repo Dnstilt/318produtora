@@ -60,7 +60,6 @@ class SocialLinkService
             SocialLink::PLATFORM_INSTAGRAM,
             SocialLink::PLATFORM_VIMEO,
             SocialLink::PLATFORM_YOUTUBE,
-            SocialLink::PLATFORM_WHATSAPP,
         ];
     }
 }

@@ -212,31 +212,6 @@
                 </div>
             </section>
 
-            <section class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Páginas Estáticas</h3>
-
-                <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    <form method="POST" action="{{ url('/admin/pages/termos') }}" class="rounded-md border border-gray-200 p-4 dark:border-gray-700 js-admin-form" data-loading-text="Salvando...">
-                        @csrf
-                        @method('PUT')
-                        <div class="text-sm font-semibold text-gray-800 dark:text-gray-100">Termos de Uso</div>
-                        <textarea class="js-editor mt-3 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100" name="content" rows="12">{{ old('content', $pageTermos?->content) }}</textarea>
-                        <button type="submit" class="mt-3 inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500">
-                            Salvar
-                        </button>
-                    </form>
-
-                    <form method="POST" action="{{ url('/admin/pages/privacidade') }}" class="rounded-md border border-gray-200 p-4 dark:border-gray-700 js-admin-form" data-loading-text="Salvando...">
-                        @csrf
-                        @method('PUT')
-                        <div class="text-sm font-semibold text-gray-800 dark:text-gray-100">Política de Privacidade</div>
-                        <textarea class="js-editor mt-3 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100" name="content" rows="12">{{ old('content', $pagePrivacidade?->content) }}</textarea>
-                        <button type="submit" class="mt-3 inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500">
-                            Salvar
-                        </button>
-                    </form>
-                </div>
-            </section>
         </div>
     </div>
 

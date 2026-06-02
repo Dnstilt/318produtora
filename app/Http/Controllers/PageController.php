@@ -37,18 +37,4 @@ class PageController extends Controller
             'rodapeSubtitulo' => $this->pages->findBySlug(Page::SLUG_RODAPE_SUBTITULO)?->content ?? 'Entre em contato para mais informações.',
         ]);
     }
-
-    public function termos(): View
-    {
-        return view('pages.termos', [
-            'page' => $this->pages->findBySlug(Page::SLUG_TERMOS),
-        ]);
-    }
-
-    public function privacidade(): View
-    {
-        return view('pages.privacidade', [
-            'page' => $this->pages->findBySlug(Page::SLUG_PRIVACIDADE),
-        ]);
-    }
 }

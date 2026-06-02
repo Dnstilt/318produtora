@@ -133,24 +133,10 @@ body.landing-is-loading #landing-root {
     transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
 } 
 
-
 /* Gallery CSS */
 .gallery-bg {
     position: relative;
     background-color: #0e0e0e;
-}
-.footer-bg-img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center top;
-    opacity: 1;
-    z-index: 0;
-    pointer-events: none;
-    display: block;
 }
 
 .gallery-section { width: 100%; padding: 2rem 0; }

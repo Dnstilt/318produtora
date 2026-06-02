@@ -10,8 +10,6 @@ class Page extends Model
 {
     use HasFactory;
 
-    public const SLUG_TERMOS = 'termos';
-    public const SLUG_PRIVACIDADE = 'privacidade';
     public const SLUG_RODAPE_TITULO = 'rodape_titulo';
     public const SLUG_RODAPE_SUBTITULO = 'rodape_subtitulo';
 

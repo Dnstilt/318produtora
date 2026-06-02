@@ -11,13 +11,14 @@ class PageService
     public function __construct(
         private readonly PageRepositoryInterface $pages,
         private readonly HtmlSanitizerService $sanitizer,
-    ) {
-    }
+    ) {}
 
     public function ensureDefaultsExist(): void
     {
         foreach ($this->defaultSlugs() as $slug) {
-            $this->pages->upsertBySlug($slug, ['content' => '']);
+            if (!$this->pages->findBySlug($slug)) {
+                $this->pages->upsertBySlug($slug, ['content' => '']);
+            }
         }
     }
 
@@ -51,8 +52,8 @@ class PageService
     private function defaultSlugs(): array
     {
         return [
-            Page::SLUG_TERMOS,
-            Page::SLUG_PRIVACIDADE,
+            Page::SLUG_RODAPE_TITULO,
+            Page::SLUG_RODAPE_SUBTITULO,
         ];
     }
 }

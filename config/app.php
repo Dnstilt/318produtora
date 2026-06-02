@@ -55,7 +55,6 @@ return [
     'url' => env('APP_URL', 'http://localhost'),
 
     'logo_path' => env('APP_LOGO_PATH', 'logo/logo_318_Produtora_laranja.png'),
-    'footer_fundo_path' => env('APP_FOOTER_FUNDO_PATH', 'images/fundo-fotos.jpg'),
 
     /*
     |--------------------------------------------------------------------------

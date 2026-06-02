@@ -3,6 +3,8 @@ import ScrollTrigger from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
+let goToSlide = null;
+
 function startLandingLoading() {
     const overlay = document.getElementById('landing-loading-overlay');
     const logoWrapper = document.getElementById('landing-loading-logo-wrapper');
@@ -184,6 +186,8 @@ function setupNavActive(activeIndex) {
     });
 }
 
+
+
 function setupScrollAnimations() {
     const frames = Array.from(document.querySelectorAll('.js-frame'));
     const footer = document.getElementById('rodape');
@@ -217,7 +221,7 @@ function setupScrollAnimations() {
 
     let currentIndex = 0;
     let isAnimating = false;
-    let goToSlide = null;
+
     const totalSlides = frames.length + (footer ? 1 : 0);
 
     // Initial nav active state
@@ -274,17 +278,9 @@ function setupScrollAnimations() {
 
                     // Make footer scrollable internally, leave it fixed
                     tl.set(footer, { overflowY: 'auto', overflowX: 'hidden' }, (pos + 1) * 1.5);
-                    const bgImg = footer.querySelector('.footer-bg-img');
-                    if (bgImg) {
-                        tl.call(() => {
-                            bgImg.style.position = 'fixed';
-                            bgImg.style.top = '0';
-                            bgImg.style.left = '0';
-                            bgImg.style.width = '100vw';
-                            bgImg.style.height = '100vh';
-                            bgImg.style.zIndex = '0';
-                        }, [], (pos + 1) * 1.5);
-                    }
+                    tl.call(() => {
+                        if (window._revealFooterLines) window._revealFooterLines();
+                    }, [], (pos + 1) * 1.5 + 0.1);
                     // Make Sidebar scroll with the footer content
                     const sidebar = document.getElementById('sidebar-nav');
                     if (sidebar) {
@@ -317,14 +313,9 @@ function setupScrollAnimations() {
 
                 if (currentEl === footer) {
                     tl.set(footer, { overflow: 'hidden' }, pos * 1.5);
-                    const bgImg = footer.querySelector('.footer-bg-img');
-                    if (bgImg) {
-                        tl.call(() => {
-                            bgImg.style.position = 'absolute';
-                            bgImg.style.width = '100%';
-                            bgImg.style.height = '100%';
-                        }, [], pos * 1.5);
-                    }
+                    tl.call(() => {
+                        if (window._resetFooterLines) window._resetFooterLines();
+                    }, [], pos * 1.5);
                     tl.to(footer, {
                         xPercent: -100,
                         duration: 1.5,
@@ -485,9 +476,7 @@ function animateFrameText(frameEl) {
 
 function setupFooterTextReveal() {
     const lines = document.querySelectorAll('.footer-line');
-    const footer = document.getElementById('rodape');
-
-    if (!lines.length || !footer) return;
+    if (!lines.length) return;
 
     function resetLines() {
         lines.forEach(el => {
@@ -505,17 +494,14 @@ function setupFooterTextReveal() {
             }, delay + 300);
         });
     }
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                resetLines();
-                setTimeout(animateLines, 50);
-            } else {
-                resetLines();
-            }
-        });
-    }, { threshold: 0.2 });
-    observer.observe(footer);
+
+    // Expõe para ser chamada pelo goToSlide
+    window._revealFooterLines = () => {
+        resetLines();
+        setTimeout(animateLines, 50);
+    };
+
+    window._resetFooterLines = resetLines;
 }
 
 function setupFooterLogoClick() {

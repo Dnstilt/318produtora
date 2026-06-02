@@ -38,8 +38,6 @@ class AdminController extends Controller
             'sections' => $this->sections->all(),
             'photos' => $this->photos->allOrdered(),
             'socialLinks' => $this->socialLinks->all(),
-            'pageTermos' => $this->pages->findBySlug(Page::SLUG_TERMOS),
-            'pagePrivacidade' => $this->pages->findBySlug(Page::SLUG_PRIVACIDADE),
             'pageRodapeTitulo' => $this->pages->findBySlug(Page::SLUG_RODAPE_TITULO),
             'pageRodapeSubtitulo' => $this->pages->findBySlug(Page::SLUG_RODAPE_SUBTITULO),
         ]);
@@ -254,7 +252,7 @@ class AdminController extends Controller
 
     public function updatePage(UpdatePageRequest $request, string $slug): RedirectResponse
     {
-        if (!in_array($slug, [Page::SLUG_TERMOS, Page::SLUG_PRIVACIDADE, Page::SLUG_RODAPE_TITULO, Page::SLUG_RODAPE_SUBTITULO], true)) {
+        if (!in_array($slug, [Page::SLUG_RODAPE_TITULO, Page::SLUG_RODAPE_SUBTITULO], true)) {
             abort(404);
         }
 

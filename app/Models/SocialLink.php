@@ -13,7 +13,6 @@ class SocialLink extends Model
     public const PLATFORM_INSTAGRAM = 'instagram';
     public const PLATFORM_VIMEO = 'vimeo';
     public const PLATFORM_YOUTUBE = 'youtube';
-    public const PLATFORM_WHATSAPP = 'whatsapp';
 
     protected $fillable = [
         'platform',

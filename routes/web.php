@@ -5,8 +5,6 @@ use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PageController::class, 'landing']);
-Route::get('/termos-de-uso', [PageController::class, 'termos']);
-Route::get('/politica-de-privacidade', [PageController::class, 'privacidade']);
 
 Route::middleware(['auth', 'can:viewAdmin'])->prefix('admin')->group(function () {
     Route::get('/', [AdminController::class, 'index']);
