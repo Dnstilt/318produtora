@@ -2,10 +2,9 @@
 
 namespace App\Services;
 
-use FFMpeg\FFMpeg;
-use FFMpeg\Format\Video\WebM;
-use FFMpeg\Format\Video\X264;
-use FFMpeg\Media\Video;
+use CloudConvert\CloudConvert;
+use CloudConvert\Models\Job;
+use CloudConvert\Models\Task;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -16,61 +15,206 @@ use Spatie\ImageOptimizer\OptimizerChainFactory;
 
 class MediaConversionService
 {
-    public function convertSectionVideo(string $inputPath, string $slug): array
+    private CloudConvert $cloudConvert;
+
+    public function __construct()
     {
-        $disk = Storage::disk('public');
-
-        $outputDir = 'videos';
-        $disk->makeDirectory($outputDir);
-
-        $desktopWebm = $outputDir . '/' . $slug . '-desktop.webm';
-        $desktopMp4 = $outputDir . '/' . $slug . '-desktop.mp4';
-        $mobileWebm = $outputDir . '/' . $slug . '-mobile.webm';
-        $mobileMp4 = $outputDir . '/' . $slug . '-mobile.mp4';
-
-        $ffmpegBinary = (string) config('services.ffmpeg.ffmpeg', 'ffmpeg');
-        $ffprobeBinary = (string) config('services.ffmpeg.ffprobe', 'ffprobe');
-
-        $normalizedFfmpeg = str_contains($ffmpegBinary, '\\') ? str_replace('\\', '/', $ffmpegBinary) : $ffmpegBinary;
-        $normalizedFfprobe = str_contains($ffprobeBinary, '\\') ? str_replace('\\', '/', $ffprobeBinary) : $ffprobeBinary;
-
-        Log::info('ffmpeg.binaries', [
-            'ffmpeg' => $normalizedFfmpeg,
-            'ffprobe' => $normalizedFfprobe,
-            'ffmpeg_exists' => is_file($normalizedFfmpeg),
-            'ffprobe_exists' => is_file($normalizedFfprobe),
+        $this->cloudConvert = new CloudConvert([
+            'api_key' => config('app.cloudconvert_key'),
+            'sandbox' => config('app.cloudconvert_sandbox', true),
         ]);
+    }
 
-        $ffmpeg = FFMpeg::create([
-            'ffmpeg.binaries' => $normalizedFfmpeg,
-            'ffprobe.binaries' => $normalizedFfprobe,
-            'timeout' => (int) config('services.ffmpeg.timeout', 600),
-            'ffmpeg.threads' => (int) config('services.ffmpeg.threads', 0),
-        ]);
-
-        $ffprobe = $ffmpeg->getFFProbe();
-        if (!$ffprobe->isValid($inputPath)) {
-            throw new \RuntimeException('Arquivo de vídeo inválido.');
+    private function requireTaskByName(Job $job, string $name): Task
+    {
+        $tasks = $job->getTasks();
+        if (!$tasks || count($tasks) === 0) {
+            throw new \RuntimeException('CloudConvert: job sem tarefas.');
         }
 
-        $maxDuration = (int) env('VIDEO_MAX_DURATION_SECONDS', 0);
-        if ($maxDuration > 0) {
-            $duration = (float) $ffprobe->format($inputPath)->get('duration');
-            if ($duration > $maxDuration) {
-                throw new \RuntimeException('Duração de vídeo acima do permitido.');
+        foreach ($tasks as $task) {
+            if ($task instanceof Task && $task->getName() === $name) {
+                return $task;
             }
         }
 
-        $this->exportWebm($ffmpeg->open($inputPath), $disk->path($desktopWebm), 1920, 1080, 3000);
-        $this->exportMp4($ffmpeg->open($inputPath), $disk->path($desktopMp4), 1920, 1080, 5000);
-        $this->exportWebm($ffmpeg->open($inputPath), $disk->path($mobileWebm), 1280, 720, 1500);
-        $this->exportMp4($ffmpeg->open($inputPath), $disk->path($mobileMp4), 1280, 720, 2500);
+        throw new \RuntimeException("CloudConvert: tarefa [{$name}] não encontrada.");
+    }
+
+    private function ensureJobHasNoTaskErrors(Job $job): void
+    {
+        $tasks = $job->getTasks() ?? [];
+        foreach ($tasks as $task) {
+            if (!$task instanceof Task) {
+                continue;
+            }
+
+            if ($task->getStatus() === Task::STATUS_ERROR) {
+                throw new \RuntimeException("CloudConvert falhou na tarefa [{$task->getName()}]: " . $task->getMessage());
+            }
+        }
+    }
+
+    public function convertSectionVideo(string $tempPath, string $baseName): array
+    {
+        $absoluteTempPath = Storage::disk('local')->path($tempPath);
+        if (!file_exists($absoluteTempPath)) {
+            throw new \RuntimeException("Arquivo não encontrado: {$absoluteTempPath}");
+        }
+        $fileSize = filesize($absoluteTempPath);
+        Log::info('Arquivo para upload', [
+            'path' => $absoluteTempPath,
+            'exists' => file_exists($absoluteTempPath),
+            'size_bytes' => $fileSize,
+        ]);
+
+        if ($fileSize === 0) {
+            throw new \RuntimeException("Arquivo vazio: {$absoluteTempPath}");
+        }
+
+        $job = (new Job())
+            ->addTask(
+                (new Task('import/upload', 'upload-video'))
+            )
+            ->addTask(
+                (new Task('convert', 'convert-webm-desktop'))
+                    ->set('input', 'upload-video')
+                    ->set('output_format', 'webm')
+                    ->set('video_codec', 'libvpx-vp9')
+                    ->set('width', 1920)
+                    ->set('height', 1080)
+                    ->set('video_bitrate', 3000)
+                    ->set('no_audio', true)
+                    ->set('pixel_format', 'yuv420p')
+                    ->set('fit', 'max')
+            )
+            ->addTask(
+                (new Task('convert', 'convert-mp4-desktop'))
+                    ->set('input', 'upload-video')
+                    ->set('output_format', 'mp4')
+                    ->set('video_codec', 'libx264')
+                    ->set('width', 1920)
+                    ->set('height', 1080)
+                    ->set('video_bitrate', 5000)
+                    ->set('no_audio', true)
+                    ->set('pixel_format', 'yuv420p')
+                    ->set('faststart', true)
+                    ->set('fit', 'max')
+            )
+            ->addTask(
+                (new Task('convert', 'convert-webm-mobile'))
+                    ->set('input', 'upload-video')
+                    ->set('output_format', 'webm')
+                    ->set('video_codec', 'libvpx-vp9')
+                    ->set('width', 1280)
+                    ->set('height', 720)
+                    ->set('video_bitrate', 1500)
+                    ->set('no_audio', true)
+                    ->set('pixel_format', 'yuv420p')
+                    ->set('fit', 'max')
+            )
+            ->addTask(
+                (new Task('convert', 'convert-mp4-mobile'))
+                    ->set('input', 'upload-video')
+                    ->set('output_format', 'mp4')
+                    ->set('video_codec', 'libx264')
+                    ->set('width', 1280)
+                    ->set('height', 720)
+                    ->set('video_bitrate', 2500)
+                    ->set('no_audio', true)
+                    ->set('pixel_format', 'yuv420p')
+                    ->set('faststart', true)
+                    ->set('fit', 'max')
+            )
+            ->addTask(
+                (new Task('export/url', 'export-webm-desktop'))
+                    ->set('input', 'convert-webm-desktop')
+            )
+            ->addTask(
+                (new Task('export/url', 'export-mp4-desktop'))
+                    ->set('input', 'convert-mp4-desktop')
+            )
+            ->addTask(
+                (new Task('export/url', 'export-webm-mobile'))
+                    ->set('input', 'convert-webm-mobile')
+            )
+            ->addTask(
+                (new Task('export/url', 'export-mp4-mobile'))
+                    ->set('input', 'convert-mp4-mobile')
+            );
+
+        $job = $this->cloudConvert->jobs()->create($job);
+        $uploadTask = $this->requireTaskByName($job, 'upload-video');
+
+        $handle = fopen($absoluteTempPath, 'r');
+        if ($handle === false) {
+            throw new \RuntimeException('Não foi possível abrir o arquivo temporário para upload.');
+        }
+        $this->cloudConvert->tasks()->upload($uploadTask, $handle, basename($absoluteTempPath));
+
+        if (is_resource($handle)) {
+            fclose($handle);
+        }
+
+        try {
+            $this->cloudConvert->tasks()->upload($uploadTask, $handle);
+        } finally {
+            if (is_resource($handle)) {
+                fclose($handle);
+            }
+        }
+
+        $job = $this->cloudConvert->jobs()->wait($job);
+        $tasks = $job->getTasks() ?? [];
+        foreach ($tasks as $task) {
+            if (!$task instanceof Task) continue;
+            Log::info('CloudConvert task status', [
+                'name'    => $task->getName(),
+                'status'  => $task->getStatus(),
+                'message' => $task->getMessage(),
+            ]);
+        }
+        $this->ensureJobHasNoTaskErrors($job);
+
+        $publicDisk = Storage::disk('public');
+        $publicDisk->makeDirectory('videos');
+
+        $exports = [
+            ['task' => $this->requireTaskByName($job, 'export-webm-desktop'), 'filename' => "{$baseName}_desktop.webm", 'key' => 'video_webm_desktop'],
+            ['task' => $this->requireTaskByName($job, 'export-mp4-desktop'), 'filename' => "{$baseName}_desktop.mp4", 'key' => 'video_mp4_desktop'],
+            ['task' => $this->requireTaskByName($job, 'export-webm-mobile'), 'filename' => "{$baseName}_mobile.webm", 'key' => 'video_webm_mobile'],
+            ['task' => $this->requireTaskByName($job, 'export-mp4-mobile'), 'filename' => "{$baseName}_mobile.mp4", 'key' => 'video_mp4_mobile'],
+        ];
+
+        $result = [];
+        foreach ($exports as $export) {
+            $exportTask = $export['task'];
+            $filename = $export['filename'];
+            $key = $export['key'];
+
+            $files = $exportTask->getResult()->files ?? null;
+            $fileUrl = $files[0]->url ?? null;
+            if (!is_string($fileUrl) || $fileUrl === '') {
+                throw new \RuntimeException("CloudConvert: URL de download ausente na tarefa [{$exportTask->getName()}].");
+            }
+
+            $stream = $this->cloudConvert
+                ->getHttpTransport()
+                ->download($fileUrl)
+                ->detach();
+
+            $relativePath = "videos/{$filename}";
+            $publicDisk->put($relativePath, $stream);
+            $result[$key] = $relativePath;
+        }
+
+        Storage::disk('local')->delete($tempPath);
 
         return [
-            'video_webm_desktop' => $desktopWebm,
-            'video_mp4_desktop' => $desktopMp4,
-            'video_webm_mobile' => $mobileWebm,
-            'video_mp4_mobile' => $mobileMp4,
+            'video_webm_desktop' => $result['video_webm_desktop'],
+            'video_mp4_desktop' => $result['video_mp4_desktop'],
+            'video_webm_mobile' => $result['video_webm_mobile'],
+            'video_mp4_mobile' => $result['video_mp4_mobile'],
         ];
     }
 
@@ -82,16 +226,16 @@ class MediaConversionService
         $outputDir = 'photos';
         $disk->makeDirectory($outputDir);
 
-        $avifPath = $outputDir.'/'.$photoId.'.avif';
-        $webpPath = $outputDir.'/'.$photoId.'.webp';
-        $jpgPath = $outputDir.'/'.$photoId.'.jpg';
+        $avifPath = $outputDir . '/' . $photoId . '.avif';
+        $webpPath = $outputDir . '/' . $photoId . '.webp';
+        $jpgPath = $outputDir . '/' . $photoId . '.jpg';
 
         $manager = new ImageManager(new Driver());
-        
+
         try {
             Log::info('convertFooterPhoto: Lendo a imagem com read()');
-            $image = $manager->decodepath($file);
-            
+            $image = $manager->decodePath($file->getPathname());
+
             Log::info('convertFooterPhoto: Aplicando cover(1200, 800)');
             $image->cover(1200, 800);
         } catch (\Throwable $e) {
@@ -140,43 +284,5 @@ class MediaConversionService
             'photo_webp' => $webpPath,
             'photo_jpg' => $jpgPath,
         ];
-    }
-
-    private function exportWebm(Video $video, string $outputPath, int $width, int $height, int $kiloBitrate): void
-    {
-        $format = (new WebM())->setVideoCodec('libvpx-vp9')->setKiloBitrate($kiloBitrate);
-        $format->setAdditionalParameters([
-            '-an',
-            '-pix_fmt',
-            'yuv420p',
-            '-deadline',
-            'good',
-            '-cpu-used',
-            '4',
-            '-row-mt',
-            '1',
-        ]);
-
-        $video->filters()->custom('scale=' . $width . ':' . $height . ':force_original_aspect_ratio=increase,crop=' . $width . ':' . $height);
-        $video->save($format, $outputPath);
-    }
-
-    private function exportMp4(Video $video, string $outputPath, int $width, int $height, int $kiloBitrate): void
-    {
-        $format = (new X264())->setKiloBitrate($kiloBitrate);
-        $format->setAdditionalParameters([
-            '-an',
-            '-pix_fmt',
-            'yuv420p',
-            '-movflags',
-            '+faststart',
-            '-preset',
-            'medium',
-            '-profile:v',
-            'high',
-        ]);
-
-        $video->filters()->custom('scale=' . $width . ':' . $height . ':force_original_aspect_ratio=increase,crop=' . $width . ':' . $height);
-        $video->save($format, $outputPath);
     }
 }

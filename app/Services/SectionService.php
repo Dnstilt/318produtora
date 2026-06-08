@@ -8,7 +8,6 @@ use App\Repositories\SectionRepositoryInterface;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 
 class SectionService
 {
@@ -52,19 +51,25 @@ class SectionService
     {
         $section = $this->requireSection($id);
 
+        // Verificar se já há um job em processamento para esta seção
+        if ($section->processing_status === 'processing' || $section->processing_status === 'pending') {
+            throw new \Exception('Já existe um vídeo sendo processado para esta seção. Aguarde a conclusão antes de enviar outro.');
+        }
+
         if (!$file->isValid()) {
             abort(422);
         }
 
         $extension = $file->guessExtension() ?: $file->getClientOriginalExtension() ?: 'bin';
-        $tmpPath = $file->storeAs('tmp', uniqid('video_', true).'.'.$extension, 'local');
-        $absoluteInputPath = Storage::disk('local')->path($tmpPath);
+        $tmpPath = $file->storeAs('temp', uniqid('video_', true).'.'.$extension, 'local');
+        $baseName = $section->slug.'_'.time().'_'.substr(bin2hex(random_bytes(4)), 0, 8);
 
         Log::info('sections.video.enqueue', [
             'section_id' => $id,
             'slug' => $section->slug,
             'extension' => $extension,
-            'tmp_file' => basename($absoluteInputPath),
+            'tmp_path' => $tmpPath,
+            'base_name' => $baseName,
             'size' => $file->getSize(),
         ]);
 
@@ -73,7 +78,7 @@ class SectionService
             'processing_error' => null,
         ]);
 
-        Bus::dispatch(new ProcessVideoJob($section->id, $absoluteInputPath));
+        Bus::dispatch(new ProcessVideoJob($section->id, $tmpPath, $baseName));
 
         return $section;
     }

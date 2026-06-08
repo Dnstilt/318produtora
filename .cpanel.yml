@@ -1,0 +1,15 @@
+---
+deployment:
+  tasks:
+    - export APPPATH=$HOME/318produtora
+    - export PUBPATH=$HOME/public_html
+    - /bin/mkdir -p $APPPATH
+    - /bin/rsync -av --exclude='public' $HOME/repository/ $APPPATH/
+    - /bin/rsync -av $HOME/repository/public/ $PUBPATH/
+    - /usr/local/bin/php $HOME/composer.phar install --no-dev --optimize-autoloader --no-interaction --working-dir=$APPPATH
+    - /usr/local/bin/php $APPPATH/artisan config:cache
+    - /usr/local/bin/php $APPPATH/artisan route:cache
+    - /usr/local/bin/php $APPPATH/artisan view:cache
+    - /usr/local/bin/php $APPPATH/artisan migrate --force
+    - /bin/chmod -R 775 $APPPATH/storage
+    - /bin/chmod -R 775 $APPPATH/bootstrap/cache

@@ -18,3 +18,5 @@ yarn-error.log
 /.idea
 /.vscode
 /database/seeders
+SECURITYCHECKLIST.md
+SECURITYREPORT.md

@@ -146,34 +146,10 @@ window.addEventListener('DOMContentLoaded', () => {
         return true;
     };
 
-    Array.from(document.querySelectorAll('form.js-admin-form')).forEach((form) => {
-        form.addEventListener('submit', () => {
-            setFormSubmitting(form);
-        });
-    });
-
     let pollTimer = null;
     const trackedSectionIds = new Set();
     const videoBanner = document.getElementById('js-video-processing-banner');
     const videoUploadForms = Array.from(document.querySelectorAll('form.js-video-upload-form'));
-
-    const setVideoUploadsEnabled = (enabled, message) => {
-        for (const form of videoUploadForms) {
-            const button = form.querySelector('button[type="submit"], input[type="submit"]');
-            const file = form.querySelector('input[type="file"]');
-            if (button) button.disabled = !enabled;
-            if (file) file.disabled = !enabled;
-        }
-
-        if (!videoBanner) return;
-        if (enabled) {
-            videoBanner.classList.add('hidden');
-            videoBanner.textContent = '';
-        } else {
-            videoBanner.classList.remove('hidden');
-            videoBanner.textContent = message || 'Processamento em andamento. Aguarde concluir para enviar outro vídeo.';
-        }
-    };
 
     const readStatusesById = () => {
         const statusEls = Array.from(document.querySelectorAll('.js-section-status'));
@@ -186,6 +162,22 @@ window.addEventListener('DOMContentLoaded', () => {
         return byId;
     };
 
+    const setVideoUploadsEnabled = (enabled, message) => {
+        for (const form of videoUploadForms) {
+            const button = form.querySelector('button[type="submit"], input[type="submit"]');
+            if (button) button.disabled = !enabled;
+        }
+
+        if (!videoBanner) return;
+        if (enabled) {
+            videoBanner.classList.add('hidden');
+            videoBanner.textContent = '';
+        } else {
+            videoBanner.classList.remove('hidden');
+            videoBanner.textContent = message || 'Processamento em andamento. Aguarde concluir para enviar outro vídeo.';
+        }
+    };
+
     const startPolling = () => {
         if (pollTimer) return;
 
@@ -196,7 +188,6 @@ window.addEventListener('DOMContentLoaded', () => {
                 pollTimer = null;
                 return;
             }
-
             const statuses = await pollSectionStatuses(ids);
             for (const [id, status] of statuses.entries()) {
                 if (status !== 'pending' && status !== 'processing') {
@@ -215,6 +206,32 @@ window.addEventListener('DOMContentLoaded', () => {
         tick();
         pollTimer = setInterval(tick, 3000);
     };
+
+    Array.from(document.querySelectorAll('form.js-admin-form')).forEach((form) => {
+        form.addEventListener('submit', (e) => {
+            if (!setFormSubmitting(form)) {
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+            }
+
+            const action = (form.getAttribute('action') || '').toString();
+            const isVideoForm =
+                form.classList.contains('js-video-upload-form') ||
+                (action.includes('/admin/sections/') && action.endsWith('/video'));
+
+            if (isVideoForm) {
+                const match = action.match(/\/admin\/sections\/(\d+)\/video$/);
+                if (match) {
+                    const id = Number(match[1]);
+                    trackedSectionIds.add(id);
+                    sessionStorage.setItem('adminActiveVideoSectionId', String(id));
+                }
+                setVideoUploadsEnabled(false);
+                startPolling();
+            }
+        });
+    });
 
     const initialStatusesById = readStatusesById();
     for (const [id, status] of initialStatusesById.entries()) {
@@ -237,17 +254,4 @@ window.addEventListener('DOMContentLoaded', () => {
     if (trackedSectionIds.size > 0) {
         startPolling();
     }
-
-    Array.from(document.querySelectorAll('form[action*="/admin/sections/"][action$="/video"]')).forEach((form) => {
-        form.addEventListener('submit', () => {
-            const match = form.getAttribute('action')?.match(/\/admin\/sections\/(\d+)\/video$/);
-            if (match) {
-                const id = Number(match[1]);
-                trackedSectionIds.add(id);
-                sessionStorage.setItem('adminActiveVideoSectionId', String(id));
-            }
-            setVideoUploadsEnabled(false);
-            startPolling();
-        });
-    });
 });

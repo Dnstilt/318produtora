@@ -31,6 +31,11 @@ return [
         ],
     ],
 
+    'cloudconvert' => [
+        'key' => env('CLOUDCONVERT_KEY'),
+        'sandbox' => env('CLOUDCONVERT_SANDBOX', false),
+    ],
+
     'ffmpeg' => [
         'ffmpeg' => env('FFMPEG_BINARY', 'ffmpeg'),
         'ffprobe' => env('FFPROBE_BINARY', 'ffprobe'),

@@ -2,13 +2,14 @@
 
 @section('content')
 <div id="landing-root">
+
     <div id="sidebar-nav" class="fixed left-0 top-0 z-50 h-screen w-[130px] px-3 py-6 xl:w-[200px] transition-transform duration-500">
         <div class="flex flex-col gap-6">
             <a href="#publicidade" class="block items-center justify-center opacity-100 hover:opacity-80 transition-opacity" data-target="publicidade">
                 <img id="landing-navbar-logo" src="{{ asset(config('app.logo_path')) }}" alt="318 Produtora" class="h-[72px] w-[110px] sm:h-[64px] sm:w-[92px] lg:h-[72px] lg:w-[110px] xl:h-[80px] xl:w-[120px]" />
             </a>
 
-            <nav class="font-pragextobl flex flex-col items-start gap-3">
+            <nav class="font-juana flex flex-col items-start gap-3">
                 @php
                 $nav = [
                 ['id' => 'publicidade', 'label' => 'Publicidade'],
@@ -34,6 +35,8 @@
         </div>
     </div>
 
+    <div id="cursor-bracket" aria-hidden="true"></div>
+    <div id="cursor-ring" aria-hidden="true"></div>
     <main class="relative">
         @php
         $frames = [
@@ -69,7 +72,7 @@
                 <div class="pointer-events-none absolute inset-0 flex flex-col justify-end items-center pb-16 px-6 md:justify-center md:items-end md:pb-0 md:pr-16 lg:pr-24">
                     <div class="js-frame-text w-full text-center max-w-[900px] md:text-right md:max-w-[70vw] lg:max-w-[80vw]">
                         @if($section?->title)
-                        <h2 class="text-5xl md:text-7xl lg:text-9xl font-pragextobl text-[#ff2600] mb-4 md:mb-6 lg:mb-8 break-words leading-tight">
+                        <h2 class="text-5xl md:text-7xl lg:text-9xl font-juana text-[#ff2600] mb-4 md:mb-6 lg:mb-8 break-words leading-tight">
                             {{ $section->title }}
                         </h2>
                         @endif
@@ -85,9 +88,12 @@
         </div>
 
         <footer id="rodape" class="gallery-bg relative min-h-screen w-screen">
+            <div class="crt-grain" aria-hidden="true"></div>
+            <div class="crt-scanlines" aria-hidden="true"></div>
+            <div class="crt-vignette" aria-hidden="true"></div>
             <div class="px-6 pt-16 sm:pt-24 relative z-10">
                 @if($rodapeTitulo)
-                <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-[#ff2600] mb-4 font-pragextobl text-center">
+                <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-[#ff2600] mb-4 font-juana text-center">
                     <span class="line-wrap"><span class="line-inner footer-line" data-delay="0">{{ $rodapeTitulo }}</span></span>
                 </h1>
                 @endif
@@ -98,26 +104,38 @@
                 </h4>
                 @endif
 
-                <section class="gallery-section w-full mx-auto px-4 md:px-8 pb-12">
-                    <div class="gallery-grid" id="gallery">
-                        @foreach ($photos ?? collect() as $index => $photo)
-                        <div class="gallery-item js-gallery-item" data-index="{{ $index }}">
-                            <picture>
-                                @if ($photo->photo_avif)
-                                <source srcset="{{ asset('storage/'.$photo->photo_avif) }}" type="image/avif">
-                                @endif
-                                @if ($photo->photo_webp)
-                                <source srcset="{{ asset('storage/'.$photo->photo_webp) }}" type="image/webp">
-                                @endif
-                                <img src="{{ $photo->photo_jpg ? asset('storage/'.$photo->photo_jpg) : '' }}" alt="Foto {{ $index + 1 }}">
-                            </picture>
+                <section class="w-full pb-12" id="gallery-carousel">
+                    <div class="carousel-wrap" id="carousel-wrap">
+                        <span id="carousel-tot" style="display:none">{{ $photos->count() }}</span>
+                        <div class="carousel-track" id="carousel-track">
+                            {{-- 3 cópias para loop infinito --}}
+                            @foreach ([0, 1, 2] as $copy)
+                            @foreach ($photos ?? collect() as $index => $photo)
+                            <div class="carousel-slide {{ $copy === 1 && $index === 0 ? 'is-active' : 'is-side' }}"
+                                data-idx="{{ $index }}"
+                                data-title="{{ $photo->title ?? 'Foto ' . ($index + 1) }}">
+                                <picture>
+                                    @if ($photo->photo_avif)
+                                    <source srcset="{{ asset('storage/'.$photo->photo_avif) }}" type="image/avif">
+                                    @endif
+                                    @if ($photo->photo_webp)
+                                    <source srcset="{{ asset('storage/'.$photo->photo_webp) }}" type="image/webp">
+                                    @endif
+                                    <img class="carousel-img"
+                                        src="{{ $photo->photo_jpg ? asset('storage/'.$photo->photo_jpg) : '' }}"
+                                        alt="Foto {{ $index + 1 }}">
+                                </picture>
+                                <div class="carousel-overlay {{ $copy === 1 && $index === 0 ? 'is-visible' : '' }}">
+                                </div>
+                            </div>
+                            @endforeach
+                            @endforeach
                         </div>
-                        @endforeach
                     </div>
                 </section>
             </div>
 
-            <div class="mx-auto mt-12 flex max-w-5xl flex-col items-center gap-6 px-6 pb-16 text-center relative z-10">
+            <div class="mx-auto mt-12 flex max-w-5xl flex-col items-center gap-6 px-6 text-center relative z-10">
                 <a href="#publicidade" class="flip-logo-wrap block items-center opacity-100 hover:opacity-80 transition-opacity lg:pb-5 js-nav-item"
                     data-src="{{ asset(config('app.logo_path')) }}" aria-label="318 Produtora" data-target="publicidade">
                     <img
@@ -152,7 +170,7 @@
 
                 <div class="flex flex-wrap items-center justify-center gap-6 text-sm">
                     <p class="font-pragext text-[#FF2600]">
-                        ©2026 318 Produtora e Website by Urutau.
+                        ©2026 318 Produtora e Website Urutau®.
                     </p>
                 </div>
             </div>

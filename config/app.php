@@ -28,6 +28,10 @@ return [
 
     'env' => env('APP_ENV', 'production'),
 
+    // Configuração do CloudConvert
+    'cloudconvert_key' => env('CLOUDCONVERT_KEY', ''),
+    'cloudconvert_sandbox' => env('CLOUDCONVERT_SANDBOX', false),
+    
     /*
     |--------------------------------------------------------------------------
     | Application Debug Mode

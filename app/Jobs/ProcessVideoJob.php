@@ -2,100 +2,86 @@
 
 namespace App\Jobs;
 
-use App\Repositories\SectionRepositoryInterface;
+use App\Models\Section;
 use App\Services\MediaConversionService;
-use Exception;
+use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 
 class ProcessVideoJob implements ShouldQueue
 {
-    use Queueable;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public int $tries = 1;
+    public int $tries = 3;
 
-    public int $timeout = 1200;
+    public int $timeout = 600;
 
-    /**
-     * Create a new job instance.
-     */
+    public int $backoff = 30;
+
+    public int $sectionId;
+    public string $tempPath;
+    public string $baseName;
+
     public function __construct(
-        private readonly int $sectionId,
-        private readonly string $inputPath,
+        int $sectionId,
+        string $tempPath,
+        string $baseName,
     ) {
+        $this->sectionId = $sectionId;
+        $this->tempPath = $tempPath;
+        $this->baseName = $baseName;
     }
 
-    /**
-     * Execute the job.
-     */
-    public function handle(SectionRepositoryInterface $sections, MediaConversionService $mediaConversion): void
+    public function handle(MediaConversionService $mediaService): void
     {
-        $section = $sections->find($this->sectionId);
-
+        $section = Section::find($this->sectionId);
         if (!$section) {
             Log::warning('video.process.missing_section', [
                 'section_id' => $this->sectionId,
-                'input_file' => basename($this->inputPath),
+                'temp_path' => $this->tempPath,
             ]);
-            $this->cleanupInput();
             return;
         }
 
-        Log::info('video.process.start', [
-            'section_id' => $this->sectionId,
-            'slug' => $section->slug,
-            'input_file' => basename($this->inputPath),
-        ]);
-
-        $sections->update($section, [
+        $section->update([
             'processing_status' => 'processing',
             'processing_error' => null,
         ]);
 
         try {
-            $paths = $mediaConversion->convertSectionVideo($this->inputPath, $section->slug);
+            $paths = $mediaService->convertSectionVideo($this->tempPath, $this->baseName);
 
-            $sections->update($section, array_merge($paths, [
+            $section->update([
+                'video_webm_desktop' => $paths['video_webm_desktop'],
+                'video_mp4_desktop' => $paths['video_mp4_desktop'],
+                'video_webm_mobile' => $paths['video_webm_mobile'],
+                'video_mp4_mobile' => $paths['video_mp4_mobile'],
                 'processing_status' => 'done',
                 'processing_error' => null,
-            ]));
-
-            Log::info('video.process.success', [
-                'section_id' => $this->sectionId,
-                'slug' => $section->slug,
-                'outputs' => array_map(
-                    fn ($p) => is_string($p) ? basename($p) : null,
-                    $paths
-                ),
             ]);
-        } catch (Exception $e) {
-            $errorMessage = 'Falha no processamento.';
-            if ($e instanceof \FFMpeg\Exception\ExecutableNotFoundException || $e instanceof \Alchemy\BinaryDriver\Exception\ExecutableNotFoundException) {
-                $errorMessage = 'FFmpeg/FFprobe não encontrado no servidor. Instale e coloque no PATH, ou configure FFMPEG_BINARY e FFPROBE_BINARY no .env.';
-            }
-
-            Log::error('Falha ao processar vídeo', [
+        } catch (\Throwable $e) {
+            Log::error('video.process.error', [
                 'section_id' => $this->sectionId,
-                'input_path' => $this->inputPath,
-                'exception' => $e->getMessage(),
+                'exception' => $e,
             ]);
 
-            $sections->update($section, [
+            $section->update([
                 'processing_status' => 'error',
-                'processing_error' => $errorMessage,
+                'processing_error' => $e->getMessage(),
             ]);
 
             throw $e;
-        } finally {
-            $this->cleanupInput();
         }
     }
 
-    private function cleanupInput(): void
+    public function failed(\Throwable $e): void
     {
-        if (is_file($this->inputPath)) {
-            @unlink($this->inputPath);
-        }
+        Section::where('id', $this->sectionId)->update([
+            'processing_status' => 'error',
+            'processing_error' => 'Falha após '.$this->tries.' tentativas: '.$e->getMessage(),
+        ]);
     }
 }

@@ -106,7 +106,23 @@ class AdminController extends Controller
                 'section_id' => $id,
                 'exception' => $e,
             ]);
-            return back()->with('error', 'Não foi possível receber o vídeo. Verifique o arquivo e tente novamente.');
+            
+            // Dar feedback mais específico baseado no tipo de erro
+            $errorMessage = 'Não foi possível receber o vídeo. ';
+            
+            if (str_contains($e->getMessage(), 'Já existe um vídeo sendo processado')) {
+                $errorMessage .= 'Já existe um vídeo sendo processado para esta seção. Aguarde a conclusão antes de enviar outro.';
+            } elseif (str_contains($e->getMessage(), 'required')) {
+                $errorMessage .= 'O campo de vídeo é obrigatório.';
+            } elseif (str_contains($e->getMessage(), 'mimes')) {
+                $errorMessage .= 'Formato de arquivo não suportado. Use: mp4, webm, mov, mkv, avi.';
+            } elseif (str_contains($e->getMessage(), 'max')) {
+                $errorMessage .= 'Arquivo muito grande. Limite: 500MB.';
+            } else {
+                $errorMessage .= 'Verifique o arquivo e tente novamente.';
+            }
+            
+            return back()->with('error', $errorMessage);
         }
     }
 

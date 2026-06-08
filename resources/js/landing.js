@@ -186,8 +186,6 @@ function setupNavActive(activeIndex) {
     });
 }
 
-
-
 function setupScrollAnimations() {
     const frames = Array.from(document.querySelectorAll('.js-frame'));
     const footer = document.getElementById('rodape');
@@ -514,6 +512,233 @@ function setupFooterLogoClick() {
     });
 }
 
+document.addEventListener('DOMContentLoaded', function () {
+
+    const bracket = document.getElementById('cursor-bracket');
+    const ring = document.getElementById('cursor-ring');
+
+    bracket.innerHTML = '<span></span><span></span>';
+
+    let mx = -200, my = -200;
+    let rx = -200, ry = -200;
+
+    /* ─── VELOCIDADE DO TRAILING ────────────────────────────
+       0.05 = muito lento / 0.15 = médio / 0.3 = quase direto
+    ──────────────────────────────────────────────────────── */
+    const lerpSpeed = 0.12;
+
+    document.addEventListener('mousemove', function (e) {
+        mx = e.clientX;
+        my = e.clientY;
+        bracket.style.left = mx + 'px';
+        bracket.style.top = my + 'px';
+    });
+
+    document.querySelectorAll('a, button, [role="button"], input, label').forEach(function (el) {
+        el.addEventListener('mouseenter', function () {
+            bracket.style.width = '28px'; /* ← tamanho no hover */
+            bracket.style.height = '28px';
+            ring.style.width = '44px';
+            ring.style.height = '44px';
+            ring.style.opacity = '0.8';
+        });
+        el.addEventListener('mouseleave', function () {
+            bracket.style.width = '';
+            bracket.style.height = '';
+            ring.style.width = '';
+            ring.style.height = '';
+            ring.style.opacity = '';
+        });
+    });
+
+    /* ─── LOOP DE ANIMAÇÃO ──────────────────────────────────*/
+    function lerp(a, b, t) { return a + (b - a) * t; }
+
+    function animate() {
+        rx = lerp(rx, mx, lerpSpeed);
+        ry = lerp(ry, my, lerpSpeed);
+        ring.style.left = rx + 'px';
+        ring.style.top = ry + 'px';
+        requestAnimationFrame(animate);
+    }
+    animate();
+});
+
+function setupGalleryCarousel() {
+    const wrap = document.getElementById('carousel-wrap');
+    const track = document.getElementById('carousel-track');
+    if (!wrap || !track) return;
+
+    const nameEl = document.getElementById('carousel-name');
+    const curEl = document.getElementById('carousel-cur');
+    const totEl = document.getElementById('carousel-tot');
+    const allSlides = Array.from(track.querySelectorAll('.carousel-slide'));
+    const N = parseInt(totEl?.textContent || '0');
+    if (N === 0) return;
+
+    const GAP = 6, PAD = 28;
+    function getActiveW() { return wrap.offsetWidth > 720 ? 480 : 280; }
+    function getSideW() { return wrap.offsetWidth > 720 ? 60 : 30; }
+    function getPAD() { return wrap.offsetWidth > 720 ? 28 : 16; }
+
+    let activeReal = 0, activeAbs = N; // começa na cópia do meio
+    let trackX = 0, targetX = 0, velX = 0;
+    let dragging = false, startMX = 0, startTX = 0;
+    let lastMX = 0, lastT = 0, didDrag = false, jumping = false;
+
+    function snapX(absIdx) {
+        const ACTIVE_W = getActiveW();
+        const SIDE_W = getSideW();
+        const PAD = getPAD();
+
+        let left = PAD;
+        for (let i = 0; i < absIdx; i++) {
+            left += (i === activeAbs ? ACTIVE_W : SIDE_W) + GAP;
+        }
+        return -(left - (wrap.offsetWidth / 2 - ACTIVE_W / 2));
+    }
+
+    function setActive(absIdx, animate) {
+        const prev = activeAbs;
+        activeAbs = absIdx;
+        activeReal = absIdx % N;
+
+        allSlides.forEach((s, i) => {
+            const ov = s.querySelector('.carousel-overlay');
+            if (i === absIdx) {
+                s.classList.remove('is-side'); s.classList.add('is-active');
+                ov.style.transition = animate ? 'opacity .55s cubic-bezier(.77,0,.18,1)' : 'none';
+                ov.style.opacity = '0';
+            } else if (i === prev && animate) {
+                s.classList.remove('is-active'); s.classList.add('is-side');
+                ov.style.transition = 'opacity .45s cubic-bezier(.77,0,.18,1)';
+                ov.style.opacity = '1';
+            } else {
+                s.classList.remove('is-active'); s.classList.add('is-side');
+                ov.style.transition = 'none';
+                ov.style.opacity = '1';
+            }
+        });
+
+        if (animate && nameEl) {
+            nameEl.style.opacity = '0';
+            nameEl.style.transform = 'translateY(5px)';
+            setTimeout(() => {
+                nameEl.textContent = allSlides[N + activeReal]?.dataset.title || '';
+                nameEl.style.opacity = '1';
+                nameEl.style.transform = 'translateY(0)';
+                if (curEl) curEl.textContent = activeReal + 1;
+            }, 160);
+        } else if (nameEl) {
+            nameEl.textContent = allSlides[N + activeReal]?.dataset.title || '';
+            if (curEl) curEl.textContent = activeReal + 1;
+        }
+    }
+
+    function maybeJump() {
+        if (jumping) return;
+        if (activeAbs < N || activeAbs >= N * 2) {
+            jumping = true;
+            const newAbs = N + activeReal;
+            const dx = snapX(newAbs) - snapX(activeAbs);
+            activeAbs = newAbs;
+            trackX += dx; targetX += dx;
+            track.style.transition = 'none';
+            track.style.transform = `translateX(${trackX}px)`;
+            setTimeout(() => { jumping = false; }, 50);
+        }
+    }
+
+    function snapNearest() {
+        let best = activeAbs, bestDist = Infinity;
+        allSlides.forEach((_, i) => {
+            const d = Math.abs(targetX - snapX(i));
+            if (d < bestDist) { bestDist = d; best = i; }
+        });
+        const newReal = best % N;
+        const preferred = N + newReal;
+        setActive(preferred, true);
+        targetX = snapX(preferred);
+    }
+
+    allSlides.forEach((s, i) => {
+        s.addEventListener('click', () => {
+            if (didDrag) return;
+            const newReal = parseInt(s.dataset.idx);
+            setActive(N + newReal, true);
+            targetX = snapX(N + newReal);
+        });
+    });
+
+    wrap.addEventListener('mousedown', e => {
+        dragging = true; didDrag = false;
+        startMX = e.clientX; startTX = targetX;
+        lastMX = e.clientX; lastT = Date.now(); velX = 0;
+        wrap.classList.add('is-dragging');
+        e.preventDefault();
+    });
+    window.addEventListener('mousemove', e => {
+        if (!dragging) return;
+        const dx = e.clientX - startMX;
+        if (Math.abs(dx) > 4) didDrag = true;
+        targetX = startTX + dx;
+        const now = Date.now();
+        if (now - lastT > 0) velX = (e.clientX - lastMX) * 0.6;
+        lastMX = e.clientX; lastT = now;
+    });
+    window.addEventListener('mouseup', () => {
+        if (!dragging) return;
+        dragging = false; wrap.classList.remove('is-dragging');
+        if (didDrag) { targetX += velX * 4; snapNearest(); }
+    });
+
+    window.addEventListener('resize', () => {
+        targetX = snapX(activeAbs);
+        trackX = targetX;
+        track.style.transform = `translateX(${trackX}px)`;
+    });
+    
+    wrap.addEventListener('touchstart', e => {
+        const t = e.touches[0];
+        dragging = true; didDrag = false;
+        startMX = t.clientX; startTX = targetX;
+        lastMX = t.clientX; lastT = Date.now(); velX = 0;
+    }, { passive: true });
+    window.addEventListener('touchmove', e => {
+        if (!dragging) return;
+        const t = e.touches[0];
+        const dx = t.clientX - startMX;
+        if (Math.abs(dx) > 4) didDrag = true;
+        targetX = startTX + dx;
+        const now = Date.now();
+        if (now - lastT > 0) velX = (t.clientX - lastMX) * 0.6;
+        lastMX = t.clientX; lastT = now;
+    }, { passive: true });
+    window.addEventListener('touchend', () => {
+        if (!dragging) return;
+        dragging = false;
+        if (didDrag) { targetX += velX * 4; snapNearest(); }
+    });
+
+    function tick() {
+        if (!dragging) {
+            trackX += (targetX - trackX) * 0.11;
+            if (Math.abs(trackX - targetX) < 0.05) trackX = targetX;
+        } else {
+            trackX = targetX;
+        }
+        track.style.transform = `translateX(${trackX}px)`;
+        if (!dragging && !jumping && Math.abs(trackX - snapX(N + activeReal)) < 1) maybeJump();
+        requestAnimationFrame(tick);
+    }
+
+    setActive(N, false);
+    targetX = snapX(N);
+    trackX = targetX;
+    track.style.transform = `translateX(${trackX}px)`;
+    tick();
+}
+
 window.addEventListener('DOMContentLoaded', () => {
     // Setup everything immediately so the DOM is ready and styled correctly
     splitFrameTexts();
@@ -522,6 +747,7 @@ window.addEventListener('DOMContentLoaded', () => {
     setupScrollAnimations();
     setupFooterTextReveal();
     setupFooterLogoClick();
+    setupGalleryCarousel();
     // Start the loading screen animation
     startLandingLoading().then(() => {
         const firstFrame = document.querySelector('.js-frame');

@@ -28,5 +28,14 @@ class FooterPhoto extends Model
         static::saving(function (self $model): void {
             $model->updated_at = Carbon::now();
         });
+
+        static::deleting(function (self $model): void {
+            // Delete physical files when model is deleted
+            \Illuminate\Support\Facades\Storage::disk('public')->delete([
+                $model->photo_avif,
+                $model->photo_webp,
+                $model->photo_jpg,
+            ]);
+        });
     }
 }
