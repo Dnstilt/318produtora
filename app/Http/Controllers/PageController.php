@@ -35,6 +35,7 @@ class PageController extends Controller
             'socialLinks' => $this->socialLinks->all(),
             'rodapeTitulo' => $this->pages->findBySlug(Page::SLUG_RODAPE_TITULO)?->content ?? 'Conheça nosso trabalho',
             'rodapeSubtitulo' => $this->pages->findBySlug(Page::SLUG_RODAPE_SUBTITULO)?->content ?? 'Entre em contato para mais informações.',
+            'cloudName' => config('cloudinary.cloud_name'),
         ]);
     }
 }

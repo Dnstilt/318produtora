@@ -2,9 +2,7 @@
 
 namespace App\Services;
 
-use CloudConvert\CloudConvert;
-use CloudConvert\Models\Job;
-use CloudConvert\Models\Task;
+use Cloudinary\Cloudinary;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -15,44 +13,11 @@ use Spatie\ImageOptimizer\OptimizerChainFactory;
 
 class MediaConversionService
 {
-    private CloudConvert $cloudConvert;
+    private Cloudinary $cloudinary;
 
     public function __construct()
     {
-        $this->cloudConvert = new CloudConvert([
-            'api_key' => config('app.cloudconvert_key'),
-            'sandbox' => config('app.cloudconvert_sandbox', false),
-        ]);
-    }
-
-    private function requireTaskByName(Job $job, string $name): Task
-    {
-        $tasks = $job->getTasks();
-        if (!$tasks || count($tasks) === 0) {
-            throw new \RuntimeException('CloudConvert: job sem tarefas.');
-        }
-
-        foreach ($tasks as $task) {
-            if ($task instanceof Task && $task->getName() === $name) {
-                return $task;
-            }
-        }
-
-        throw new \RuntimeException("CloudConvert: tarefa [{$name}] não encontrada.");
-    }
-
-    private function ensureJobHasNoTaskErrors(Job $job): void
-    {
-        $tasks = $job->getTasks() ?? [];
-        foreach ($tasks as $task) {
-            if (!$task instanceof Task) {
-                continue;
-            }
-
-            if ($task->getStatus() === Task::STATUS_ERROR) {
-                throw new \RuntimeException("CloudConvert falhou na tarefa [{$task->getName()}]: " . $task->getMessage());
-            }
-        }
+        $this->cloudinary = new Cloudinary(env('CLOUDINARY_URL'));
     }
 
     public function convertSectionVideo(string $tempPath, string $baseName): array
@@ -61,161 +26,21 @@ class MediaConversionService
         if (!file_exists($absoluteTempPath)) {
             throw new \RuntimeException("Arquivo não encontrado: {$absoluteTempPath}");
         }
-        $fileSize = filesize($absoluteTempPath);
-        Log::info('Arquivo para upload', [
-            'path' => $absoluteTempPath,
-            'exists' => file_exists($absoluteTempPath),
-            'size_bytes' => $fileSize,
+        Log::info('Cloudinary upload iniciado', ['path' => $absoluteTempPath]);
+
+        $result = $this->cloudinary->uploadApi()->upload($absoluteTempPath, [
+            'resource_type' => 'video',
+            'public_id'     => $baseName,
+            'folder'        => 'videos',
+            'overwrite'     => true,
+            'chunk_size'    => 6000000, // upload em chunks de 6MB
         ]);
-
-        if ($fileSize === 0) {
-            throw new \RuntimeException("Arquivo vazio: {$absoluteTempPath}");
-        }
-
-        $job = (new Job())
-            ->addTask(
-                (new Task('import/upload', 'upload-video'))
-            )
-            ->addTask(
-                (new Task('convert', 'convert-webm-desktop'))
-                    ->set('input', 'upload-video')
-                    ->set('output_format', 'webm')
-                    ->set('video_codec', 'libvpx-vp9')
-                    ->set('width', 1920)
-                    ->set('height', 1080)
-                    ->set('video_bitrate', 3000)
-                    ->set('no_audio', true)
-                    ->set('pixel_format', 'yuv420p')
-                    ->set('fit', 'max')
-            )
-            ->addTask(
-                (new Task('convert', 'convert-mp4-desktop'))
-                    ->set('input', 'upload-video')
-                    ->set('output_format', 'mp4')
-                    ->set('video_codec', 'libx264')
-                    ->set('width', 1920)
-                    ->set('height', 1080)
-                    ->set('video_bitrate', 5000)
-                    ->set('no_audio', true)
-                    ->set('pixel_format', 'yuv420p')
-                    ->set('faststart', true)
-                    ->set('fit', 'max')
-            )
-            ->addTask(
-                (new Task('convert', 'convert-webm-mobile'))
-                    ->set('input', 'upload-video')
-                    ->set('output_format', 'webm')
-                    ->set('video_codec', 'libvpx-vp9')
-                    ->set('width', 1280)
-                    ->set('height', 720)
-                    ->set('video_bitrate', 1500)
-                    ->set('no_audio', true)
-                    ->set('pixel_format', 'yuv420p')
-                    ->set('fit', 'max')
-            )
-            ->addTask(
-                (new Task('convert', 'convert-mp4-mobile'))
-                    ->set('input', 'upload-video')
-                    ->set('output_format', 'mp4')
-                    ->set('video_codec', 'libx264')
-                    ->set('width', 1280)
-                    ->set('height', 720)
-                    ->set('video_bitrate', 2500)
-                    ->set('no_audio', true)
-                    ->set('pixel_format', 'yuv420p')
-                    ->set('faststart', true)
-                    ->set('fit', 'max')
-            )
-            ->addTask(
-                (new Task('export/url', 'export-webm-desktop'))
-                    ->set('input', 'convert-webm-desktop')
-            )
-            ->addTask(
-                (new Task('export/url', 'export-mp4-desktop'))
-                    ->set('input', 'convert-mp4-desktop')
-            )
-            ->addTask(
-                (new Task('export/url', 'export-webm-mobile'))
-                    ->set('input', 'convert-webm-mobile')
-            )
-            ->addTask(
-                (new Task('export/url', 'export-mp4-mobile'))
-                    ->set('input', 'convert-mp4-mobile')
-            );
-
-        $job = $this->cloudConvert->jobs()->create($job);
-        $uploadTask = $this->requireTaskByName($job, 'upload-video');
-
-        $handle = fopen($absoluteTempPath, 'r');
-        if ($handle === false) {
-            throw new \RuntimeException('Não foi possível abrir o arquivo temporário para upload.');
-        }
-        $this->cloudConvert->tasks()->upload($uploadTask, $handle, basename($absoluteTempPath));
-
-        if (is_resource($handle)) {
-            fclose($handle);
-        }
-
-        try {
-            $this->cloudConvert->tasks()->upload($uploadTask, $handle);
-        } finally {
-            if (is_resource($handle)) {
-                fclose($handle);
-            }
-        }
-
-        $job = $this->cloudConvert->jobs()->wait($job);
-        $tasks = $job->getTasks() ?? [];
-        foreach ($tasks as $task) {
-            if (!$task instanceof Task) continue;
-            Log::info('CloudConvert task status', [
-                'name'    => $task->getName(),
-                'status'  => $task->getStatus(),
-                'message' => $task->getMessage(),
-            ]);
-        }
-        $this->ensureJobHasNoTaskErrors($job);
-
-        $publicDisk = Storage::disk('public');
-        $publicDisk->makeDirectory('videos');
-
-        $exports = [
-            ['task' => $this->requireTaskByName($job, 'export-webm-desktop'), 'filename' => "{$baseName}_desktop.webm", 'key' => 'video_webm_desktop'],
-            ['task' => $this->requireTaskByName($job, 'export-mp4-desktop'), 'filename' => "{$baseName}_desktop.mp4", 'key' => 'video_mp4_desktop'],
-            ['task' => $this->requireTaskByName($job, 'export-webm-mobile'), 'filename' => "{$baseName}_mobile.webm", 'key' => 'video_webm_mobile'],
-            ['task' => $this->requireTaskByName($job, 'export-mp4-mobile'), 'filename' => "{$baseName}_mobile.mp4", 'key' => 'video_mp4_mobile'],
-        ];
-
-        $result = [];
-        foreach ($exports as $export) {
-            $exportTask = $export['task'];
-            $filename = $export['filename'];
-            $key = $export['key'];
-
-            $files = $exportTask->getResult()->files ?? null;
-            $fileUrl = $files[0]->url ?? null;
-            if (!is_string($fileUrl) || $fileUrl === '') {
-                throw new \RuntimeException("CloudConvert: URL de download ausente na tarefa [{$exportTask->getName()}].");
-            }
-
-            $stream = $this->cloudConvert
-                ->getHttpTransport()
-                ->download($fileUrl)
-                ->detach();
-
-            $relativePath = "videos/{$filename}";
-            $publicDisk->put($relativePath, $stream);
-            $result[$key] = $relativePath;
-        }
-
         Storage::disk('local')->delete($tempPath);
 
-        return [
-            'video_webm_desktop' => $result['video_webm_desktop'],
-            'video_mp4_desktop' => $result['video_mp4_desktop'],
-            'video_webm_mobile' => $result['video_webm_mobile'],
-            'video_mp4_mobile' => $result['video_mp4_mobile'],
-        ];
+        $publicId = $result['public_id'];
+        Log::info('Cloudinary upload finalizado', ['public_id' => $publicId]);
+
+        return ['video_public_id' => $publicId];
     }
 
     public function convertFooterPhoto(UploadedFile $file, int $photoId): array

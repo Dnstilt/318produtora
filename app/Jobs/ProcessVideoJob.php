@@ -15,7 +15,8 @@ class ProcessVideoJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public int $tries = 3;
+    public int $tries = 1;
+    public $maxExceptions = 1;
 
     public int $timeout = 600;
 
@@ -47,20 +48,19 @@ class ProcessVideoJob implements ShouldQueue
         }
 
         $section->update([
-            'processing_status' => 'processing',
-            'processing_error' => null,
+            'video_public_id'   => $paths['video_public_id'],
+            'processing_status' => 'done',
+            'processing_error'  => null,
         ]);
 
         try {
             $paths = $mediaService->convertSectionVideo($this->tempPath, $this->baseName);
 
+            $paths = $mediaService->convertSectionVideo($this->tempPath, $this->baseName);
             $section->update([
-                'video_webm_desktop' => $paths['video_webm_desktop'],
-                'video_mp4_desktop' => $paths['video_mp4_desktop'],
-                'video_webm_mobile' => $paths['video_webm_mobile'],
-                'video_mp4_mobile' => $paths['video_mp4_mobile'],
+                'video_public_id'   => $paths['video_public_id'],
                 'processing_status' => 'done',
-                'processing_error' => null,
+                'processing_error'  => null,
             ]);
         } catch (\Throwable $e) {
             Log::error('video.process.error', [
@@ -81,7 +81,7 @@ class ProcessVideoJob implements ShouldQueue
     {
         Section::where('id', $this->sectionId)->update([
             'processing_status' => 'error',
-            'processing_error' => 'Falha após '.$this->tries.' tentativas: '.$e->getMessage(),
+            'processing_error' => 'Falha após ' . $this->tries . ' tentativas: ' . $e->getMessage(),
         ]);
     }
 }

@@ -40,14 +40,7 @@
                         </div>
                         <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                             Vídeos:
-                            @if ($section->video_mp4_desktop || $section->video_webm_desktop || $section->video_mp4_mobile || $section->video_webm_mobile)
-                            {{ $section->video_mp4_desktop ? basename($section->video_mp4_desktop) : '—' }},
-                            {{ $section->video_webm_desktop ? basename($section->video_webm_desktop) : '—' }},
-                            {{ $section->video_mp4_mobile ? basename($section->video_mp4_mobile) : '—' }},
-                            {{ $section->video_webm_mobile ? basename($section->video_webm_mobile) : '—' }}
-                            @else
-                            —
-                            @endif
+                            {{ $section->video_public_id ?? '—' }}
                         </div>
 
                         @if ($section->processing_status === 'error' && $section->processing_error)

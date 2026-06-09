@@ -59,19 +59,28 @@
                 id="{{ $frame['id'] }}"
                 class="js-frame absolute inset-0 h-screen w-screen overflow-hidden"
                 data-frame="{{ $frame['id'] }}">
-                <video
-                    class="js-frame-video absolute inset-0 h-full w-full object-cover"
-                    autoplay
-                    muted
-                    loop
-                    playsinline
-                    preload="{{ $frame['preload'] }}"
-                    data-preload="{{ $frame['preload'] }}"
-                    data-desktop-webm="{{ $section?->video_webm_desktop ? asset('storage/'.$section->video_webm_desktop) : '' }}"
-                    data-desktop-mp4="{{ $section?->video_mp4_desktop ? asset('storage/'.$section->video_mp4_desktop) : '' }}"
-                    data-mobile-webm="{{ $section?->video_webm_mobile ? asset('storage/'.$section->video_webm_mobile) : '' }}"
-                    data-mobile-mp4="{{ $section?->video_mp4_mobile ? asset('storage/'.$section->video_mp4_mobile) : '' }}"></video>
-
+                @if($section?->video_public_id)
+                <video autoplay muted loop playsinline>
+                    {{-- WebM VP9 desktop --}}
+                    <source
+                        media="(min-width: 768px)"
+                        src="https://res.cloudinary.com/{{ $cloudName }}/video/upload/w_1920,h_1080,c_fill,vc_vp9,q_auto/{{ $section->video_public_id }}.webm"
+                        type="video/webm">
+                    {{-- MP4 H264 desktop --}}
+                    <source
+                        media="(min-width: 768px)"
+                        src="https://res.cloudinary.com/{{ $cloudName }}/video/upload/w_1920,h_1080,c_fill,vc_h264,q_auto/{{ $section->video_public_id }}.mp4"
+                        type="video/mp4">
+                    {{-- WebM VP9 mobile --}}
+                    <source
+                        src="https://res.cloudinary.com/{{ $cloudName }}/video/upload/w_1280,h_720,c_fill,vc_vp9,q_auto/{{ $section->video_public_id }}.webm"
+                        type="video/webm">
+                    {{-- MP4 H264 mobile --}}
+                    <source
+                        src="https://res.cloudinary.com/{{ $cloudName }}/video/upload/w_1280,h_720,c_fill,vc_h264,q_auto/{{ $section->video_public_id }}.mp4"
+                        type="video/mp4">
+                </video>
+                @endif
                 <div class="pointer-events-none absolute inset-0 flex flex-col justify-end items-center pb-16 px-6 md:justify-center md:items-end md:pb-0 md:pr-16 lg:pr-24">
                     <div class="js-frame-text w-full text-center max-w-[900px] md:text-right md:max-w-[70vw] lg:max-w-[80vw]">
                         @if($section?->title)

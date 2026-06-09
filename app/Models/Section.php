@@ -19,10 +19,7 @@ class Section extends Model
         'slug',
         'title',
         'description_text',
-        'video_webm_desktop',
-        'video_mp4_desktop',
-        'video_webm_mobile',
-        'video_mp4_mobile',
+        'video_public_id',
         'processing_status',
         'processing_error',
     ];

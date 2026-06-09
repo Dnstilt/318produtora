@@ -6,7 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "cloudconvert/cloudconvert-php": "^3.4",
+        "cloudinary-labs/cloudinary-laravel": "^3.0",
         "ezyang/htmlpurifier": "^4.19",
         "intervention/image": "^4.0",
         "laravel/framework": "^11.0",
