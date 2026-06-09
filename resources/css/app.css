@@ -108,10 +108,10 @@ body:has(#landing-root) * {
 
 /* ← logo da navbar */
 #landing-navbar-logo {
-        max-width: none;
-        object-fit: contain;
-        display: block;
-    }
+    max-width: none;
+    object-fit: contain;
+    display: block;
+}
 
 #landing-loading-overlay {
     position: fixed;
@@ -270,9 +270,18 @@ body:has(#landing-root) * {
 }
 
 /* Footer backgroud efect*/
-.crt-grain {
+.crt-grain,
+.crt-scanlines,
+.crt-vignette {
     position: absolute;
-    inset: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-height: 100%;
+    height: 100%;
+}
+
+.crt-grain {
     z-index: 1;
     pointer-events: none;
     opacity: 0.33;
@@ -283,62 +292,86 @@ body:has(#landing-root) * {
 }
 
 .crt-scanlines {
-    position: absolute;
-    inset: 0;
     z-index: 2;
     pointer-events: none;
-    background: repeating-linear-gradient(
-        to bottom,
-        transparent 0px,
-        transparent 2px,
-        rgba(0,0,0,0.11) 2px,   /* ← 11% */
-        rgba(0,0,0,0.11) 4px
-    );
+    background: repeating-linear-gradient(to bottom,
+            transparent 0px,
+            transparent 2px,
+            rgba(0, 0, 0, 0.11) 2px,
+            rgba(0, 0, 0, 0.11) 4px);
 }
 
 .crt-vignette {
-    position: absolute;
-    inset: 0;
     z-index: 3;
     pointer-events: none;
-    background: radial-gradient(
-        ellipse at center,
-        transparent 55%,
-        rgba(0,0,0,0.05) 100%   /* ←  5% */
-    );
+    background: radial-gradient(ellipse at center,
+            transparent 55%,
+            rgba(0, 0, 0, 0.05) 100%);
 }
 
 @keyframes grain-shift {
-    0%   { background-position:   0%   0%; }
-    10%  { background-position:  20%  35%; }
-    20%  { background-position: -15%  10%; }
-    30%  { background-position:  40% -20%; }
-    40%  { background-position: -30%  50%; }
-    50%  { background-position:  10%  80%; }
-    60%  { background-position:  60%  20%; }
-    70%  { background-position: -40%  70%; }
-    80%  { background-position:  80% -10%; }
-    90%  { background-position: -60%  40%; }
-    100% { background-position:  30%  90%; }
+    0% {
+        background-position: 0% 0%;
+    }
+
+    10% {
+        background-position: 20% 35%;
+    }
+
+    20% {
+        background-position: -15% 10%;
+    }
+
+    30% {
+        background-position: 40% -20%;
+    }
+
+    40% {
+        background-position: -30% 50%;
+    }
+
+    50% {
+        background-position: 10% 80%;
+    }
+
+    60% {
+        background-position: 60% 20%;
+    }
+
+    70% {
+        background-position: -40% 70%;
+    }
+
+    80% {
+        background-position: 80% -10%;
+    }
+
+    90% {
+        background-position: -60% 40%;
+    }
+
+    100% {
+        background-position: 30% 90%;
+    }
 }
 
 /* Gallery CSS */
 
 #gallery-carousel {
-    width: 100%;  
+    width: 100%;
 }
 
 .gallery-bg {
     position: relative;
-    background-color: #0e0e0e;
+    background-color: #d60001;
 }
 
 .carousel-overlay {
-    opacity: 1; 
+    opacity: 1;
 }
 
 .carousel-overlay.is-visible {
-    opacity: 0; 
+    opacity: 0;
 }
 
 .carousel-wrap {
@@ -346,9 +379,11 @@ body:has(#landing-root) * {
     width: 100%;
     cursor: grab;
 }
+
 .carousel-wrap.is-dragging {
     cursor: grabbing;
 }
+
 .carousel-track {
     display: flex;
     gap: 6px;
@@ -356,6 +391,7 @@ body:has(#landing-root) * {
     will-change: transform;
     align-items: center;
 }
+
 .carousel-slide {
     flex-shrink: 0;
     overflow: hidden;
@@ -364,12 +400,15 @@ body:has(#landing-root) * {
     background: #000;
     transition: width .6s cubic-bezier(.77, 0, .18, 1);
 }
+
 .carousel-slide.is-active {
     width: 720px;
 }
+
 .carousel-slide.is-side {
     width: 60px;
 }
+
 .carousel-img {
     position: absolute;
     inset: 0;
@@ -379,9 +418,11 @@ body:has(#landing-root) * {
     transform-origin: center;
     transition: transform .5s cubic-bezier(.25, .46, .45, .94);
 }
+
 .carousel-slide.is-active:hover .carousel-img {
     transform: scale(1.07);
 }
+
 .carousel-overlay {
     position: absolute;
     inset: 0;
@@ -391,10 +432,54 @@ body:has(#landing-root) * {
     transition: opacity .55s cubic-bezier(.77, 0, .18, 1);
 }
 
+/* Footer Button */
+.letter-slide-link {
+    display: inline-block;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.letter-slide-char {
+    display: inline-block;
+    overflow: hidden;
+    height: 1em;
+    vertical-align: bottom;
+}
+
+.letter-slide-inner {
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.letter-slide-link:hover .letter-slide-inner {
+    transform: translateY(-50%);
+}
+
+.letter-slide-top,
+.letter-slide-bottom {
+    display: block;
+    height: 1em;
+    line-height: 1em;
+    flex-shrink: 0;
+}
+
+.letter-slide-bottom {
+    border-bottom: 1.5px solid currentColor
+}
+
 @media (max-width: 768px) {
-    .carousel-slide.is-active { width: 280px; }
-    .carousel-slide.is-side   { width: 24px; }
-    .carousel-slide           { height: 260px; }
+    .carousel-slide.is-active {
+        width: 280px;
+    }
+
+    .carousel-slide.is-side {
+        width: 24px;
+    }
+
+    .carousel-slide {
+        height: 260px;
+    }
 }
 
 /* Responsivo Gallery */
@@ -423,14 +508,21 @@ body:has(#landing-root) * {
 
 @font-face {
     font-family: 'Juana';
-    src: url('/fonts/juana-light.ttf') format('truetype');
+    src: url('/public/fonts/juana-light.ttf') format('truetype');
     font-weight: 400;
     font-display: swap;
 }
 
 @font-face {
     font-family: 'PragExt';
-    src: url('/fonts/pragmatica_Ext_Book.otf') format('opentype');
+    src: url('/public/fonts/pragmatica_Ext_Book.otf') format('opentype');
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'OldStandard';
+    src: url('/public/fonts/oldstandardtt-regular.ttf') format('truetype');
     font-weight: 400;
     font-display: swap;
 }

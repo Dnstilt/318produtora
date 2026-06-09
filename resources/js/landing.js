@@ -512,6 +512,27 @@ function setupFooterLogoClick() {
     });
 }
 
+function initLetterSlide() {
+    document.querySelectorAll('.letter-slide-link[data-text]').forEach(link => {
+        const text = link.dataset.text;
+        let html = '';
+        [...text].forEach((char, i) => {
+            if (char === '-' || char === ' ') {
+                html += `<span style="display:inline-block;width:0.3em;"></span>`;
+                return;
+            }
+            const delay = i * 35;
+            html += `<span class="letter-slide-char">` +
+                `<span class="letter-slide-inner" style="transition-delay:${delay}ms">` +
+                    `<span class="letter-slide-top">${char}</span>` +
+                    `<span class="letter-slide-bottom">${char}</span>` +
+                `</span>` +
+                `</span>`;
+        });
+        link.innerHTML = html;
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function () {
 
     const bracket = document.getElementById('cursor-bracket');
@@ -577,9 +598,9 @@ function setupGalleryCarousel() {
     if (N === 0) return;
 
     const GAP = 6, PAD = 28;
-    function getActiveW() { return wrap.offsetWidth > 720 ? 480 : 280; }
-    function getSideW() { return wrap.offsetWidth > 720 ? 60 : 30; }
-    function getPAD() { return wrap.offsetWidth > 720 ? 28 : 16; }
+    function getActiveW() { return wrap.offsetWidth > 768 ? 720 : 280; }
+    function getSideW() { return wrap.offsetWidth > 768 ? 60 : 24; }
+    function getPAD() { return 28; }
 
     let activeReal = 0, activeAbs = N; // começa na cópia do meio
     let trackX = 0, targetX = 0, velX = 0;
@@ -697,7 +718,7 @@ function setupGalleryCarousel() {
         trackX = targetX;
         track.style.transform = `translateX(${trackX}px)`;
     });
-    
+
     wrap.addEventListener('touchstart', e => {
         const t = e.touches[0];
         dragging = true; didDrag = false;
@@ -740,7 +761,6 @@ function setupGalleryCarousel() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    // Setup everything immediately so the DOM is ready and styled correctly
     splitFrameTexts();
     setupVideoLazyLoad();
     setupNavActive(0);
@@ -748,7 +768,8 @@ window.addEventListener('DOMContentLoaded', () => {
     setupFooterTextReveal();
     setupFooterLogoClick();
     setupGalleryCarousel();
-    // Start the loading screen animation
+    initLetterSlide();
+
     startLandingLoading().then(() => {
         const firstFrame = document.querySelector('.js-frame');
         if (firstFrame) animateFrameText(firstFrame);

@@ -21,7 +21,7 @@ class MediaConversionService
     {
         $this->cloudConvert = new CloudConvert([
             'api_key' => config('app.cloudconvert_key'),
-            'sandbox' => config('app.cloudconvert_sandbox', true),
+            'sandbox' => config('app.cloudconvert_sandbox', false),
         ]);
     }
 

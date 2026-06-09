@@ -12,10 +12,9 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                patua: ['"Patua One"', ...defaultTheme.fontFamily.serif],
-                unineue: ['"UniNeue"', ...defaultTheme.fontFamily.serif],
-                pragextobl: ['"PragExtObl"', ...defaultTheme.fontFamily.serif],
+                juana: ['"Juana"', ...defaultTheme.fontFamily.serif],
                 pragext: ['"PragExt"', ...defaultTheme.fontFamily.serif],
+                oldstandard: ['"OldStandard"', ...defaultTheme.fontFamily.serif],
             },
         },
     },
