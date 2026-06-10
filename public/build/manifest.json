@@ -1,0 +1,40 @@
+{
+  "public/fonts/juana-light.ttf": {
+    "file": "assets/juana-light-BACSUWqg.ttf",
+    "src": "public/fonts/juana-light.ttf"
+  },
+  "public/fonts/oldstandardtt-regular.ttf": {
+    "file": "assets/oldstandardtt-regular-BNLcCIn2.ttf",
+    "src": "public/fonts/oldstandardtt-regular.ttf"
+  },
+  "public/fonts/pragmatica_Ext_Book.otf": {
+    "file": "assets/pragmatica_Ext_Book-CMZGVX_F.otf",
+    "src": "public/fonts/pragmatica_Ext_Book.otf"
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-ByroMYNB.css",
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/js/admin.js": {
+    "file": "assets/admin-BFscyNUe.js",
+    "name": "admin",
+    "src": "resources/js/admin.js",
+    "isEntry": true,
+    "css": [
+      "assets/admin-B0QVxhVY.css"
+    ]
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-CRDdtbQ7.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  },
+  "resources/js/landing.js": {
+    "file": "assets/landing-DfCL--LM.js",
+    "name": "landing",
+    "src": "resources/js/landing.js",
+    "isEntry": true
+  }
+}
