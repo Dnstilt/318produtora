@@ -55,7 +55,7 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
-    'logo_path' => env('APP_LOGO_PATH', 'logo/logo_318_Produtora_laranja.png'),
+    'logo_path' => env('APP_LOGO_PATH', 'logo/Logo_318_Produtora_laranja.png'),
     'footer_photo_path' => env('APP_FOOTER_PHOTO_PATH', 'logo/logo_318_produtora_preto.png'),
 
     /*
