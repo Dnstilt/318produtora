@@ -135,7 +135,7 @@
             </div>
             <div class="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-8 px-6 lg:grid-cols-2 lg:items-center z-10 relative">
                 <div class="flex flex-col items-center lg:items-start justify-center">
-                    <a href="#publicidade" class="flip-logo-wrap block opacity-100 hover:opacity-80 transition-opacity js-nav-item"
+                    <a href="#publicidade" class="flip-logo-wrap block opacity-100 hover:opacity-60 transition-opacity js-nav-item"
                         data-src="{{ asset(config('app.footer_photo_path')) }}" aria-label="318 Produtora" data-target="publicidade">
                         <img
                             src="{{ asset(config('app.footer_photo_path')) }}"
