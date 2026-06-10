@@ -24,6 +24,15 @@ class PageController extends Controller
     {
         $sections = collect($this->sections->all())->keyBy('slug');
 
+        $cloudUrl = (string) config('cloudinary.cloud_url', '');
+        $cloudName = '';
+        if ($cloudUrl !== '') {
+            $atPos = strrpos($cloudUrl, '@');
+            if ($atPos !== false) {
+                $cloudName = substr($cloudUrl, $atPos + 1);
+            }
+        }
+
         return view('landing.index', [
             'sections' => [
                 Section::SLUG_PUBLICIDADE => $sections->get(Section::SLUG_PUBLICIDADE),
@@ -35,7 +44,7 @@ class PageController extends Controller
             'socialLinks' => $this->socialLinks->all(),
             'rodapeTitulo' => $this->pages->findBySlug(Page::SLUG_RODAPE_TITULO)?->content ?? 'Conheça nosso trabalho',
             'rodapeSubtitulo' => $this->pages->findBySlug(Page::SLUG_RODAPE_SUBTITULO)?->content ?? 'Entre em contato para mais informações.',
-            'cloudName' => config('cloudinary.cloud_name'),
+            'cloudName' => $cloudName,
         ]);
     }
 }

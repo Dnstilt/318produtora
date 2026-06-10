@@ -56,7 +56,7 @@ class SecurityHeaders
             'object-src \'none\'',
             'frame-ancestors \'none\'',
             'img-src \'self\' data: blob:',
-            'media-src \'self\' blob:',
+            'media-src \'self\' blob: https://res.cloudinary.com',
             'font-src \'self\' https://fonts.bunny.net data:',
             'script-src '.implode(' ', $script),
             'style-src '.implode(' ', $style),

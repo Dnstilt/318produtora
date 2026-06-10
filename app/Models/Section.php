@@ -20,6 +20,10 @@ class Section extends Model
         'title',
         'description_text',
         'video_public_id',
+        'video_webm_desktop',
+        'video_mp4_desktop',
+        'video_webm_mobile',
+        'video_mp4_mobile',
         'processing_status',
         'processing_error',
     ];

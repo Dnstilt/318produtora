@@ -17,6 +17,10 @@ return new class extends Migration
             $table->longText('description_text')->nullable();
 
             $table->string('video_public_id',)->nullable()->after('id');
+            $table->string('video_webm_desktop',)->nullable();
+            $table->string('video_mp4_desktop',)->nullable();
+            $table->string('video_webm_mobile',)->nullable();
+            $table->string('video_mp4_mobile',)->nullable();
             
             $table->enum('processing_status', ['pending', 'processing', 'done', 'error'])->default('pending');
             $table->text('processing_error')->nullable();
