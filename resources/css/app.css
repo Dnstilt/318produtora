@@ -433,6 +433,14 @@ body:has(#landing-root) * {
     transition: opacity .55s cubic-bezier(.77, 0, .18, 1);
 }
 
+.logofooter{
+    opacity: 1;
+}
+
+.logofooter:hover{
+    opacity: 0.6;
+}
+
 /* Footer Button */
 .letter-slide-link {
     display: inline-block;
