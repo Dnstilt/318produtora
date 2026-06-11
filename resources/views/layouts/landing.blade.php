@@ -11,7 +11,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png?v=20260610" />
     <meta name="apple-mobile-web-app-title" content="318" />
     <link rel="manifest" href="/site.webmanifest?v=20260610" />
-    <title>318 Produtora</title>
+    <title>318 Produtora — Produção Audiovisual | Publicidade, Documentários e Natureza</title>
 
     <meta name="google-site-verification" content="kSk_cf24AnZzPsKL8LwpiUL0i9bm1rQvuueAQExiRsU" />
     <meta name="description" content="318 Produtora — Produção audiovisual de publicidade, OOH, documentários e natureza.">
@@ -35,8 +35,30 @@
     @vite(['resources/css/app.css', 'resources/js/landing.js'])
 </head>
 
+
 <body class="bg-black text-white antialiased">
     @yield('content')
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "318 Produtora",
+            "url": "https://318produtora.com.br",
+            "logo": "https://318produtora.com.br/logo/Logo_318_Produtora_laranja.png",
+            "email": "info@318produtora.com.br",
+            "description": "Produção audiovisual de publicidade, OOH, documentários e natureza.",
+            "address": {
+                "@type": "PostalAddress",
+                "addressCountry": "BR",
+                "addressRegion": "SP",
+                "addressLocality": "São Paulo"
+            },
+            "sameAs": [
+                "https://www.instagram.com/318produtora?igsh=MTVkMmI0MzJzNDNpNw%3D%3D",
+                "https://www.youtube.com/watch?v=PZuCw8chDzk"
+            ]
+        }
+    </script>
 </body>
 
 </html>
