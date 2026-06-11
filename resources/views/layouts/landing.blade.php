@@ -13,6 +13,7 @@
     <link rel="manifest" href="/site.webmanifest?v=20260610" />
     <title>318 Produtora</title>
 
+    <meta name="google-site-verification" content="kSk_cf24AnZzPsKL8LwpiUL0i9bm1rQvuueAQExiRsU" />
     <meta name="description" content="318 Produtora — Produção audiovisual de publicidade, OOH, documentários e natureza.">
     <meta name="keywords" content="produtora de vídeo, publicidade, documentários, produção audiovisual, Brasil, São Paulo, SP">
     <meta name="robots" content="index, follow">
