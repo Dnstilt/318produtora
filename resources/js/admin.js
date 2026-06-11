@@ -111,7 +111,7 @@ window.photoManager = function photoManager(initialPhotos) {
                 }
                 return false;
             }
-            this.photos = this.photos.filter((p) => p.id !== id);
+            return true;
         },
     };
 };
