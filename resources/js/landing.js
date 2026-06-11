@@ -540,8 +540,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     bracket.innerHTML = '<span></span><span></span>';
 
-    if (window.matchMedia('(pointer: coarse)').matches) return;
-    
+    const isTouch = window.matchMedia('(pointer: coarse)').matches ||
+        !window.matchMedia('(hover: hover)').matches ||
+        ('ontouchstart' in window && !window.matchMedia('(pointer: fine)').matches);
+
+    if (isTouch) return;
+
     let mx = -200, my = -200;
     let rx = -200, ry = -200;
     let cursorInitialized = false;

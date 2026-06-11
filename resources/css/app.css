@@ -474,7 +474,7 @@ body.landing-is-loading #landing-root {
     border-bottom: 1.5px solid currentColor
 }
 
-@media (pointer: fine) {
+@media (pointer: fine) and (hover: hover){
     body:has(#landing-root) * {
         cursor: none !important;
     }
