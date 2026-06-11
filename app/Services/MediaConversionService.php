@@ -138,7 +138,7 @@ class MediaConversionService
 
         try {
             Log::info('convertFooterPhoto: Tentando converter para AVIF');
-            $disk->put($avifPath, (string) $image->encodeUsingFormat(Format::AVIF, 75));
+            $disk->put($avifPath, (string) $image->encodeUsingFormat(Format::AVIF, 65));
         } catch (\Throwable $e) {
             Log::warning('GD Extension não suporta AVIF neste servidor, pulando formato AVIF.', ['error' => $e->getMessage()]);
             $avifPath = null;

@@ -183,15 +183,15 @@ body.landing-is-loading #landing-root {
 #landing-loading-progress-bar {
     width: 0%;
     height: 100%;
-    background: #ff4f00;
+    background: #ff6b2b;
     border-radius: 2px;
     transition: width 0.12s ease;
-    box-shadow: 0 0 8px #ff4f00, 0 0 18px rgba(255, 79, 0, 0.35);
+    box-shadow: 0 0 8px #ff6b2b, 0 0 18px rgba(255, 79, 0, 0.35);
 }
 
 #landing-loading-progress-label {
     text-align: right;
-    color: #ff4f00;
+    color: #ff6b2b;
     font-size: 11px;
     letter-spacing: 2px;
     margin-top: 6px;
