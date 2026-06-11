@@ -540,6 +540,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     bracket.innerHTML = '<span></span><span></span>';
 
+    if (window.matchMedia('(pointer: coarse)').matches) return;
+    
     let mx = -200, my = -200;
     let rx = -200, ry = -200;
     let cursorInitialized = false;
