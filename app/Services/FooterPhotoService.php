@@ -46,6 +46,10 @@ class FooterPhotoService
     {
         $photo = $this->requirePhoto($id);
 
+        Log::info('photos.delete.start', [
+            'photo_id' => $id,
+        ]);
+
         Log::info('photos.delete', [
             'photo_id' => $id,
             'paths' => [
@@ -62,6 +66,10 @@ class FooterPhotoService
         ]);
 
         $this->photos->delete($photo);
+
+        Log::info('photos.delete.done', [
+            'photo_id' => $id,
+        ]);
     }
 
     public function reorder(array $orderedIds): void

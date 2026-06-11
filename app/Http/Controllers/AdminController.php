@@ -18,6 +18,8 @@ use App\Services\SocialLinkService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\View\View;
 
 class AdminController extends Controller
@@ -202,17 +204,23 @@ class AdminController extends Controller
         }
     }
 
-    public function deletePhoto(int $id): RedirectResponse
+    public function deletePhoto(int $id): RedirectResponse|JsonResponse
     {
         Log::info('admin.photos.delete.request', [
             'user_id' => request()->user()?->id,
             'photo_id' => $id,
             'ip' => request()->ip(),
+            'expects_json' => request()->expectsJson(),
         ]);
 
         try {
             $photo = FooterPhoto::query()->findOrFail($id);
             $this->authorize('delete', $photo);
+
+            Log::info('admin.photos.delete.start', [
+                'user_id' => request()->user()?->id,
+                'photo_id' => $id,
+            ]);
 
             $this->photos->delete($id);
 
@@ -221,6 +229,10 @@ class AdminController extends Controller
                 'photo_id' => $id,
             ]);
 
+            if (request()->expectsJson()) {
+                return response()->json(['ok' => true, 'id' => $id]);
+            }
+
             return back()->with('success', 'Foto removida.');
         } catch (\Throwable $e) {
             Log::error('admin.photos.delete.error', [
@@ -228,6 +240,18 @@ class AdminController extends Controller
                 'photo_id' => $id,
                 'exception' => $e,
             ]);
+
+            if (request()->expectsJson()) {
+                if ($e instanceof AuthorizationException) {
+                    return response()->json(['ok' => false, 'message' => 'Sem permissão para excluir esta foto.'], 403);
+                }
+                if ($e instanceof ModelNotFoundException) {
+                    return response()->json(['ok' => false, 'message' => 'Foto não encontrada.'], 404);
+                }
+
+                return response()->json(['ok' => false, 'message' => 'Não foi possível remover a foto.'], 500);
+            }
+
             return back()->with('error', 'Não foi possível remover a foto. Tente novamente.');
         }
     }

@@ -168,7 +168,7 @@
                             </div>
                             <div class="mt-2 flex items-center justify-between gap-2">
                                 <div class="text-xs text-gray-600 dark:text-gray-300">#<span x-text="photo.id"></span></div>
-                                <form method="POST" :action="'/admin/photos/' + photo.id" class="js-admin-form" data-loading-text="Excluindo..." @submit="onDeleteSubmit($event, photo.id)">
+                                <form method="POST" :action="'/admin/photos/' + photo.id" class="js-admin-form" data-loading-text="Excluindo..." @submit.prevent="onDeleteSubmit($event, photo.id)">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-xs font-semibold text-red-600 hover:underline">Excluir</button>

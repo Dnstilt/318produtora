@@ -70,6 +70,7 @@ window.photoManager = function photoManager(initialPhotos) {
     return {
         photos: initialPhotos,
         draggingId: null,
+        deletingId: null,
         onDragStart(id) {
             this.draggingId = id;
         },
@@ -97,10 +98,8 @@ window.photoManager = function photoManager(initialPhotos) {
                 body: JSON.stringify({ orders: this.photos.map((p) => p.id) }),
             });
         },
-        onDeleteSubmit(event, id) {
+        async onDeleteSubmit(event, id) {
             if (!window.confirm('Você quer mesmo excluir essa foto?')) {
-                event.preventDefault();
-                event.stopPropagation();
                 // Restore form submitting state since it was blocked
                 const form = event.target;
                 form.dataset.submitting = '0';
@@ -111,7 +110,53 @@ window.photoManager = function photoManager(initialPhotos) {
                 }
                 return false;
             }
-            return true;
+
+            const form = event.target;
+            const action = (form?.getAttribute('action') || '').toString();
+            const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+            if (!action || !csrf) {
+                window.location.href = action || window.location.href;
+                return true;
+            }
+
+            this.deletingId = id;
+            console.log('[photos.delete] start', { id, action });
+
+            try {
+                const res = await fetch(action, {
+                    method: 'DELETE',
+                    headers: {
+                        Accept: 'application/json',
+                        'X-CSRF-TOKEN': csrf,
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+
+                const payload = await res.json().catch(() => null);
+                if (!res.ok || payload?.ok !== true) {
+                    const message = (payload?.message || '').toString().trim() || 'Não foi possível remover a foto.';
+                    throw new Error(message);
+                }
+
+                console.log('[photos.delete] success', { id });
+                this.photos = this.photos.filter((p) => p.id !== id);
+                return true;
+            } catch (e) {
+                console.log('[photos.delete] error', { id, error: e?.message || e });
+                window.alert(e?.message || 'Não foi possível remover a foto.');
+
+                form.dataset.submitting = '0';
+                const submitButtons = Array.from(form.querySelectorAll('button[type="submit"]'));
+                for (const btn of submitButtons) {
+                    btn.disabled = false;
+                    btn.textContent = btn.dataset.originalLabel || 'Excluir';
+                }
+
+                return false;
+            } finally {
+                this.deletingId = null;
+            }
         },
     };
 };
