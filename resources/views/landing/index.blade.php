@@ -26,7 +26,7 @@
                     class="nav-item js-nav-item group relative flex h-10 items-center justify-center text-[#ff2600] text-bold"
                     data-target="{{ $item['id'] }}">
                     <span class="nav-icon flex h-12 w-12 items-center justify-center sm:h-12 sm:w-12 lg:h-13 lg:w-13 xl:h-14 xl:w-14">
-                        <span class="h-3/4 w-3/4 rounded-full border-2 border-[#ff2600] sm:h-7 sm:w-7 lg:h-8 lg:w-8 xl:h-9 xl:w-9"></span>
+                        <span class="h-3/4 w-3/4 rounded-full border-2 border-[#ff2600] sm:h-6 sm:w-6 lg:h-8 lg:w-8 xl:h-9 xl:w-9"></span>
                     </span>
                     <span class="nav-label px-2 tracking-wide text-3xl">{{ $item['label'] }}</span>
                 </a>

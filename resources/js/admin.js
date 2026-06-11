@@ -56,8 +56,9 @@ async function pollSectionStatuses(sectionIds) {
                 if (!res.ok) return;
                 const json = await res.json();
                 const status = (json?.status || '').toString().trim();
+                const error = (json?.error || '').toString().trim();
                 el.textContent = status;
-                results.set(id, status);
+                results.set(id, { status, error });
             } catch (e) { }
         })
     );
@@ -148,6 +149,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     let pollTimer = null;
     const trackedSectionIds = new Set();
+    const notifiedSectionIds = new Set();
     const videoBanner = document.getElementById('js-video-processing-banner');
     const videoUploadForms = Array.from(document.querySelectorAll('form.js-video-upload-form'));
 
@@ -162,19 +164,36 @@ window.addEventListener('DOMContentLoaded', () => {
         return byId;
     };
 
+    const setVideoBanner = (kind, message) => {
+        if (!videoBanner) return;
+
+        videoBanner.classList.remove('hidden');
+        videoBanner.classList.remove('bg-amber-50', 'text-amber-900', 'bg-green-50', 'text-green-800', 'bg-red-50', 'text-red-800');
+
+        if (kind === 'success') {
+            videoBanner.classList.add('bg-green-50', 'text-green-800');
+        } else if (kind === 'error') {
+            videoBanner.classList.add('bg-red-50', 'text-red-800');
+        } else {
+            videoBanner.classList.add('bg-amber-50', 'text-amber-900');
+        }
+
+        videoBanner.textContent = message || '';
+        if (!videoBanner.textContent) {
+            videoBanner.classList.add('hidden');
+        }
+    };
+
     const setVideoUploadsEnabled = (enabled, message) => {
         for (const form of videoUploadForms) {
             const button = form.querySelector('button[type="submit"], input[type="submit"]');
             if (button) button.disabled = !enabled;
         }
 
-        if (!videoBanner) return;
         if (enabled) {
-            videoBanner.classList.add('hidden');
-            videoBanner.textContent = '';
+            setVideoBanner('info', '');
         } else {
-            videoBanner.classList.remove('hidden');
-            videoBanner.textContent = message || 'Processamento em andamento. Aguarde concluir para enviar outro vídeo.';
+            setVideoBanner('info', message || 'Processamento em andamento. Aguarde concluir para enviar outro vídeo.');
         }
     };
 
@@ -189,9 +208,25 @@ window.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             const statuses = await pollSectionStatuses(ids);
-            for (const [id, status] of statuses.entries()) {
+            let completedDone = 0;
+            let completedError = 0;
+            let lastErrorMessage = '';
+
+            for (const [id, info] of statuses.entries()) {
+                const status = info?.status;
+                const error = info?.error;
+
                 if (status !== 'pending' && status !== 'processing') {
                     trackedSectionIds.delete(id);
+                    if (!notifiedSectionIds.has(id)) {
+                        notifiedSectionIds.add(id);
+                        if (status === 'done') {
+                            completedDone += 1;
+                        } else if (status === 'error') {
+                            completedError += 1;
+                            if (error) lastErrorMessage = error;
+                        }
+                    }
                 }
             }
 
@@ -200,6 +235,12 @@ window.addEventListener('DOMContentLoaded', () => {
                 pollTimer = null;
                 setVideoUploadsEnabled(true);
                 sessionStorage.removeItem('adminActiveVideoSectionId');
+                if (completedDone > 0) {
+                    setVideoBanner('success', completedDone === 1 ? 'Conversão concluída com sucesso.' : `Conversões concluídas com sucesso: ${completedDone}.`);
+                    setTimeout(() => setVideoBanner('success', ''), 6000);
+                } else if (completedError > 0) {
+                    setVideoBanner('error', lastErrorMessage ? `Falha na conversão: ${lastErrorMessage}` : 'Falha na conversão. Verifique o status da seção.');
+                }
             }
         };
 

@@ -3,14 +3,17 @@ deployment:
   tasks:
     - export APPPATH=$HOME/318produtora
     - export PUBPATH=$HOME/public_html
+    - export SRC=${DEPLOYMENT_SOURCE:-$PWD}
+    - export PHPBIN=/usr/local/bin/ea-php84
+    - if [ ! -x "$PHPBIN" ]; then export PHPBIN=/usr/local/bin/php; fi
     - /bin/mkdir -p $APPPATH
-    - /bin/rsync -av --delete --exclude='.git' --exclude='public' ./ $APPPATH/
-    - /bin/rsync -av --delete ./public/ $PUBPATH/
-    - /usr/local/bin/php $HOME/composer.phar install --no-dev --optimize-autoloader --no-interaction --working-dir=$APPPATH
-    - /usr/local/bin/php $APPPATH/artisan migrate --force
-    - /usr/local/bin/php $APPPATH/artisan config:cache
-    - /usr/local/bin/php $APPPATH/artisan route:cache
-    - /usr/local/bin/php $APPPATH/artisan view:cache
+    - /bin/rsync -av --delete --exclude='.git' --exclude='public' $SRC/ $APPPATH/
+    - /bin/rsync -av --delete $SRC/public/ $PUBPATH/
+    - if [ -f "$HOME/composer.phar" ]; then $PHPBIN $HOME/composer.phar install --no-dev --optimize-autoloader --no-interaction --working-dir=$APPPATH; elif command -v composer >/dev/null 2>&1; then composer install --no-dev --optimize-autoloader --no-interaction --working-dir=$APPPATH; elif [ -x /opt/cpanel/composer/bin/composer ]; then /opt/cpanel/composer/bin/composer install --no-dev --optimize-autoloader --no-interaction --working-dir=$APPPATH; fi
+    - $PHPBIN $APPPATH/artisan migrate --force
+    - $PHPBIN $APPPATH/artisan config:cache
+    - $PHPBIN $APPPATH/artisan route:cache
+    - $PHPBIN $APPPATH/artisan view:cache
     - /bin/ln -sfn $APPPATH/storage/app/public $PUBPATH/storage
     - /bin/chmod -R 775 $APPPATH/storage
     - /bin/chmod -R 775 $APPPATH/bootstrap/cache

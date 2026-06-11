@@ -47,15 +47,22 @@ class ProcessVideoJob implements ShouldQueue
             return;
         }
 
-        $section->update([
+        Section::where('id', $this->sectionId)->update([
             'processing_status' => 'processing',
             'processing_error' => null,
+            'updated_at' => now(),
         ]);
 
         try {
             $paths = $mediaService->convertSectionVideo($this->tempPath, $this->baseName);
 
-            $section->update([
+            $hasDesktop = !empty($paths['video_mp4_desktop']);
+            $hasMobile  = !empty($paths['video_mp4_mobile']);
+
+            if (!$hasDesktop && !$hasMobile) {
+                throw new \RuntimeException('Nenhuma variante de vídeo foi baixada com sucesso.');
+            }
+            Section::where('id', $this->sectionId)->update([
                 'video_public_id'    => $paths['video_public_id'],
                 'video_webm_desktop' => $paths['video_webm_desktop'],
                 'video_mp4_desktop'  => $paths['video_mp4_desktop'],
@@ -63,6 +70,7 @@ class ProcessVideoJob implements ShouldQueue
                 'video_mp4_mobile'   => $paths['video_mp4_mobile'],
                 'processing_status'  => 'done',
                 'processing_error'   => null,
+                'updated_at' => now(),
             ]);
         } catch (\Throwable $e) {
             Log::error('video.process.error', [
@@ -70,9 +78,10 @@ class ProcessVideoJob implements ShouldQueue
                 'exception' => $e,
             ]);
 
-            $section->update([
+            Section::where('id', $this->sectionId)->update([
                 'processing_status' => 'error',
                 'processing_error' => $e->getMessage(),
+                'updated_at' => now(),
             ]);
 
             throw $e;

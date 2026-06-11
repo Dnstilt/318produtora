@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Cloudinary\Cloudinary;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Drivers\Gd\Driver;
@@ -35,6 +36,7 @@ class MediaConversionService
             'overwrite'     => true,
             'chunk_size'    => 6000000,
         ]);
+
         Storage::disk('local')->delete($tempPath);
         $publicId = $result['public_id'];
         $cloudName = config('cloudinary.cloud_url') ? parse_url(config('cloudinary.cloud_url'), PHP_URL_HOST) : env('CLOUDINARY_CLOUD_NAME');
@@ -51,14 +53,52 @@ class MediaConversionService
         $localPaths = [];
         foreach ($variants as $key => $url) {
             $filename = "videos/{$baseName}_{$key}." . (str_contains($key, 'webm') ? 'webm' : 'mp4');
-            $contents = file_get_contents($url);
-            if ($contents !== false) {
-                $disk->put($filename, $contents);
-                $localPaths[$key] = $filename;
-                Log::info("Vídeo baixado: {$filename}");
-            } else {
-                Log::warning("Falha ao baixar: {$url}");
-                $localPaths[$key] = null;
+            $maxRetries = 5;
+            $attempt = 0;
+
+            while ($attempt < $maxRetries) {
+                try {
+                    $res = Http::timeout(300)->withOptions(['stream' => true])->get($url);
+
+                    if (in_array($res->status(), [423, 503])) {
+                        $attempt++;
+                        Log::info('Cloudinary ainda processando', ['key' => $key, 'tentativa' => $attempt]);
+                        sleep(15);
+                        continue;
+                    }
+
+                    if (!$res->successful()) {
+                        throw new \RuntimeException("HTTP {$res->status()}");
+                    }
+
+                    $resource = $res->toPsrResponse()->getBody()->detach();
+                    if (!is_resource($resource)) {
+                        throw new \RuntimeException('Resposta sem stream');
+                    }
+
+                    $ok = $disk->writeStream($filename, $resource);
+                    if (is_resource($resource)) fclose($resource);
+
+                    if (!$ok) {
+                        throw new \RuntimeException('Falha ao gravar no storage');
+                    }
+
+                    $localPaths[$key] = $filename;
+                    Log::info('video.downloaded', ['path' => $filename]);
+                    break;
+                } catch (\Throwable $e) {
+                    $attempt++;
+                    Log::warning('video.download_failed', [
+                        'url' => $url,
+                        'tentativa' => $attempt,
+                        'exception' => $e->getMessage(),
+                    ]);
+                    if ($attempt >= $maxRetries) {
+                        $localPaths[$key] = null;
+                        break;
+                    }
+                    sleep(15);
+                }
             }
         }
 

@@ -8,6 +8,7 @@ use App\Repositories\SectionRepositoryInterface;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class SectionService
 {
@@ -60,9 +61,26 @@ class SectionService
             abort(422);
         }
 
+        $publicDisk = Storage::disk('public');
+        $videoDir = 'videos';
+        try {
+            $publicDisk->makeDirectory($videoDir);
+            foreach ($publicDisk->files($videoDir) as $path) {
+                $name = basename((string) $path);
+                if (str_starts_with($name, $section->slug . '_')) {
+                    $publicDisk->delete($path);
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::warning('sections.video.cleanup_failed', [
+                'section_id' => $id,
+                'exception' => $e->getMessage(),
+            ]);
+        }
+
         $extension = $file->guessExtension() ?: $file->getClientOriginalExtension() ?: 'bin';
         $tmpPath = $file->storeAs('temp', uniqid('video_', true).'.'.$extension, 'local');
-        $baseName = $section->slug.'_'.time().'_'.substr(bin2hex(random_bytes(4)), 0, 8);
+        $baseName = $section->slug . '_' . $section->id;
 
         Log::info('sections.video.enqueue', [
             'section_id' => $id,
