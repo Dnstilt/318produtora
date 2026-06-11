@@ -48,9 +48,7 @@
         @endphp
 
         <div id="frames-wrapper" class="relative h-screen w-screen overflow-hidden bg-[#000000]">
-            <div class="crt-grain" aria-hidden="true" style="z-index:0"></div>
-            <div class="crt-scanlines" aria-hidden="true" style="z-index:0"></div>
-            <div class="crt-vignette" aria-hidden="true" style="z-index:0"></div>
+            
             @foreach ($frames as $frame)
             @php
             $section = $sections[$frame['slug']] ?? null;

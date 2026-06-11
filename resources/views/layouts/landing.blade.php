@@ -12,6 +12,25 @@
     <meta name="apple-mobile-web-app-title" content="318" />
     <link rel="manifest" href="/site.webmanifest?v=20260610" />
     <title>318 Produtora</title>
+
+    <meta name="description" content="318 Produtora — Produção audiovisual de publicidade, OOH, documentários e natureza.">
+    <meta name="keywords" content="produtora de vídeo, publicidade, documentários, produção audiovisual, Brasil, São Paulo, SP">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://318produtora.com.br">
+    <!-- Open Graph -->
+    <meta property="og:title" content="318 Produtora">
+    <meta property="og:description" content="Produção audiovisual de publicidade, OOH, documentários e natureza.">
+    <meta property="og:image" content="https://318produtora.com.br/logo/Logo_318_Produtora_laranja.png">
+    <meta property="og:url" content="https://318produtora.com.br">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="pt_BR">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="318 Produtora">
+    <meta name="twitter:description" content="Produção audiovisual de publicidade, OOH, documentários e natureza.">
+    <meta name="twitter:image" content="https://318produtora.com.br/logo/Logo_318_Produtora_laranja.png">
+
+
     @vite(['resources/css/app.css', 'resources/js/landing.js'])
 </head>
 
