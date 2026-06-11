@@ -24,6 +24,11 @@ body:has(#landing-root) * {
 }
 
 /* ← cursor bracket */
+#cursor-bracket,
+#cursor-ring {
+    display: none;
+}
+
 #cursor-bracket {
     position: fixed;
     top: 0;

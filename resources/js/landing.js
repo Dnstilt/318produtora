@@ -524,8 +524,8 @@ function initLetterSlide() {
             const delay = i * 35;
             html += `<span class="letter-slide-char">` +
                 `<span class="letter-slide-inner" style="transition-delay:${delay}ms">` +
-                    `<span class="letter-slide-top">${char}</span>` +
-                    `<span class="letter-slide-bottom">${char}</span>` +
+                `<span class="letter-slide-top">${char}</span>` +
+                `<span class="letter-slide-bottom">${char}</span>` +
                 `</span>` +
                 `</span>`;
         });
@@ -542,13 +542,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let mx = -200, my = -200;
     let rx = -200, ry = -200;
+    let cursorInitialized = false;
 
     /* ─── VELOCIDADE DO TRAILING ────────────────────────────
        0.05 = muito lento / 0.15 = médio / 0.3 = quase direto
     ──────────────────────────────────────────────────────── */
     const lerpSpeed = 0.12;
 
+    function lerp(a, b, t) { return a + (b - a) * t; }
+
+    function animate() {
+        rx = lerp(rx, mx, lerpSpeed);
+        ry = lerp(ry, my, lerpSpeed);
+        ring.style.left = rx + 'px';
+        ring.style.top = ry + 'px';
+        requestAnimationFrame(animate);
+    }
+
     document.addEventListener('mousemove', function (e) {
+        if (!cursorInitialized) {
+            cursorInitialized = true;
+            bracket.style.display = 'block';
+            ring.style.display = 'block';
+            animate();
+        }
         mx = e.clientX;
         my = e.clientY;
         bracket.style.left = mx + 'px';
@@ -557,7 +574,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.querySelectorAll('a, button, [role="button"], input, label').forEach(function (el) {
         el.addEventListener('mouseenter', function () {
-            bracket.style.width = '28px'; /* ← tamanho no hover */
+            bracket.style.width = '28px';
             bracket.style.height = '28px';
             ring.style.width = '44px';
             ring.style.height = '44px';
@@ -571,18 +588,6 @@ document.addEventListener('DOMContentLoaded', function () {
             ring.style.opacity = '';
         });
     });
-
-    /* ─── LOOP DE ANIMAÇÃO ──────────────────────────────────*/
-    function lerp(a, b, t) { return a + (b - a) * t; }
-
-    function animate() {
-        rx = lerp(rx, mx, lerpSpeed);
-        ry = lerp(ry, my, lerpSpeed);
-        ring.style.left = rx + 'px';
-        ring.style.top = ry + 'px';
-        requestAnimationFrame(animate);
-    }
-    animate();
 });
 
 function setupGalleryCarousel() {
