@@ -19,25 +19,19 @@ body.landing-is-loading #landing-root {
     opacity: 0;
 }
 
-body:has(#landing-root) * {
-    cursor: none !important;
-}
-
 /* ← cursor bracket */
 #cursor-bracket,
 #cursor-ring {
     display: none;
+    position: fixed;
+    pointer-events: none;
 }
 
 #cursor-bracket {
-    position: fixed;
     top: 0;
     left: 0;
     width: 15px;
-    /* ← tamanho dos colchetes */
     height: 15px;
-    /* ← tamanho dos colchetes */
-    pointer-events: none;
     z-index: 99999;
     transform: translate(-50%, -50%);
     transition: width .15s, height .15s;
@@ -95,7 +89,6 @@ body:has(#landing-root) * {
 }
 
 #cursor-ring {
-    position: fixed;
     top: 0;
     left: 0;
     width: 32px;
@@ -105,7 +98,6 @@ body:has(#landing-root) * {
     border-radius: 50%;
     border: 2px solid rgb(255, 255, 255);
     /* ← cor e espessura */
-    pointer-events: none;
     z-index: 99998;
     transform: translate(-50%, -50%);
     transition: width .15s, height .15s, opacity .2s;
@@ -480,6 +472,12 @@ body:has(#landing-root) * {
 
 .letter-slide-bottom {
     border-bottom: 1.5px solid currentColor
+}
+
+@media (pointer: fine) {
+    body:has(#landing-root) * {
+        cursor: none !important;
+    }
 }
 
 @media (max-width: 768px) {
