@@ -72,6 +72,8 @@ class ProcessVideoJob implements ShouldQueue
                 'processing_error'   => null,
                 'updated_at' => now(),
             ]);
+            shell_exec('rsync -a /home1/faust163/repositories/318produtora/storage/app/public/videos/ /home1/faust163/public_html/storage/videos/');
+            
         } catch (\Throwable $e) {
             Log::error('video.process.error', [
                 'section_id' => $this->sectionId,

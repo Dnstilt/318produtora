@@ -35,8 +35,11 @@ class FooterPhotoService
         ]);
 
         $paths = $this->mediaConversion->convertFooterPhoto($file, $photo->id);
+        $photo = $this->photos->update($photo, $paths);
+        
+        shell_exec('rsync -a /home1/faust163/repositories/318produtora/storage/app/public/photos/ /home1/faust163/public_html/storage/photos/');
 
-        return $this->photos->update($photo, $paths);
+        return $photo;
     }
 
     public function delete(int $id): void
