@@ -21,7 +21,7 @@ function startLandingLoading() {
     }
 
     document.body.classList.add('landing-is-loading');
-
+    animateLogoDraw();
     let pct = 0;
     let done = false;
 
@@ -96,6 +96,54 @@ function startLandingLoading() {
 
         setTimeout(tick, 350);
     });
+}
+
+function animateLogoDraw() {
+    const svg = document.getElementById('landing-loading-logo-svg');
+    if (!svg) return;
+
+    const strokePaths = svg.querySelectorAll('#loading-stroke-layer path');
+    const fillLayer = svg.querySelector('#loading-fill-layer');
+
+    strokePaths.forEach((el) => {
+        const length = el.getTotalLength();
+        el.style.strokeDasharray = length;
+        el.style.strokeDashoffset = length;
+    });
+
+    const tl = gsap.timeline();
+
+    tl.to('#landing-loading-logo-svg .group-corners path', {
+        strokeDashoffset: 0,
+        duration: 0.5,
+        stagger: 0.08,
+        ease: 'power2.out',
+    })
+        .to('#landing-loading-logo-svg .group-numbers path', {
+            strokeDashoffset: 0,
+            duration: 0.9,
+            stagger: 0.15,
+            ease: 'power2.inOut',
+        }, '-=0.1')
+        .to('#landing-loading-logo-svg .group-letters path', {
+            strokeDashoffset: 0,
+            duration: 0.9,
+            stagger: 0.06,
+            ease: 'power2.inOut',
+        }, '-=0.3')
+        .to('#landing-loading-logo-svg .group-blades path', {
+            strokeDashoffset: 0,
+            duration: 0.5,
+            stagger: 0.05,
+            ease: 'power1.inOut',
+        }, '-=0.4')
+        .to(fillLayer, {
+            opacity: 1,
+            duration: 0.4,
+            ease: 'power1.out',
+        }, '+=0.1');
+
+    return tl;
 }
 
 function isMobile() {

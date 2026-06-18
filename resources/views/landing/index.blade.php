@@ -186,7 +186,7 @@
 
 <div id="landing-loading-overlay" aria-hidden="true"></div>
 <div id="landing-loading-logo-wrapper" aria-hidden="true">
-    <img src="{{ asset(config('app.logo_path')) }}" alt="318 Produtora" />
+    @include('partials.logo-loading-svg')
 </div>
 <div id="landing-loading-progress" aria-hidden="true">
     <div id="landing-loading-progress-track">
