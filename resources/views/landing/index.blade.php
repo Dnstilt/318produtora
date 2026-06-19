@@ -48,7 +48,7 @@
         @endphp
 
         <div id="frames-wrapper" class="relative h-screen w-screen overflow-hidden bg-[#000000]">
-            
+
             @foreach ($frames as $frame)
             @php
             $section = $sections[$frame['slug']] ?? null;
@@ -90,15 +90,15 @@
         <footer id="rodape" class="gallery-bg relative min-h-screen w-screen">
             <div class="px-6 pt-16 sm:pt-24 relative z-10">
                 @if($rodapeTitulo)
-                <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-[#000000] mb-4 font-juana text-center">
-                    <span class="line-wrap"><span class="line-inner footer-line" data-delay="0">{{ $rodapeTitulo }}</span></span>
+                <h1 id="footer-title" class="text-5xl md:text-6xl lg:text-7xl font-bold text-[#000000] mb-4 font-juana text-center">
+                    {{ $rodapeTitulo }}
                 </h1>
                 @endif
 
                 @if($rodapeSubtitulo)
-                <h4 class="text-lg md:text-xl font-pragext text-center pb-6 text-[#000000] mb-10">
-                    <span class="line-wrap"><span class="line-inner footer-line" data-delay="280">{{ $rodapeSubtitulo }}</span></span>
-                </h4>
+                <p id="footer-subtitle" class="text-lg md:text-xl font-pragext text-center pb-6 text-[#000000] mb-10">
+                    {{ $rodapeSubtitulo }}
+                </p>
                 @endif
 
                 <section class="w-full pb-12" id="gallery-carousel">

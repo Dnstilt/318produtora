@@ -521,33 +521,87 @@ function animateFrameText(frameEl) {
 }
 
 function setupFooterTextReveal() {
-    const lines = document.querySelectorAll('.footer-line');
-    if (!lines.length) return;
+    const titleEl = document.getElementById('footer-title');
+    const subtitleEl = document.getElementById('footer-subtitle');
+    if (!titleEl && !subtitleEl) return;
 
-    function resetLines() {
-        lines.forEach(el => {
-            el.style.transition = 'transform 0s';
-            el.classList.remove('go');
+    function splitIntoLetters(el) {
+        const text = el.textContent.trim();
+        const order = [...text].map((_, i) => i);
+        for (let i = order.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [order[i], order[j]] = [order[j], order[i]];
+        }
+        const revealRank = new Array(text.length);
+        order.forEach((charIndex, rank) => { revealRank[charIndex] = rank; });
+
+        el.innerHTML = '';
+        const spans = [];
+        [...text].forEach((ch, i) => {
+            const span = document.createElement('span');
+            span.className = 'reveal-letter';
+            span.textContent = ch === ' ' ? '\u00A0' : ch;
+            span.dataset.rank = revealRank[i];
+            el.appendChild(span);
+            spans.push(span);
         });
+        return spans;
     }
 
-    function animateLines() {
-        lines.forEach(el => {
-            const delay = parseInt(el.dataset.delay) || 0;
-            setTimeout(() => {
-                el.style.transition = '';
-                el.classList.add('go');
-            }, delay + 300);
-        });
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+
+    function animateGroup(spans, totalDuration, startTime) {
+        const total = spans.length;
+        if (total === 0) return;
+
+        function frame(now) {
+            const elapsed = now - startTime;
+            let allDone = true;
+
+            spans.forEach((span) => {
+                const rank = parseInt(span.dataset.rank, 10);
+                const letterStart = (rank / total) * (totalDuration * 0.6);
+                const letterDuration = totalDuration * 0.45;
+                let t = (elapsed - letterStart) / letterDuration;
+                t = Math.max(0, Math.min(1, t));
+                if (t < 1) allDone = false;
+
+                const eased = easeOutCubic(t);
+                span.style.opacity = eased.toFixed(3);
+                span.style.filter = `blur(${(1 - eased) * 14}px)`;
+            });
+
+            if (!allDone) requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
     }
 
-    // Expõe para ser chamada pelo goToSlide
+    function playReveal() {
+        const now = performance.now();
+        if (titleEl) {
+            const titleSpans = splitIntoLetters(titleEl);
+            animateGroup(titleSpans, 2200, now);
+        }
+        if (subtitleEl) {
+            const subtitleSpans = splitIntoLetters(subtitleEl);
+            animateGroup(subtitleSpans, 2200, now + 500);
+        }
+    }
+
+    function resetReveal() {
+        [titleEl, subtitleEl].forEach((el) => {
+            if (!el) return;
+            el.querySelectorAll('.reveal-letter').forEach((span) => {
+                span.style.opacity = '0';
+                span.style.filter = 'blur(14px)';
+            });
+        });
+    }
     window._revealFooterLines = () => {
-        resetLines();
-        setTimeout(animateLines, 50);
+        playReveal();
     };
 
-    window._resetFooterLines = resetLines;
+    window._resetFooterLines = resetReveal;
 }
 
 function setupFooterLogoClick() {

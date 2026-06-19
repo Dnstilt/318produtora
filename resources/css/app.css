@@ -265,23 +265,18 @@ body.landing-is-loading #landing-root {
 }
 
 /* Footer Line Animation */
-.line-wrap {
-    overflow: hidden;
-    display: block;
+#footer-title,
+#footer-subtitle {
+    opacity: 1;
 }
 
-.line-inner {
-    display: block;
-    transform: translateY(115%);
-    transition: transform 0s;
+#footer-title .reveal-letter,
+#footer-subtitle .reveal-letter {
+    display: inline-block;
+    opacity: 0;
+    filter: blur(14px);
+    will-change: opacity, filter;
 }
-
-.line-inner.go {
-    transform: translateY(0);
-    transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Gallery CSS */
 
 #gallery-carousel {
     width: 100%;
@@ -289,7 +284,7 @@ body.landing-is-loading #landing-root {
 
 .gallery-bg {
     position: relative;
-    background-color: #d60001;
+    background-color: #dfdfdf;
 }
 
 .carousel-overlay {
@@ -405,6 +400,17 @@ body.landing-is-loading #landing-root {
 @media (pointer: fine) and (hover: hover) {
     body:has(#landing-root) * {
         cursor: none !important;
+    }
+}
+
+@media (min-width: 1024px) {
+    #landing-loading-logo-wrapper {
+        width: 400px;
+        height: 270px;
+    }
+    #landing-loading-progress {
+        top: calc(50% + 150px);
+        width: 320px;
     }
 }
 
