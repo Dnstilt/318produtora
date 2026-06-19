@@ -541,6 +541,7 @@ function setupFooterTextReveal() {
             const span = document.createElement('span');
             span.className = 'reveal-letter';
             span.textContent = ch === ' ' ? '\u00A0' : ch;
+            span.style.transformOrigin = 'center bottom';
             span.dataset.rank = revealRank[i];
             el.appendChild(span);
             spans.push(span);
@@ -549,6 +550,7 @@ function setupFooterTextReveal() {
     }
 
     function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+    function easeOutQuad(t) { return 1 - (1 - t) * (1 - t); }
 
     function animateGroup(spans, totalDuration, startTime) {
         const total = spans.length;
@@ -566,9 +568,14 @@ function setupFooterTextReveal() {
                 t = Math.max(0, Math.min(1, t));
                 if (t < 1) allDone = false;
 
-                const eased = easeOutCubic(t);
-                span.style.opacity = eased.toFixed(3);
-                span.style.filter = `blur(${(1 - eased) * 14}px)`;
+                const tBlur = Math.min(1, t / 0.45);
+                const easedBlur = easeOutQuad(tBlur);
+                span.style.opacity = easedBlur.toFixed(3);
+                span.style.filter = `blur(${(1 - easedBlur) * 14}px)`;
+ 
+                const easedScale = easeOutCubic(t);
+                span.style.transform = `scale(${2.4 - easedScale * 1.4})`;
+
             });
 
             if (!allDone) requestAnimationFrame(frame);
@@ -594,6 +601,7 @@ function setupFooterTextReveal() {
             el.querySelectorAll('.reveal-letter').forEach((span) => {
                 span.style.opacity = '0';
                 span.style.filter = 'blur(14px)';
+                span.style.transform = 'scale(2.4)';
             });
         });
     }

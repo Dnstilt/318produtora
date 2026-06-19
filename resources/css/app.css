@@ -275,6 +275,7 @@ body.landing-is-loading #landing-root {
     display: inline-block;
     opacity: 0;
     filter: blur(14px);
+    transform: scale(2.4);
     will-change: opacity, filter;
 }
 
