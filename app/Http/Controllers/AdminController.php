@@ -163,16 +163,7 @@ class AdminController extends Controller
         }
 
         $file = $request->file('photo');
-
-        Log::info('admin.photos.upload.request', [
-            'user_id' => $request->user()?->id,
-            'ip' => $request->ip(),
-            'original_name' => $file?->getClientOriginalName(),
-            'mime' => $file?->getClientMimeType(),
-            'size' => $file?->getSize(),
-            'error' => $file?->getError(),
-            'is_valid' => $file?->isValid(),
-        ]);
+        $title = (string) $request->input('title', '');
 
         if (!$file || !$file->isValid()) {
             Log::error('admin.photos.upload.invalid', [
@@ -187,7 +178,7 @@ class AdminController extends Controller
             $this->authorize('create', FooterPhoto::class);
             Log::info('admin.photos.upload.authorized');
             
-            $this->photos->storeUploaded($file);
+            $this->photos->storeUploaded($file, $title);
 
             Log::info('admin.photos.upload.success', [
                 'user_id' => $request->user()?->id,
@@ -200,7 +191,11 @@ class AdminController extends Controller
                 'exception' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return back()->with('error', 'Não foi possível adicionar a foto. Erro: ' . $e->getMessage());
+            $message = $e->getMessage();
+            if (str_contains($message, 'limite de 8 fotos atingido')) {
+                return back()->with('error', 'limite de 8 fotos atingido, subistitua uma das atuais');
+            }
+            return back()->with('error', 'Não foi possível adicionar a foto. Erro: ' . $message);
         }
     }
 

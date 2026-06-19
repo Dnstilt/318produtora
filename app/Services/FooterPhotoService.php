@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Storage;
 
 class FooterPhotoService
 {
+    private const MAX_PHOTOS = 8;
+
     public function __construct(
         private readonly FooterPhotoRepositoryInterface $photos,
         private readonly MediaConversionService $mediaConversion,
@@ -21,14 +23,22 @@ class FooterPhotoService
         return $this->photos->allOrdered()->all();
     }
 
-    public function storeUploaded(UploadedFile $file): FooterPhoto
+    public function storeUploaded(UploadedFile $file, string $title): FooterPhoto
     {
         $nextOrder = $this->photos->allOrdered()->count();
-        $photo = $this->photos->create(['order' => $nextOrder]);
+        if ($nextOrder >= self::MAX_PHOTOS) {
+            throw new \RuntimeException('limite de 8 fotos atingido, subistitua uma das atuais');
+        }
+
+        $photo = $this->photos->create([
+            'order' => $nextOrder,
+            'title' => $title,
+        ]);
 
         Log::info('photos.store_uploaded', [
             'photo_id' => $photo->id,
             'order' => $nextOrder,
+            'title_length' => strlen($title),
             'original_name' => $file->getClientOriginalName(),
             'mime' => $file->getClientMimeType(),
             'size' => $file->getSize(),

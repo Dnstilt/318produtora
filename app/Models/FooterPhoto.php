@@ -11,6 +11,7 @@ class FooterPhoto extends Model
     use HasFactory;
 
     protected $fillable = [
+        'title',
         'photo_avif',
         'photo_webp',
         'photo_jpg',

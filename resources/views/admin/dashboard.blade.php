@@ -107,6 +107,7 @@
             $photosPayload = collect($photos)->map(fn ($p) => [
             'id' => $p->id,
             'photo_webp' => $p->photo_webp,
+            'title' => $p->title,
             ])->values();
             @endphp
 
@@ -144,6 +145,8 @@
                         @csrf
                         <input type="file" name="photo" accept="image/*" required
                             class="block w-full text-sm text-gray-700 dark:text-gray-200">
+                        <input type="text" name="title" required maxlength="120" placeholder="Título da foto"
+                            class="block w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
                         <button type="submit"
                             class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500">
                             Adicionar Foto
@@ -167,7 +170,10 @@
                                     alt="">
                             </div>
                             <div class="mt-2 flex items-center justify-between gap-2">
-                                <div class="text-xs text-gray-600 dark:text-gray-300">#<span x-text="photo.id"></span></div>
+                                <div class="min-w-0">
+                                    <div class="text-xs text-gray-600 dark:text-gray-300">#<span x-text="photo.id"></span></div>
+                                    <div class="truncate text-xs text-gray-700 dark:text-gray-200" x-text="photo.title || ''"></div>
+                                </div>
                                 <form method="POST" :action="'/admin/photos/' + photo.id" class="js-admin-form" data-loading-text="Excluindo..." @submit.prevent="onDeleteSubmit($event, photo.id)">
                                     @csrf
                                     @method('DELETE')

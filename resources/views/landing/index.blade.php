@@ -101,16 +101,12 @@
                 </p>
                 @endif
 
-                <section class="w-full pb-12" id="gallery-carousel">
-                    <div class="carousel-wrap" id="carousel-wrap">
-                        <span id="carousel-tot" style="display:none">{{ $photos->count() }}</span>
-                        <div class="carousel-track" id="carousel-track">
-                            {{-- 3 cópias para loop infinito --}}
-                            @foreach ([0, 1, 2] as $copy)
-                            @foreach ($photos ?? collect() as $index => $photo)
-                            <div class="carousel-slide {{ $copy === 1 && $index === 0 ? 'is-active' : 'is-side' }}"
-                                data-idx="{{ $index }}"
-                                data-title="{{ $photo->title ?? 'Foto ' . ($index + 1) }}">
+                <section class="w-full pb-12" id="gallery-grid-section">
+                    <div class="gallery-grid-wrap">
+                        <div class="gallery-col gallery-col-left">
+                            @foreach (($photos ?? collect()) as $index => $photo)
+                            @if ($index % 2 === 0)
+                            <div class="gallery-grid-item">
                                 <picture>
                                     @if ($photo->photo_avif)
                                     <source srcset="{{ asset('storage/'.$photo->photo_avif) }}" type="image/avif">
@@ -118,14 +114,34 @@
                                     @if ($photo->photo_webp)
                                     <source srcset="{{ asset('storage/'.$photo->photo_webp) }}" type="image/webp">
                                     @endif
-                                    <img class="carousel-img"
+                                    <img class="gallery-grid-img"
                                         src="{{ $photo->photo_jpg ? asset('storage/'.$photo->photo_jpg) : '' }}"
-                                        alt="Foto {{ $index + 1 }}">
+                                        alt="{{ $photo->title ?? 'Foto' }}"
+                                        loading="lazy">
                                 </picture>
-                                <div class="carousel-overlay {{ $copy === 1 && $index === 0 ? 'is-visible' : '' }}">
-                                </div>
                             </div>
+                            @endif
                             @endforeach
+                        </div>
+
+                        <div class="gallery-col gallery-col-right">
+                            @foreach (($photos ?? collect()) as $index => $photo)
+                            @if ($index % 2 !== 0)
+                            <div class="gallery-grid-item">
+                                <picture>
+                                    @if ($photo->photo_avif)
+                                    <source srcset="{{ asset('storage/'.$photo->photo_avif) }}" type="image/avif">
+                                    @endif
+                                    @if ($photo->photo_webp)
+                                    <source srcset="{{ asset('storage/'.$photo->photo_webp) }}" type="image/webp">
+                                    @endif
+                                    <img class="gallery-grid-img"
+                                        src="{{ $photo->photo_jpg ? asset('storage/'.$photo->photo_jpg) : '' }}"
+                                        alt="{{ $photo->title ?? 'Foto' }}"
+                                        loading="lazy">
+                                </picture>
+                            </div>
+                            @endif
                             @endforeach
                         </div>
                     </div>
