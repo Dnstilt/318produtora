@@ -26,11 +26,12 @@
     <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
         <div>
             <a href="/">
-                <img src="{{ asset(config('app.logo_path')) }}" alt="318 Produtora" class="h-20 w-30 fill-current opacity-70 text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.65)]" />
+                <img src="{{ asset(config('app.logo_path')) }}" alt="318 Produtora" class="fill-current opacity-70 text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.65)]" style="height: clamp(80px, 6vw, 160px); width: auto;" />
             </a>
         </div>
 
-        <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
+        <div class="w-full mt-6 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg" 
+            style="max-width: min(90vw, 560px); padding: clamp(1rem, 2vw, 2.5rem);">
             {{ $slot }}
         </div>
     </div>

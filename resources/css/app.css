@@ -347,11 +347,13 @@ body.landing-is-loading #landing-root {
 
 .gallery-grid-item {
     overflow: hidden;
-    border-radius: clamp(2px, 0.3vw, 6px);
     background: #000;
-    box-shadow: clamp(0.5rem, 1vw, 3rem) rgba(27, 27, 27, 0.442);
     position: relative;
     width: 100%;
+    transform-style: preserve-3d;
+    transform: perspective(800px) rotateX(0deg) rotateY(0deg);
+    transition: box-shadow 0.3s ease;
+    will-change: transform;
 }
 
 .gallery-grid-overlay {
@@ -370,8 +372,13 @@ body.landing-is-loading #landing-root {
     transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.gallery-grid-item:hover .gallery-grid-img { transform: scale(1.07); }
-.gallery-grid-item:hover .gallery-grid-overlay { opacity: 0; }
+.gallery-grid-item:hover {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.gallery-grid-item:hover .gallery-grid-overlay {
+    opacity: 0;
+}
 
 .gallery-grid-caption {
     margin-top: clamp(0.5rem, 1vw, 3rem);
@@ -382,12 +389,28 @@ body.landing-is-loading #landing-root {
     background-image: linear-gradient(currentColor, currentColor);
     background-position: 0 100%;
     background-repeat: no-repeat;
-    background-size: 0% 1.5px;
+    background-size: 0% 1px;
     transition: background-size 0.4s cubic-bezier(0.77, 0, 0.18, 1);
 }
 
 .gallery-grid-item-wrap:hover .gallery-grid-caption {
-    background-size: 100% 1.5px;
+    background-size: 100% 1px;
+}
+
+.gallery-grid-item-wrap {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.gallery-grid-item-wrap.pf-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.gallery-grid-item-wrap.pf-above {
+    opacity: 0;
+    transform: translateY(-20px);
 }
 
 /* Footer títulos */
@@ -424,18 +447,15 @@ body.landing-is-loading #landing-root {
 }
 
 /* Footer logo */
-.logofooter {
-    opacity: 1;
-}
-
-.logofooter:hover {
-    opacity: 0.6;
-}
-
 .footer-logo-img {
     width: clamp(200px, 12vw, 600px);
     height: clamp(160px, 8vw, 400px);
     object-fit: contain;
+    opacity: 1;
+}
+
+.footer-logo-img:hover {
+    opacity: 0.5;
 }
 
 /* Footer redes sociais */
@@ -477,6 +497,7 @@ body.landing-is-loading #landing-root {
     font-size: clamp(1rem, 1.5vw, 7rem);
     cursor: pointer;
     line-height: 1.2;
+    margin-bottom: clamp(0.5rem, 1vw, 3rem);
 }
 
 .letter-slide-char {
@@ -506,6 +527,73 @@ body.landing-is-loading #landing-root {
 
 .letter-slide-bottom {
     border-bottom: 1.5px solid currentColor;
+}
+
+/* ============================================================
+   ADMIN — responsividade fluida
+   ============================================================ */
+
+.admin-wrap {
+    width: min(90vw, 1800px);
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 3vw, 4rem);
+}
+
+.admin-wrap h3,
+.admin-wrap h4 {
+    font-size: clamp(1rem, 1.2vw, 1.8rem);
+}
+
+.admin-wrap label,
+.admin-wrap .text-sm,
+.admin-wrap .text-xs {
+    font-size: clamp(0.7rem, 0.85vw, 1.1rem);
+}
+
+.admin-wrap input[type="text"],
+.admin-wrap input[type="email"],
+.admin-wrap input[type="url"],
+.admin-wrap input[type="file"],
+.admin-wrap input[type="password"],
+.admin-wrap textarea,
+.admin-wrap select {
+    font-size: clamp(0.75rem, 0.9vw, 1.1rem);
+    padding: clamp(0.4rem, 0.6vw, 1rem) clamp(0.5rem, 0.8vw, 1.25rem);
+}
+
+.admin-wrap button {
+    font-size: clamp(0.75rem, 0.9vw, 1.1rem);
+    padding: clamp(0.4rem, 0.6vw, 1rem) clamp(0.75rem, 1.2vw, 2rem);
+}
+
+.admin-wrap section {
+    padding: clamp(1rem, 2vw, 3rem);
+    border-radius: clamp(0.5rem, 0.8vw, 1.25rem);
+}
+
+.admin-wrap .grid {
+    gap: clamp(0.75rem, 1.5vw, 2.5rem);
+}
+
+.admin-wrap .rounded-md {
+    padding: clamp(0.6rem, 1.2vw, 2rem);
+    border-radius: clamp(4px, 0.4vw, 10px);
+}
+
+/* Login */
+.min-h-screen>div:last-child label {
+    font-size: clamp(0.8rem, 0.9vw, 1.1rem);
+}
+
+.min-h-screen>div:last-child input[type="email"],
+.min-h-screen>div:last-child input[type="password"],
+.min-h-screen>div:last-child input[type="checkbox"] {
+    font-size: clamp(0.8rem, 0.9vw, 1.1rem);
+}
+
+.min-h-screen>div:last-child button {
+    font-size: clamp(0.8rem, 0.9vw, 1.1rem);
+    padding: clamp(0.4rem, 0.6vw, 1rem) clamp(0.75rem, 1.2vw, 2rem);
 }
 
 /* ============================================================

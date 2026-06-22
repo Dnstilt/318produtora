@@ -2,7 +2,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "dev": "concurrently -k \"php artisan serve\" \"vite\" \"wait-on http://127.0.0.1:8000 && start http://127.0.0.1:8000\"",
+        "dev": "concurrently --kill-others-on-fail \"php artisan serve\" \"vite\" \"wait-on http://127.0.0.1:8000 && start http://127.0.0.1:8000\"",
         "build": "vite build",
         "preview": "vite preview"
     },

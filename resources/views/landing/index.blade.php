@@ -90,13 +90,13 @@
         <footer id="rodape" class="gallery-bg relative min-h-screen w-screen">
             <div class="px-6 pt-16 sm:pt-24 relative z-10">
                 @if($rodapeTitulo)
-                <h1 id="footer-title" class="footer-title font-bold text-[#ff2600] mb-4 font-juana text-center">
+                <h1 id="footer-title" class="footer-title font-bold text-[#ff2600] mb-4 font-juana text-center style="opacity:0">
                     {{ $rodapeTitulo }}
                 </h1>
                 @endif
 
                 @if($rodapeSubtitulo)
-                <p id="footer-subtitle" class="footer-subtitle font-pragext text-center pb-6 text-[#000000] mb-10">
+                <p id="footer-subtitle" class="footer-subtitle font-pragext text-center pb-6 text-[#000000] mb-10 style="opacity:0">
                     {{ $rodapeSubtitulo }}
                 </p>
                 @endif
@@ -120,9 +120,10 @@
                                             alt="{{ $photo->title ?? 'Foto' }}"
                                             loading="lazy">
                                     </picture>
+                                    <div class="gallery-grid-overlay"></div>
                                 </div>
                                 @if ($photo->title)
-                                <p class="gallery-grid-caption">{{ $photo->title }}</p>
+                                <p class="gallery-grid-caption font-oldstandard">{{ $photo->title }}</p>
                                 @endif
                             </div>
                             @endif
@@ -146,9 +147,10 @@
                                             alt="{{ $photo->title ?? 'Foto' }}"
                                             loading="lazy">
                                     </picture>
+                                    <div class="gallery-grid-overlay"></div>
                                 </div>
                                 @if ($photo->title)
-                                <p class="gallery-grid-caption">{{ $photo->title }}</p>
+                                <p class="gallery-grid-caption font-oldstandard">{{ $photo->title }}</p>
                                 @endif
                             </div>
                             @endif
@@ -202,7 +204,7 @@
                 </div>
             </div>
             <div class="flex flex-wrap items-center justify-center gap-6 pt-8 pb-7">
-                <p class="registro font-pragext text-[#ff2600]">
+                <p class="registro font-pragext text-[#000000]">
                     ©2026 318 Produtora e Website Urutau®
                 </p>
             </div>

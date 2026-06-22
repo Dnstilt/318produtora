@@ -38,9 +38,23 @@ class SecurityHeaders
     private function buildCsp(): string
     {
         $connect = ["'self'"];
+        $script  = ["'self'", "'unsafe-inline'", "'unsafe-eval'"];
+        $style   = ["'self'", "'unsafe-inline'", 'https://fonts.bunny.net'];
+
         if (app()->environment('local')) {
-            $connect[] = 'http://localhost:5173';
-            $connect[] = 'ws://localhost:5173';
+            $viteSrc = [
+                'http://localhost:5173',
+                'http://127.0.0.1:5173',
+                'http://[::1]:5173',
+            ];
+            $viteWs = [
+                'ws://localhost:5173',
+                'ws://127.0.0.1:5173',
+                'ws://[::1]:5173',
+            ];
+            $connect = array_merge($connect, $viteSrc, $viteWs);
+            $script  = array_merge($script,  $viteSrc);
+            $style   = array_merge($style,   $viteSrc);
         }
 
         $script = ["'self'", "'unsafe-inline'", "'unsafe-eval'"];
@@ -55,9 +69,9 @@ class SecurityHeaders
             'img-src \'self\' data: blob:',
             'media-src \'self\' blob: https://res.cloudinary.com',
             'font-src \'self\' https://fonts.bunny.net data:',
-            'script-src '.implode(' ', $script),
-            'style-src '.implode(' ', $style),
-            'connect-src '.implode(' ', $connect),
+            'script-src ' . implode(' ', $script),
+            'style-src ' . implode(' ', $style),
+            'connect-src ' . implode(' ', $connect),
         ];
 
         if (app()->environment('production')) {
