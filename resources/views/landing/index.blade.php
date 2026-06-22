@@ -3,10 +3,10 @@
 @section('content')
 <div id="landing-root">
 
-    <div id="sidebar-nav" class="fixed left-0 top-0 z-50 h-screen w-[130px] px-3 py-6 xl:w-[200px] transition-transform duration-500">
+    <div id="sidebar-nav" class="fixed left-0 top-0 z-50 h-screen  px-3 py-6 transition-transform duration-500">
         <div class="flex flex-col gap-6">
             <a href="#publicidade" class="block items-center justify-center opacity-100 hover:opacity-80 transition-opacity" data-target="publicidade">
-                <img id="landing-navbar-logo" src="{{ asset(config('app.logo_path')) }}" alt="318 Produtora" class="h-[72px] w-[110px] sm:h-[64px] sm:w-[92px] lg:h-[72px] lg:w-[110px] xl:h-[80px] xl:w-[120px]" />
+                <img id="landing-navbar-logo" src="{{ asset(config('app.logo_path')) }}" alt="318 Produtora" class="logo-navbar" />
             </a>
 
             <nav class="font-juana flex flex-col items-start gap-3">
@@ -23,12 +23,12 @@
                 @foreach ($nav as $item)
                 <a
                     href="#{{ $item['id'] }}"
-                    class="nav-item js-nav-item group relative flex h-10 items-center justify-center text-[#ff2600] text-bold"
+                    class="nav-item js-nav-item group relative flex items-center justify-center text-[#ff2600] text-bold"
                     data-target="{{ $item['id'] }}">
-                    <span class="nav-icon flex h-12 w-12 items-center justify-center sm:h-12 sm:w-12 lg:h-13 lg:w-13 xl:h-14 xl:w-14">
-                        <span class="h-3/4 w-3/4 rounded-full border-2 border-[#ff2600] sm:h-6 sm:w-6 lg:h-8 lg:w-8 xl:h-9 xl:w-9"></span>
+                    <span class="nav-icon flex items-center justify-center">
+                        <span class="nav-icon-circle"></span>
                     </span>
-                    <span class="nav-label px-2 tracking-wide text-3xl">{{ $item['label'] }}</span>
+                    <span class="nav-label px-2 tracking-wide">{{ $item['label'] }}</span>
                 </a>
                 @endforeach
             </nav>
@@ -70,14 +70,14 @@
                 </video>
                 @endif
                 <div class="pointer-events-none absolute  inset-0 flex flex-col justify-end items-center pb-16 px-6 md:justify-center md:items-end md:pb-0 md:pr-16 lg:pr-24" style="z-index: 2">
-                    <div class="js-frame-text w-full text-center max-w-[900px] md:text-right md:max-w-[70vw] lg:max-w-[80vw]">
+                    <div class="js-frame-text w-full text-center md:text-right md:max-w-[70vw] lg:max-w-[80vw]">
                         @if($section?->title)
-                        <h2 class="text-5xl md:text-7xl lg:text-9xl font-juana text-[#ff2600] mb-4 md:mb-6 lg:mb-8 break-words leading-tight">
+                        <h2 class="frame-title font-juana text-[#ff2600] mb-4 md:mb-6 lg:mb-8 break-words leading-tight">
                             {{ $section->title }}
                         </h2>
                         @endif
                         @if($section?->description_text)
-                        <p class="font-pragext text-[#ffffff] text-3xl md:text-3xl lg:text-4xl break-words">
+                        <p class="frame-description font-pragext text-[#ffffff] break-words">
                             {{ $section->description_text }}
                         </p>
                         @endif
@@ -90,13 +90,13 @@
         <footer id="rodape" class="gallery-bg relative min-h-screen w-screen">
             <div class="px-6 pt-16 sm:pt-24 relative z-10">
                 @if($rodapeTitulo)
-                <h1 id="footer-title" class="text-5xl md:text-6xl lg:text-7xl font-bold text-[#000000] mb-4 font-juana text-center">
+                <h1 id="footer-title" class="footer-title font-bold text-[#ff2600] mb-4 font-juana text-center">
                     {{ $rodapeTitulo }}
                 </h1>
                 @endif
 
                 @if($rodapeSubtitulo)
-                <p id="footer-subtitle" class="text-lg md:text-xl font-pragext text-center pb-6 text-[#000000] mb-10">
+                <p id="footer-subtitle" class="footer-subtitle font-pragext text-center pb-6 text-[#000000] mb-10">
                     {{ $rodapeSubtitulo }}
                 </p>
                 @endif
@@ -106,19 +106,24 @@
                         <div class="gallery-col gallery-col-left">
                             @foreach (($photos ?? collect()) as $index => $photo)
                             @if ($index % 2 === 0)
-                            <div class="gallery-grid-item">
-                                <picture>
-                                    @if ($photo->photo_avif)
-                                    <source srcset="{{ asset('storage/'.$photo->photo_avif) }}" type="image/avif">
-                                    @endif
-                                    @if ($photo->photo_webp)
-                                    <source srcset="{{ asset('storage/'.$photo->photo_webp) }}" type="image/webp">
-                                    @endif
-                                    <img class="gallery-grid-img"
-                                        src="{{ $photo->photo_jpg ? asset('storage/'.$photo->photo_jpg) : '' }}"
-                                        alt="{{ $photo->title ?? 'Foto' }}"
-                                        loading="lazy">
-                                </picture>
+                            <div class="gallery-grid-item-wrap">
+                                <div class="gallery-grid-item">
+                                    <picture>
+                                        @if ($photo->photo_avif)
+                                        <source srcset="{{ asset('storage/'.$photo->photo_avif) }}" type="image/avif">
+                                        @endif
+                                        @if ($photo->photo_webp)
+                                        <source srcset="{{ asset('storage/'.$photo->photo_webp) }}" type="image/webp">
+                                        @endif
+                                        <img class="gallery-grid-img"
+                                            src="{{ $photo->photo_jpg ? asset('storage/'.$photo->photo_jpg) : '' }}"
+                                            alt="{{ $photo->title ?? 'Foto' }}"
+                                            loading="lazy">
+                                    </picture>
+                                </div>
+                                @if ($photo->title)
+                                <p class="gallery-grid-caption">{{ $photo->title }}</p>
+                                @endif
                             </div>
                             @endif
                             @endforeach
@@ -127,19 +132,24 @@
                         <div class="gallery-col gallery-col-right">
                             @foreach (($photos ?? collect()) as $index => $photo)
                             @if ($index % 2 !== 0)
-                            <div class="gallery-grid-item">
-                                <picture>
-                                    @if ($photo->photo_avif)
-                                    <source srcset="{{ asset('storage/'.$photo->photo_avif) }}" type="image/avif">
-                                    @endif
-                                    @if ($photo->photo_webp)
-                                    <source srcset="{{ asset('storage/'.$photo->photo_webp) }}" type="image/webp">
-                                    @endif
-                                    <img class="gallery-grid-img"
-                                        src="{{ $photo->photo_jpg ? asset('storage/'.$photo->photo_jpg) : '' }}"
-                                        alt="{{ $photo->title ?? 'Foto' }}"
-                                        loading="lazy">
-                                </picture>
+                            <div class="gallery-grid-item-wrap">
+                                <div class="gallery-grid-item">
+                                    <picture>
+                                        @if ($photo->photo_avif)
+                                        <source srcset="{{ asset('storage/'.$photo->photo_avif) }}" type="image/avif">
+                                        @endif
+                                        @if ($photo->photo_webp)
+                                        <source srcset="{{ asset('storage/'.$photo->photo_webp) }}" type="image/webp">
+                                        @endif
+                                        <img class="gallery-grid-img"
+                                            src="{{ $photo->photo_jpg ? asset('storage/'.$photo->photo_jpg) : '' }}"
+                                            alt="{{ $photo->title ?? 'Foto' }}"
+                                            loading="lazy">
+                                    </picture>
+                                </div>
+                                @if ($photo->title)
+                                <p class="gallery-grid-caption">{{ $photo->title }}</p>
+                                @endif
                             </div>
                             @endif
                             @endforeach
@@ -147,42 +157,42 @@
                     </div>
                 </section>
             </div>
-            <div class="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-8 px-6 lg:grid-cols-2 lg:items-center z-10 relative">
+            <div class="mx-auto mt-12 grid grid-cols-1 gap-8 px-6 lg:grid-cols-2 lg:items-center z-10 relative">
                 <div class="logofooter flex flex-col items-center lg:items-start justify-center">
                     <a href="#publicidade" class="flip-logo-wrap block js-nav-item"
                         data-src="{{ asset(config('app.footer_photo_path')) }}" aria-label="318 Produtora" data-target="publicidade">
                         <img
                             src="{{ asset(config('app.footer_photo_path')) }}"
                             alt="318 Produtora"
-                            class="w-auto h-32 sm:h-40 md:h-48 lg:h-56 xl:h-64 object-contain" />
+                            class="footer-logo-img" />
                     </a>
                 </div>
 
-                <div class="flex flex-col items-center lg:items-end justify-center gap-6">
+                <div class="flex flex-col items-center lg:items-end justify-center">
                     <a href="mailto:info@318produtora.com.br?subject=Contato%20via%20Site"
-                        class="letter-slide-link font-oldstandard tracking-wider text-xl md:text-xl lg:text-2xl text-[#000000]"
+                        class="letter-slide-link font-oldstandard tracking-wider text-[#000000]"
                         data-text="info@318produtora.com.br"
                         style="text-decoration: none;">
                     </a>
-                    <div class="flex items-center gap-4">
+                    <div class="footer-social-gap flex items-center">
                         @foreach ($socialLinks as $link)
                         <a
                             href="{{ $link->url ?: '#' }}"
-                            class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#000000] text-[#000000] hover:bg-[#000000] hover:text-white transition-all"
+                            class="social-icon-wrapper"
                             target="{{ $link->url ? '_blank' : '_self' }}"
                             rel="noopener noreferrer"
                             aria-label="{{ $link->platform }}">
 
                             @if($link->platform === 'instagram')
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <svg class="social-icon-svg" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
                             </svg>
                             @elseif($link->platform === 'youtube')
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <svg class="social-icon-svg" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
                             </svg>
                             @elseif($link->platform === 'vimeo')
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <svg class="social-icon-svg" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M22.396 7.164c-.093 2.026-1.507 4.8-4.245 8.32C15.323 19.161 12.93 21 11.003 21c-1.562 0-2.955-1.933-4.18-5.801L5.05 6.55c-.563-2.091-1.39-2.185-2.483-2.185H.813V2.428h2.641c2.148 0 3.738 1.488 4.766 4.464l1.378 5.438c.677 2.656 1.43 3.984 2.257 3.984 1.137 0 2.871-2.158 5.204-6.474.966-1.745 1.258-3.033.876-3.864-.475-1.03-1.631-.968-3.468-.621 1.054-3.23 3.65-4.845 7.784-4.845 2.518 0 3.96 1.83 4.145 6.134z" />
                             </svg>
                             @endif
@@ -191,9 +201,9 @@
                     </div>
                 </div>
             </div>
-            <div class="flex flex-wrap items-center justify-center gap-6 pt-8 pb-7 text-sm">
-                <p class="font-pragext text-[#000000]">
-                    ©2026 318 Produtora e Website Urutau®.
+            <div class="flex flex-wrap items-center justify-center gap-6 pt-8 pb-7">
+                <p class="registro font-pragext text-[#ff2600]">
+                    ©2026 318 Produtora e Website Urutau®
                 </p>
             </div>
         </footer>
