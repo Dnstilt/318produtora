@@ -5,11 +5,14 @@
 
     <div id="sidebar-nav" class="fixed left-0 top-0 z-50 h-screen  px-3 py-6 transition-transform duration-500">
         <div class="flex flex-col gap-6">
-            <a href="#publicidade" class="block items-center justify-center opacity-100 hover:opacity-80 transition-opacity" data-target="publicidade">
-                <img id="landing-navbar-logo" src="{{ asset(config('app.logo_path')) }}" alt="318 Produtora" class="logo-navbar" />
+            <a href="#publicidade" class="logo-navbar block items-center justify-center opacity-100 hover:opacity-80 transition-opacity"
+                data-target="publicidade" aria-label="318 Produtora">
+                <div id="landing-navbar-logo" class="logo-navbar opacity-0">
+                    @include('partials.logo-static')
+                </div>
             </a>
 
-            <nav class="font-juana flex flex-col items-start gap-3">
+            <nav class="font-juana flex flex-col items-start">
                 @php
                 $nav = [
                 ['id' => 'publicidade', 'label' => 'Publicidade'],
@@ -88,21 +91,22 @@
         </div>
 
         <footer id="rodape" class="gallery-bg relative min-h-screen w-screen">
-            <div class="px-6 pt-16 sm:pt-24 relative z-10">
+            <div class="layer1" aria-hidden="true"></div>
+            <div class="footer-content pt-16 sm:pt-24">
                 @if($rodapeTitulo)
-                <h1 id="footer-title" class="footer-title font-bold text-[#ff2600] mb-4 font-juana text-center style="opacity:0">
+                <h1 id="footer-title" class="footer-title font-bold text-[#ff2600] mb-4 mt-16 font-juana text-center opacity-0">
                     {{ $rodapeTitulo }}
                 </h1>
                 @endif
 
                 @if($rodapeSubtitulo)
-                <p id="footer-subtitle" class="footer-subtitle font-pragext text-center pb-6 text-[#000000] mb-10 style="opacity:0">
+                <p id="footer-subtitle" class="footer-subtitle font-pragext text-center text-[#ddddddea] opacity-0">
                     {{ $rodapeSubtitulo }}
                 </p>
                 @endif
 
-                <section class="w-full pb-12" id="gallery-grid-section">
-                    <div class="gallery-grid-wrap">
+                <section class="w-full" id="gallery-grid-section">
+                    <div class="text-[#ff2600] gallery-grid-wrap">
                         <div class="gallery-col gallery-col-left">
                             @foreach (($photos ?? collect()) as $index => $photo)
                             @if ($index % 2 === 0)
@@ -159,20 +163,19 @@
                     </div>
                 </section>
             </div>
-            <div class="mx-auto mt-12 grid grid-cols-1 gap-8 px-6 lg:grid-cols-2 lg:items-center z-10 relative">
-                <div class="logofooter flex flex-col items-center lg:items-start justify-center">
-                    <a href="#publicidade" class="flip-logo-wrap block js-nav-item"
-                        data-src="{{ asset(config('app.footer_photo_path')) }}" aria-label="318 Produtora" data-target="publicidade">
-                        <img
-                            src="{{ asset(config('app.footer_photo_path')) }}"
-                            alt="318 Produtora"
-                            class="footer-logo-img" />
+            <div class="info mx-auto grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-center relative">
+                <div class="logofooter flex flex-col items-center lg:items-start justify-center
+                    hover:opacity-50">
+                    <a href="#publicidade"
+                        class="flex justify-center lg:justify-start w-full"
+                        data-target="publicidade"
+                        aria-label="318 Produtora">
+                        @include('partials.logo-static')
                     </a>
                 </div>
-
                 <div class="flex flex-col items-center lg:items-end justify-center">
                     <a href="mailto:info@318produtora.com.br?subject=Contato%20via%20Site"
-                        class="letter-slide-link font-oldstandard tracking-wider text-[#000000]"
+                        class="letter-slide-link font-oldstandard tracking-wider text-[#ff2600]"
                         data-text="info@318produtora.com.br"
                         style="text-decoration: none;">
                     </a>
@@ -203,8 +206,8 @@
                     </div>
                 </div>
             </div>
-            <div class="flex flex-wrap items-center justify-center gap-6 pt-8 pb-7">
-                <p class="registro font-pragext text-[#000000]">
+            <div class="flex flex-wrap items-center justify-center gap-6">
+                <p class="registro font-pragext text-[#ff2600]">
                     ©2026 318 Produtora e Website Urutau®
                 </p>
             </div>

@@ -95,7 +95,7 @@ body.landing-is-loading #landing-root {
 
 #landing-loading-logo-svg .draw {
     fill: none;
-    stroke: #ff6b2b;
+    stroke: #ff2600;
     stroke-width: 2.5;
     stroke-linecap: round;
     stroke-linejoin: round;
@@ -106,7 +106,7 @@ body.landing-is-loading #landing-root {
 }
 
 #landing-loading-logo-svg .fillshape {
-    fill: #ff6b2b;
+    fill: #ff2600;
 }
 
 #landing-loading-progress {
@@ -136,15 +136,15 @@ body.landing-is-loading #landing-root {
 #landing-loading-progress-bar {
     width: 0%;
     height: 100%;
-    background: #ff6b2b;
+    background: #ff2600;
     border-radius: 4px;
     transition: width 0.12s ease;
-    box-shadow: 0 0 8px #ff6b2b, 0 0 18px rgba(255, 79, 0, 0.35);
+    box-shadow: 0 0 8px #ff2600, 0 0 18px rgba(255, 79, 0, 0.35);
 }
 
 #landing-loading-progress-label {
     text-align: right;
-    color: #ff6b2b;
+    color: #ff2600;
     font-size: clamp(0.8rem, 1.2vw, 2rem);
     letter-spacing: 2px;
     margin-top: clamp(6px, 0.5vw, 16px);
@@ -179,7 +179,7 @@ body.landing-is-loading #landing-root {
     width: clamp(4px, 0.4vw, 12px);
     /* ← cantos */
     height: clamp(4px, 0.4vw, 12px);
-    border-color: #ffffff;
+    border-color: #ff2600;
     border-style: solid;
     border-width: 0;
 }
@@ -204,8 +204,8 @@ body.landing-is-loading #landing-root {
     right: 0;
     width: clamp(4px, 0.4vw, 12px);
     height: clamp(4px, 0.4vw, 12px);
-    border-top: clamp(1px, 0.15vw, 4px) solid #ffffff;
-    border-right: clamp(1px, 0.15vw, 4px) solid #ffffff;
+    border-top: clamp(1px, 0.15vw, 4px) solid #ff2600;
+    border-right: clamp(1px, 0.15vw, 4px) solid #ff2600;
 }
 
 #cursor-bracket span:last-child {
@@ -214,8 +214,8 @@ body.landing-is-loading #landing-root {
     left: 0;
     width: clamp(4px, 0.4vw, 12px);
     height: clamp(4px, 0.4vw, 12px);
-    border-bottom: clamp(1px, 0.15vw, 4px) solid #ffffff;
-    border-left: clamp(1px, 0.15vw, 4px) solid #ffffff;
+    border-bottom: clamp(1px, 0.15vw, 4px) solid #ff2600;
+    border-left: clamp(1px, 0.15vw, 4px) solid #ff2600;
 }
 
 #cursor-ring {
@@ -224,7 +224,7 @@ body.landing-is-loading #landing-root {
     width: clamp(20px, 2.5vw, 64px);
     height: clamp(20px, 2.5vw, 64px);
     border-radius: 50%;
-    border: clamp(1px, 0.15vw, 4px) solid rgb(255, 255, 255);
+    border: clamp(1px, 0.15vw, 4px) solid rgb(255, 38, 0);
     z-index: 99998;
     transform: translate(-50%, -50%);
     transition: width 0.15s, height 0.15s, opacity 0.2s;
@@ -319,22 +319,37 @@ body.landing-is-loading #landing-root {
 /* ============================================================
    6. FOOTER – GALERIA, TÍTULOS, REDES, LOGO
    ============================================================ */
-.gallery-bg {
-    position: relative;
-    background-color: #dfdfdf;
+.info {
+    padding-inline: clamp(1.5rem, 5vw, 4rem);
+    margin-top: clamp(3rem, 6vw, 7rem);
+    margin-bottom: clamp(2rem, 4vw, 5rem);
 }
 
-#gallery-carousel,
+   .gallery-bg {
+    position: relative;
+    background-color: #000000;
+}
+
+.layer1 {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(255, 38, 0, 0.082);
+    pointer-events: none;
+    z-index: 1;
+}
+
 #gallery-grid-section {
-    width: 100%;
+    position: relative;
 }
 
 .gallery-grid-wrap {
     display: flex;
+    width: 100%;
     flex-direction: column;
     align-items: center;
     gap: clamp(2rem, 4vw, 12rem);
-    padding: 0 clamp(1rem, 3vw, 4rem);
+    padding-bottom: clamp(1rem, 3vw, 5rem);
+    padding-top: clamp(1rem, 3vw, 5rem);
 }
 
 .gallery-col {
@@ -342,7 +357,7 @@ body.landing-is-loading #landing-root {
     flex-direction: column;
     gap: clamp(2rem, 4vw, 12rem);
     width: 100%;
-    max-width: 90%;
+    max-width: 100%;
 }
 
 .gallery-grid-item {
@@ -373,7 +388,7 @@ body.landing-is-loading #landing-root {
 }
 
 .gallery-grid-item:hover {
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 20px 60px rgba(255, 38, 0, 0.3);
 }
 
 .gallery-grid-item:hover .gallery-grid-overlay {
@@ -381,10 +396,10 @@ body.landing-is-loading #landing-root {
 }
 
 .gallery-grid-caption {
-    margin-top: clamp(0.5rem, 1vw, 3rem);
-    font-size: clamp(0.8rem, 1vw, 2.5rem);
+    margin-top: clamp(1rem, 2vw, 4rem);
+    font-size: clamp(1rem, 1.5vw, 6rem);
     text-align: center;
-    color: #000;
+    color: #ff2600;
     display: inline-block;
     background-image: linear-gradient(currentColor, currentColor);
     background-position: 0 100%;
@@ -413,12 +428,6 @@ body.landing-is-loading #landing-root {
     transform: translateY(-20px);
 }
 
-/* Footer títulos */
-#footer-title,
-#footer-subtitle {
-    opacity: 1;
-}
-
 #footer-title .reveal-letter,
 #footer-subtitle .reveal-letter {
     display: inline-block;
@@ -430,10 +439,12 @@ body.landing-is-loading #landing-root {
 
 .footer-title {
     font-size: clamp(2.5rem, 5vw, 16rem);
+    padding-bottom: clamp(1rem, 3vw, 4rem);
 }
 
 .footer-subtitle {
     font-size: clamp(1rem, 1.5vw, 6rem);
+    padding-bottom: clamp(1rem, 3vw, 7rem);
 }
 
 /* Ajustes de padding do footer via IDs (para manter compatibilidade com classes Tailwind) */
@@ -444,18 +455,36 @@ body.landing-is-loading #landing-root {
 
 #rodape .pt-16 {
     padding-top: clamp(2rem, 5vw, 12rem);
+    margin: 2rem;
+}
+
+#rodape {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+}
+
+#rodape::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: screen;
+    will-change: background;
+}
+
+
+#rodape>div:not(.layer1),
+#rodape>section {
+    position: relative;
+    z-index: 2;
 }
 
 /* Footer logo */
-.footer-logo-img {
-    width: clamp(200px, 12vw, 600px);
-    height: clamp(160px, 8vw, 400px);
-    object-fit: contain;
-    opacity: 1;
-}
-
-.footer-logo-img:hover {
-    opacity: 0.5;
+.logofooter {
+    width: 100%;       
+    height: auto;
 }
 
 /* Footer redes sociais */
@@ -470,14 +499,14 @@ body.landing-is-loading #landing-root {
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    border: 2px solid #000000;
-    color: #000000;
+    border: 2px solid #ff2600;
+    color: #ff2600;
     transition: all 0.3s ease;
 }
 
 .social-icon-wrapper:hover {
-    background-color: #000000;
-    color: #ffffff;
+    background-color: #ffffff6e;
+    color: #ff2600;
 }
 
 .social-icon-svg {
@@ -488,6 +517,7 @@ body.landing-is-loading #landing-root {
 
 .registro {
     font-size: clamp(0.8rem, 1vw, 2.5rem);
+    margin-top: clamp(2rem, 3vw, 6rem);
 }
 
 /* Footer letter-slide (animação do e-mail) */
@@ -606,17 +636,87 @@ body.landing-is-loading #landing-root {
 }
 
 @media (min-width: 1024px) {
+    .footer-subtitle {
+        margin-bottom: clamp(7rem, 10vw, 10rem);
+    }
+
+    .gallery-divider-line {
+        display: block;
+        position: relative;
+        width: 2px;
+        flex-shrink: 0;
+        align-self: stretch;
+    }
+
     .gallery-grid-wrap {
         flex-direction: row;
         align-items: flex-start;
         justify-content: center;
         gap: clamp(4rem, 10vw, 12rem);
-        width: 90%;
+        width: 100%;
         margin: 0 auto;
+        position: relative;
+    }
+
+    .gallery-grid-wrap::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 0;
+        transform: translateX(-50%);
+        width: 3px;
+        height: 100%;
+        z-index: 10;
+        pointer-events: none;
+
+        background-image: repeating-linear-gradient(to bottom,
+                rgba(255, 38, 0, 0.7) 0px,
+                rgba(255, 38, 0, 0.7) 15px,
+                transparent 15px,
+                transparent 24px);
+        background-size: 3px 24px;
+        background-position: 0 0;
+
+        /* fade no final */
+        -webkit-mask-image: linear-gradient(to bottom,
+                black 0%,
+                black 75%,
+                transparent 100%);
+        mask-image: linear-gradient(to bottom,
+                black 0%,
+                black 75%,
+                transparent 100%);
+
+        border-radius: 2px;
+        animation: rain-fall-bg 1.4s linear infinite;
+    }
+
+    .gallery-col-left {
+        margin-top: 6rem;
+        margin-left: 2rem;
     }
 
     .gallery-col-right {
-        margin-top: clamp(3rem, 6vw, 8rem);
+        margin-top: 16rem;
+        margin-right: 2rem;
+    }
+
+    .logofooter {
+        width: clamp(200px, 12vw, 800px);
+    }
+
+    .info {
+        margin: clamp(7rem, 14vw, 14rem);
+    }
+}
+
+@keyframes rain-fall-bg {
+    from {
+        background-position: 0 0;
+    }
+
+    to {
+        background-position: 0 24px;
     }
 }
 

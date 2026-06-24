@@ -605,90 +605,90 @@ function animateFrameText(frameEl) {
  * Configura a revelação das letras do título e subtítulo do footer.
  */
 function setupFooterTextReveal() {
-    const titleEl = document.getElementById('footer-title');
-    const subtitleEl = document.getElementById('footer-subtitle');
-    if (!titleEl && !subtitleEl) return;
+  const titleEl = document.getElementById('footer-title');
+  const subtitleEl = document.getElementById('footer-subtitle');
+  if (!titleEl && !subtitleEl) return;
 
-    // guarda texto original para poder re-animar ao rolar para cima e voltar
-    if (titleEl) titleEl.dataset.original = titleEl.textContent.trim();
-    if (subtitleEl) subtitleEl.dataset.original = subtitleEl.textContent.trim();
+  // guarda texto original para poder re-animar ao rolar para cima e voltar
+  if (titleEl) titleEl.dataset.original = titleEl.textContent.trim();
+  if (subtitleEl) subtitleEl.dataset.original = subtitleEl.textContent.trim();
 
-    function splitIntoLetters(el) {
-        const text = el.dataset.original || el.textContent.trim();
-        const order = [...text].map((_, i) => i);
-        for (let i = order.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [order[i], order[j]] = [order[j], order[i]];
-        }
-        const revealRank = new Array(text.length);
-        order.forEach((charIndex, rank) => { revealRank[charIndex] = rank; });
-
-        el.innerHTML = '';
-        const spans = [];
-        [...text].forEach((ch, i) => {
-            const span = document.createElement('span');
-            span.className = 'reveal-letter';
-            span.textContent = ch === ' ' ? '\u00A0' : ch;
-            span.style.transformOrigin = 'center bottom';
-            span.dataset.rank = revealRank[i];
-            el.appendChild(span);
-            spans.push(span);
-        });
-        return spans;
+  function splitIntoLetters(el) {
+    const text = el.dataset.original || el.textContent.trim();
+    const order = [...text].map((_, i) => i);
+    for (let i = order.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [order[i], order[j]] = [order[j], order[i]];
     }
+    const revealRank = new Array(text.length);
+    order.forEach((charIndex, rank) => { revealRank[charIndex] = rank; });
 
-    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
-    function easeOutQuad(t) { return 1 - (1 - t) * (1 - t); }
+    el.innerHTML = '';
+    const spans = [];
+    [...text].forEach((ch, i) => {
+      const span = document.createElement('span');
+      span.className = 'reveal-letter';
+      span.textContent = ch === ' ' ? '\u00A0' : ch;
+      span.style.transformOrigin = 'center bottom';
+      span.dataset.rank = revealRank[i];
+      el.appendChild(span);
+      spans.push(span);
+    });
+    return spans;
+  }
 
-    function animateGroup(spans, totalDuration, startTime) {
-        const total = spans.length;
-        if (total === 0) return;
-        function frame(now) {
-            const elapsed = now - startTime;
-            let allDone = true;
-            spans.forEach((span) => {
-                const rank = parseInt(span.dataset.rank, 10);
-                const letterStart = (rank / total) * (totalDuration * 0.6);
-                const letterDuration = totalDuration * 0.55;
-                let t = (elapsed - letterStart) / letterDuration;
-                t = Math.max(0, Math.min(1, t));
-                if (t < 1) allDone = false;
-                const tBlur = Math.min(1, t / 0.45);
-                const easedBlur = easeOutQuad(tBlur);
-                span.style.opacity = easedBlur.toFixed(3);
-                span.style.filter = `blur(${(1 - easedBlur) * 14}px)`;
-                const easedScale = easeOutCubic(t);
-                span.style.transform = `scale(${2.4 - easedScale * 1.4})`;
-            });
-            if (!allDone) requestAnimationFrame(frame);
-        }
-        requestAnimationFrame(frame);
+  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+  function easeOutQuad(t) { return 1 - (1 - t) * (1 - t); }
+
+  function animateGroup(spans, totalDuration, startTime) {
+    const total = spans.length;
+    if (total === 0) return;
+    function frame(now) {
+      const elapsed = now - startTime;
+      let allDone = true;
+      spans.forEach((span) => {
+        const rank = parseInt(span.dataset.rank, 10);
+        const letterStart = (rank / total) * (totalDuration * 0.6);
+        const letterDuration = totalDuration * 0.55;
+        let t = (elapsed - letterStart) / letterDuration;
+        t = Math.max(0, Math.min(1, t));
+        if (t < 1) allDone = false;
+        const tBlur = Math.min(1, t / 0.45);
+        const easedBlur = easeOutQuad(tBlur);
+        span.style.opacity = easedBlur.toFixed(3);
+        span.style.filter = `blur(${(1 - easedBlur) * 14}px)`;
+        const easedScale = easeOutCubic(t);
+        span.style.transform = `scale(${2.4 - easedScale * 1.4})`;
+      });
+      if (!allDone) requestAnimationFrame(frame);
     }
+    requestAnimationFrame(frame);
+  }
 
-    function playReveal() {
-        const now = performance.now();
-        if (titleEl) {
-            titleEl.style.opacity = '1';
-            const titleSpans = splitIntoLetters(titleEl);
-            animateGroup(titleSpans, 2200, now);
-        }
-        if (subtitleEl) {
-            subtitleEl.style.opacity = '1';
-            const subtitleSpans = splitIntoLetters(subtitleEl);
-            animateGroup(subtitleSpans, 2200, now + 500);
-        }
+  function playReveal() {
+    const now = performance.now();
+    if (titleEl) {
+      titleEl.style.opacity = '1';
+      const titleSpans = splitIntoLetters(titleEl);
+      animateGroup(titleSpans, 2200, now);
     }
-
-    function resetReveal() {
-        [titleEl, subtitleEl].forEach((el) => {
-            if (!el) return;
-            el.style.opacity = '0';
-            if (el.dataset.original) el.textContent = el.dataset.original;
-        });
+    if (subtitleEl) {
+      subtitleEl.style.opacity = '1';
+      const subtitleSpans = splitIntoLetters(subtitleEl);
+      animateGroup(subtitleSpans, 2200, now + 500);
     }
+  }
 
-    window._revealFooterLines = playReveal;
-    window._resetFooterLines = resetReveal;
+  function resetReveal() {
+    [titleEl, subtitleEl].forEach((el) => {
+      if (!el) return;
+      el.style.opacity = '0';
+      if (el.dataset.original) el.textContent = el.dataset.original;
+    });
+  }
+
+  window._revealFooterLines = playReveal;
+  window._resetFooterLines = resetReveal;
 }
 
 /**
@@ -731,65 +731,125 @@ function initLetterSlide() {
  * Inicializa o efeito scroll do footer.
  */
 function setupFooterScrollReveal() {
-    const footer = document.getElementById('rodape');
-    if (!footer) return;
+  const footer = document.getElementById('rodape');
+  if (!footer) return;
 
-    function getWraps() {
-        return Array.from(footer.querySelectorAll('.gallery-grid-item-wrap'));
+  function getWraps() {
+    return Array.from(footer.querySelectorAll('.gallery-grid-item-wrap'));
+  }
+
+  let lastScrollTop = 0;
+
+  function onFooterScroll() {
+    const st = footer.scrollTop;
+    const footerH = footer.clientHeight;
+    const wraps = getWraps();
+
+    wraps.forEach((wrap, i) => {
+      const rect = wrap.getBoundingClientRect();
+      const footerRect = footer.getBoundingClientRect();
+      const relTop = rect.top - footerRect.top;
+      const relBottom = rect.bottom - footerRect.top;
+      const inView = relTop < footerH * 0.88 && relBottom > 0;
+      const aboveView = relBottom < 0;
+
+      if (inView) {
+        setTimeout(() => {
+          wrap.classList.add('pf-visible');
+          wrap.classList.remove('pf-above');
+        }, i * 80);
+      } else if (aboveView) {
+        wrap.classList.remove('pf-visible');
+        wrap.classList.add('pf-above');
+      } else {
+        wrap.classList.remove('pf-visible', 'pf-above');
+      }
+    });
+
+    lastScrollTop = st;
+  }
+
+  function resetScrollReveal() {
+    const wraps = getWraps();
+    wraps.forEach(wrap => {
+      wrap.classList.remove('pf-visible', 'pf-above');
+    });
+    footer.removeEventListener('scroll', onFooterScroll);
+  }
+  // ativa o listener de scroll quando o footer entra, remove quando sai
+  const originalReveal = window._revealFooterLines;
+  const originalReset = window._resetFooterLines;
+
+  window._revealFooterLines = () => {
+    if (originalReveal) originalReveal();
+    footer.addEventListener('scroll', onFooterScroll);
+  };
+
+  window._resetFooterLines = () => {
+    if (originalReset) originalReset();
+    resetScrollReveal();
+  };
+}
+
+function setupGradientParallax() {
+  if (window.matchMedia('(pointer: coarse)').matches) return;
+
+  const footer = document.getElementById('rodape');
+  if (!footer) return;
+
+  const blobs = [
+    { bx: 0, by: 20, speed: 0.1, color: 'rgba(255,38,0,0.16)', size: '90% 90%' },
+    { bx: 80, by: 50, speed: 0.1, color: 'rgba(255,38,0,0.16)', size: '90% 90%' }
+  ];
+
+  let mouseX = footer.offsetWidth / 2;
+  let mouseY = footer.offsetHeight / 2;
+  let curX = mouseX;
+  let curY = mouseY;
+  let raf = null;
+  let active = false;
+
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  function update() {
+    const W = footer.offsetWidth;
+    const H = footer.offsetHeight;
+    const gradients = blobs.map(b => {
+      const ox = (curX / W - 0.5) * b.speed * 100;
+      const oy = (curY / H - 0.5) * b.speed * 100;
+      return `radial-gradient(ellipse ${b.size} at ${b.bx + ox}% ${b.by + oy}%, ${b.color} 0%, transparent 70%)`;
+    });
+    footer.style.setProperty('--gradient-bg', gradients.join(', '));
+    // aplica diretamente no ::before via custom property não funciona — usa um elemento filho
+    footer.querySelector('.layer1') && (footer.querySelector('.layer1').style.background = 'none');
+    footer.style.backgroundImage = gradients.join(', ');
+  }
+
+  function animate() {
+    curX = lerp(curX, mouseX, 0.06);
+    curY = lerp(curY, mouseY, 0.06);
+    update();
+    if (active || Math.abs(curX - mouseX) > 0.5 || Math.abs(curY - mouseY) > 0.5) {
+      raf = requestAnimationFrame(animate);
+    } else {
+      raf = null;
     }
+  }
 
-    let lastScrollTop = 0;
+  footer.addEventListener('mousemove', e => {
+    const rect = footer.getBoundingClientRect();
+    mouseX = e.clientX - rect.left;
+    mouseY = e.clientY - rect.top + footer.scrollTop;
+    active = true;
+    if (!raf) raf = requestAnimationFrame(animate);
+  });
 
-    function onFooterScroll() {
-        const st = footer.scrollTop;
-        const footerH = footer.clientHeight;
-        const wraps = getWraps();
-
-        wraps.forEach((wrap, i) => {
-            const rect = wrap.getBoundingClientRect();
-            const footerRect = footer.getBoundingClientRect();
-            const relTop = rect.top - footerRect.top;
-            const relBottom = rect.bottom - footerRect.top;
-            const inView = relTop < footerH * 0.88 && relBottom > 0;
-            const aboveView = relBottom < 0;
-
-            if (inView) {
-                setTimeout(() => {
-                    wrap.classList.add('pf-visible');
-                    wrap.classList.remove('pf-above');
-                }, i * 80);
-            } else if (aboveView) {
-                wrap.classList.remove('pf-visible');
-                wrap.classList.add('pf-above');
-            } else {
-                wrap.classList.remove('pf-visible', 'pf-above');
-            }
-        });
-
-        lastScrollTop = st;
-    }
-
-    function resetScrollReveal() {
-        const wraps = getWraps();
-        wraps.forEach(wrap => {
-            wrap.classList.remove('pf-visible', 'pf-above');
-        });
-        footer.removeEventListener('scroll', onFooterScroll);
-    }
-
-    // ativa o listener de scroll quando o footer entra, remove quando sai
-    const originalReveal = window._revealFooterLines;
-    const originalReset = window._resetFooterLines;
-
-    window._revealFooterLines = () => {
-        if (originalReveal) originalReveal();
-        footer.addEventListener('scroll', onFooterScroll);
-    };
-
-    window._resetFooterLines = () => {
-        if (originalReset) originalReset();
-        resetScrollReveal();
-    };
+  footer.addEventListener('mouseleave', () => {
+    active = false;
+    mouseX = footer.offsetWidth / 2;
+    mouseY = footer.offsetHeight / 2;
+    if (!raf) raf = requestAnimationFrame(animate);
+  });
 }
 
 /* ============================================================
@@ -921,6 +981,7 @@ window.addEventListener('DOMContentLoaded', () => {
   setupFooterLogoClick();
   initLetterSlide();
   setupGalleryTilt();
+  setupGradientParallax();
 
   startLandingLoading().then(() => {
     const firstFrame = document.querySelector('.js-frame');
