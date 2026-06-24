@@ -451,6 +451,7 @@ body.landing-is-loading #landing-root {
 #rodape .px-6 {
     padding-left: clamp(1rem, 3vw, 8rem);
     padding-right: clamp(1rem, 3vw, 8rem);
+    margin: 3rem;
 }
 
 #rodape .pt-16 {
