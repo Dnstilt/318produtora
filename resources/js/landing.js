@@ -9,7 +9,7 @@ gsap.registerPlugin(ScrollTrigger);
 let goToSlide = null;
 
 // IDs dos slides (usados na navegação e ativação)
-const SECTION_IDS = ['publicidade', 'ooh', 'documentarios', 'natureza', 'rodape'];
+const SECTION_IDS = ['home', 'ooh', 'eventos', 'oque-mais-fazemos', 'fotos'];
 
 // Configurações de animação
 const ANIMATION_DEFAULTS = {
@@ -308,7 +308,7 @@ function setupNavActive(activeIndex) {
  */
 function setupScrollAnimations() {
   const frames = Array.from(document.querySelectorAll('.js-frame'));
-  const footer = document.getElementById('rodape');
+  const footer = document.getElementById('fotos');
   const wrapper = document.getElementById('frames-wrapper');
 
   if (!wrapper || frames.length === 0) return;
@@ -381,7 +381,6 @@ function setupScrollAnimations() {
       }
 
       if (nextEl === footer) {
-        // Entrada do footer
         tl.set(footer, {
           position: 'fixed',
           top: 0,
@@ -389,13 +388,13 @@ function setupScrollAnimations() {
           width: '100vw',
           height: '100vh',
           zIndex: frames.length + 10,
-          xPercent: -100,
+          yPercent: 100,
           overflow: 'hidden',
           scrollTop: 0,
         }, pos * ANIMATION_DEFAULTS.slideDuration);
 
         tl.to(footer, {
-          xPercent: 0,
+          yPercent: 0,
           duration: ANIMATION_DEFAULTS.slideDuration,
           ease: 'power2.inOut',
         }, pos * ANIMATION_DEFAULTS.slideDuration);
@@ -405,7 +404,6 @@ function setupScrollAnimations() {
           if (window._revealFooterLines) window._revealFooterLines();
         }, [], (pos + 1) * ANIMATION_DEFAULTS.slideDuration + 0.1);
 
-        // Oculta sidebar durante o footer
         const sidebar = document.getElementById('sidebar-nav');
         if (sidebar) {
           tl.to(sidebar, {
@@ -445,7 +443,7 @@ function setupScrollAnimations() {
         }, [], pos * ANIMATION_DEFAULTS.slideDuration);
 
         tl.to(footer, {
-          xPercent: -100,
+          yPercent: 100,
           duration: ANIMATION_DEFAULTS.slideDuration,
           ease: 'power2.inOut',
         }, pos * ANIMATION_DEFAULTS.slideDuration);
@@ -681,6 +679,7 @@ function setupFooterTextReveal() {
 
   function resetReveal() {
     [titleEl, subtitleEl].forEach((el) => {
+      F
       if (!el) return;
       el.style.opacity = '0';
       if (el.dataset.original) el.textContent = el.dataset.original;
@@ -695,7 +694,7 @@ function setupFooterTextReveal() {
  * Faz o clique no logo do footer voltar ao primeiro slide.
  */
 function setupFooterLogoClick() {
-  const logoLink = document.querySelector('a[data-target="publicidade"][aria-label="318 Produtora"]');
+  const logoLink = document.querySelector('#fotos a[data-target="home"]');
   if (!logoLink) return;
 
   logoLink.addEventListener('click', (e) => {
@@ -731,7 +730,7 @@ function initLetterSlide() {
  * Inicializa o efeito scroll do footer.
  */
 function setupFooterScrollReveal() {
-  const footer = document.getElementById('rodape');
+  const footer = document.getElementById('fotos');
   if (!footer) return;
 
   function getWraps() {
@@ -789,67 +788,6 @@ function setupFooterScrollReveal() {
     if (originalReset) originalReset();
     resetScrollReveal();
   };
-}
-
-function setupGradientParallax() {
-  if (window.matchMedia('(pointer: coarse)').matches) return;
-
-  const footer = document.getElementById('rodape');
-  if (!footer) return;
-
-  const blobs = [
-    { bx: 0, by: 20, speed: 0.1, color: 'rgba(255,38,0,0.16)', size: '90% 90%' },
-    { bx: 80, by: 50, speed: 0.1, color: 'rgba(255,38,0,0.16)', size: '90% 90%' }
-  ];
-
-  let mouseX = footer.offsetWidth / 2;
-  let mouseY = footer.offsetHeight / 2;
-  let curX = mouseX;
-  let curY = mouseY;
-  let raf = null;
-  let active = false;
-
-  function lerp(a, b, t) { return a + (b - a) * t; }
-
-  function update() {
-    const W = footer.offsetWidth;
-    const H = footer.offsetHeight;
-    const gradients = blobs.map(b => {
-      const ox = (curX / W - 0.5) * b.speed * 100;
-      const oy = (curY / H - 0.5) * b.speed * 100;
-      return `radial-gradient(ellipse ${b.size} at ${b.bx + ox}% ${b.by + oy}%, ${b.color} 0%, transparent 70%)`;
-    });
-    footer.style.setProperty('--gradient-bg', gradients.join(', '));
-    // aplica diretamente no ::before via custom property não funciona — usa um elemento filho
-    footer.querySelector('.layer1') && (footer.querySelector('.layer1').style.background = 'none');
-    footer.style.backgroundImage = gradients.join(', ');
-  }
-
-  function animate() {
-    curX = lerp(curX, mouseX, 0.06);
-    curY = lerp(curY, mouseY, 0.06);
-    update();
-    if (active || Math.abs(curX - mouseX) > 0.5 || Math.abs(curY - mouseY) > 0.5) {
-      raf = requestAnimationFrame(animate);
-    } else {
-      raf = null;
-    }
-  }
-
-  footer.addEventListener('mousemove', e => {
-    const rect = footer.getBoundingClientRect();
-    mouseX = e.clientX - rect.left;
-    mouseY = e.clientY - rect.top + footer.scrollTop;
-    active = true;
-    if (!raf) raf = requestAnimationFrame(animate);
-  });
-
-  footer.addEventListener('mouseleave', () => {
-    active = false;
-    mouseX = footer.offsetWidth / 2;
-    mouseY = footer.offsetHeight / 2;
-    if (!raf) raf = requestAnimationFrame(animate);
-  });
 }
 
 /* ============================================================
@@ -981,7 +919,6 @@ window.addEventListener('DOMContentLoaded', () => {
   setupFooterLogoClick();
   initLetterSlide();
   setupGalleryTilt();
-  setupGradientParallax();
 
   startLandingLoading().then(() => {
     const firstFrame = document.querySelector('.js-frame');

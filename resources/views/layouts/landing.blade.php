@@ -11,16 +11,16 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png?v=20260610" />
     <meta name="apple-mobile-web-app-title" content="318" />
     <link rel="manifest" href="/site.webmanifest?v=20260610" />
-    <title>318 Produtora — Produção Audiovisual | Publicidade, Documentários e Natureza</title>
+    <title>318 Produtora — Produção Audiovisual | Home, Eventos, O que fazemos e Fotos</title>
 
     <meta name="google-site-verification" content="kSk_cf24AnZzPsKL8LwpiUL0i9bm1rQvuueAQExiRsU" />
-    <meta name="description" content="318 Produtora — Produção audiovisual de publicidade, OOH, documentários e natureza.">
-    <meta name="keywords" content="produtora de vídeo, publicidade, documentários, produção audiovisual, Brasil, São Paulo, SP">
+    <meta name="description" content="318 Produtora — Produção audiovisual de publicidade, OOH, Eventos, O que fazemos e fotos.">
+    <meta name="keywords" content="produtora de vídeo, OOH, publicidade, Eventos, fotos, produção audiovisual, Brasil, São Paulo, SP">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://318produtora.com.br">
     <!-- Open Graph -->
     <meta property="og:title" content="318 Produtora">
-    <meta property="og:description" content="Produção audiovisual de publicidade, OOH, documentários e natureza.">
+    <meta property="og:description" content="Produção audiovisual de publicidade, OOH, documentários e fotos.">
     <meta property="og:image" content="https://318produtora.com.br/logo/Logo_318_Produtora_laranja.png">
     <meta property="og:url" content="https://318produtora.com.br">
     <meta property="og:type" content="website">
@@ -28,7 +28,7 @@
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="318 Produtora">
-    <meta name="twitter:description" content="Produção audiovisual de publicidade, OOH, documentários e natureza.">
+    <meta name="twitter:description" content="Produção audiovisual de publicidade, OOH, Eventos e fotos.">
     <meta name="twitter:image" content="https://318produtora.com.br/logo/Logo_318_Produtora_laranja.png">
 
 
@@ -46,7 +46,7 @@
             "url": "https://318produtora.com.br",
             "logo": "https://318produtora.com.br/logo/Logo_318_Produtora_laranja.png",
             "email": "info@318produtora.com.br",
-            "description": "Produção audiovisual de publicidade, OOH, documentários e natureza.",
+            "description": "Produção audiovisual de publicidade, OOH, documentários e fotos.",
             "address": {
                 "@type": "PostalAddress",
                 "addressCountry": "BR",

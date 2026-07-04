@@ -10,8 +10,8 @@ class Page extends Model
 {
     use HasFactory;
 
-    public const SLUG_RODAPE_TITULO = 'rodape_titulo';
-    public const SLUG_RODAPE_SUBTITULO = 'rodape_subtitulo';
+    public const SLUG_FOTOS_TITULO = 'fotos_titulo';
+    public const SLUG_FOTOS_SUBTITULO = 'fotos_subtitulo';
 
     protected $fillable = [
         'slug',

@@ -10,10 +10,10 @@ class Section extends Model
 {
     use HasFactory;
 
-    public const SLUG_PUBLICIDADE = 'publicidade';
+    public const SLUG_HOME = 'home';
     public const SLUG_OOH = 'ooh';
-    public const SLUG_DOCUMENTARIOS = 'documentarios';
-    public const SLUG_NATUREZA = 'natureza';
+    public const SLUG_EVENTOS = 'eventos';
+    public const SLUG_OQUEMAISFAZEMOS = 'oque-mais-fazemos';
 
     protected $fillable = [
         'slug',

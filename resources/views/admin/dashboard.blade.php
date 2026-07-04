@@ -117,21 +117,21 @@
                 </div>
                 
                 <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    <form method="POST" action="{{ url('/admin/pages/rodape_titulo') }}" class="rounded-md border border-gray-200 p-4 dark:border-gray-700 js-admin-form" data-loading-text="Salvando...">
+                    <form method="POST" action="{{ url('/admin/pages/fotos_titulo') }}" class="rounded-md border border-gray-200 p-4 dark:border-gray-700 js-admin-form" data-loading-text="Salvando...">
                         @csrf
                         @method('PUT')
-                        <div class="text-sm font-semibold text-gray-800 dark:text-gray-100">Título do Rodapé (h1)</div>
-                        <input type="text" class="mt-3 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100" name="content" value="{{ old('content', $pageRodapeTitulo?->content) }}">
+                        <div class="text-sm font-semibold text-gray-800 dark:text-gray-100">Título do Fotos</div>
+                        <input type="text" class="mt-3 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100" name="content" value="{{ old('content', $pageFotosTitulo?->content) }}">
                         <button type="submit" class="mt-3 inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500">
                             Salvar Título
                         </button>
                     </form>
 
-                    <form method="POST" action="{{ url('/admin/pages/rodape_subtitulo') }}" class="rounded-md border border-gray-200 p-4 dark:border-gray-700 js-admin-form" data-loading-text="Salvando...">
+                    <form method="POST" action="{{ url('/admin/pages/fotos_subtitulo') }}" class="rounded-md border border-gray-200 p-4 dark:border-gray-700 js-admin-form" data-loading-text="Salvando...">
                         @csrf
                         @method('PUT')
-                        <div class="text-sm font-semibold text-gray-800 dark:text-gray-100">Subtítulo do Rodapé (h4)</div>
-                        <textarea class="mt-3 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100" name="content" rows="3">{{ old('content', $pageRodapeSubtitulo?->content) }}</textarea>
+                        <div class="text-sm font-semibold text-gray-800 dark:text-gray-100">Subtítulo do Fotos</div>
+                        <textarea class="mt-3 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100" name="content" rows="3">{{ old('content', $pageFotosSubtitulo?->content) }}</textarea>
                         <button type="submit" class="mt-3 inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500">
                             Salvar Subtítulo
                         </button>

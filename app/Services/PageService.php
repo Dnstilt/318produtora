@@ -52,8 +52,8 @@ class PageService
     private function defaultSlugs(): array
     {
         return [
-            Page::SLUG_RODAPE_TITULO,
-            Page::SLUG_RODAPE_SUBTITULO,
+            Page::SLUG_FOTOS_TITULO,
+            Page::SLUG_FOTOS_SUBTITULO,
         ];
     }
 }

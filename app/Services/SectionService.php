@@ -125,10 +125,10 @@ class SectionService
     private function defaultSlugs(): array
     {
         return [
-            Section::SLUG_PUBLICIDADE,
+            Section::SLUG_HOME,
             Section::SLUG_OOH,
-            Section::SLUG_DOCUMENTARIOS,
-            Section::SLUG_NATUREZA,
+            Section::SLUG_EVENTOS,
+            Section::SLUG_OQUEMAISFAZEMOS,
         ];
     }
 }

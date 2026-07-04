@@ -5,8 +5,8 @@
 
     <div id="sidebar-nav" class="fixed left-0 top-0 z-50 h-screen  px-3 py-6 transition-transform duration-500">
         <div class="flex flex-col gap-6">
-            <a href="#publicidade" class="logo-navbar block items-center justify-center opacity-100 hover:opacity-80 transition-opacity"
-                data-target="publicidade" aria-label="318 Produtora">
+            <a href="#home" class="logo-navbar block items-center justify-center opacity-100 hover:opacity-80 transition-opacity"
+                data-target="home" aria-label="318 Produtora">
                 <div id="landing-navbar-logo" class="logo-navbar opacity-0">
                     @include('partials.logo-static')
                 </div>
@@ -15,11 +15,11 @@
             <nav class="font-juana flex flex-col items-start">
                 @php
                 $nav = [
-                ['id' => 'publicidade', 'label' => 'Publicidade'],
+                ['id' => 'home', 'label' => 'Home'],
                 ['id' => 'ooh', 'label' => 'OOH'],
-                ['id' => 'documentarios', 'label' => 'Documentários'],
-                ['id' => 'natureza', 'label' => 'Natureza'],
-                ['id' => 'rodape', 'label' => 'Fotos e Contato'],
+                ['id' => 'eventos', 'label' => 'Eventos'],
+                ['id' => 'oque-mais-fazemos', 'label' => 'O que mais fazemos'],
+                ['id' => 'fotos', 'label' => 'Fotos e Contato'],
                 ];
                 @endphp
 
@@ -43,10 +43,10 @@
     <main class="relative">
         @php
         $frames = [
-        ['id' => 'publicidade', 'slug' => 'publicidade', 'preload' => 'auto'],
+        ['id' => 'home', 'slug' => 'home', 'preload' => 'auto'],
         ['id' => 'ooh', 'slug' => 'ooh', 'preload' => 'none'],
-        ['id' => 'documentarios', 'slug' => 'documentarios', 'preload' => 'none'],
-        ['id' => 'natureza', 'slug' => 'natureza', 'preload' => 'none'],
+        ['id' => 'eventos', 'slug' => 'eventos', 'preload' => 'none'],
+        ['id' => 'oque-mais-fazemos', 'slug' => 'oque-mais-fazemos', 'preload' => 'none'],
         ];
         @endphp
 
@@ -72,7 +72,7 @@
                     data-mobile-mp4="{{ $section->video_mp4_mobile ? asset('storage/'.$section->video_mp4_mobile) : 'https://res.cloudinary.com/'.$cloudName.'/video/upload/w_768,h_1280,c_fill,vc_h264,q_auto/'.$section->video_public_id.'.mp4' }}">
                 </video>
                 @endif
-                <div class="pointer-events-none absolute  inset-0 flex flex-col justify-end items-center pb-16 px-6 md:justify-center md:items-end md:pb-0 md:pr-16 lg:pr-24" style="z-index: 2">
+                <div class="frame-content pointer-events-none absolute  inset-0 flex flex-col justify-end items-center px-6 md:justify-center md:pr-16 lg:pr-24" style="z-index: 2">
                     <div class="js-frame-text w-full text-center md:text-right md:max-w-[70vw] lg:max-w-[80vw]">
                         @if($section?->title)
                         <h2 class="frame-title font-juana text-[#ff2600] mb-4 md:mb-6 lg:mb-8 break-words leading-tight">
@@ -90,18 +90,17 @@
             @endforeach
         </div>
 
-        <footer id="rodape" class="gallery-bg relative min-h-screen w-screen">
-            <div class="layer1" aria-hidden="true"></div>
+        <footer id="fotos" class="gallery-bg relative min-h-screen w-screen">
             <div class="footer-content pt-16 sm:pt-24">
-                @if($rodapeTitulo)
+                @if($fotosTitulo)
                 <h1 id="footer-title" class="footer-title font-bold text-[#ff2600] mb-4 mt-16 font-juana text-center opacity-0">
-                    {{ $rodapeTitulo }}
+                    {{ $fotosTitulo }}
                 </h1>
                 @endif
 
-                @if($rodapeSubtitulo)
-                <p id="footer-subtitle" class="footer-subtitle font-pragext text-center text-[#ddddddea] opacity-0">
-                    {{ $rodapeSubtitulo }}
+                @if($fotosSubtitulo)
+                <p id="footer-subtitle" class="footer-subtitle font-pragext text-center text-[#000000ea] opacity-0">
+                    {{ $fotosSubtitulo }}
                 </p>
                 @endif
 
@@ -126,9 +125,6 @@
                                     </picture>
                                     <div class="gallery-grid-overlay"></div>
                                 </div>
-                                @if ($photo->title)
-                                <p class="gallery-grid-caption font-oldstandard">{{ $photo->title }}</p>
-                                @endif
                             </div>
                             @endif
                             @endforeach
@@ -153,9 +149,6 @@
                                     </picture>
                                     <div class="gallery-grid-overlay"></div>
                                 </div>
-                                @if ($photo->title)
-                                <p class="gallery-grid-caption font-oldstandard">{{ $photo->title }}</p>
-                                @endif
                             </div>
                             @endif
                             @endforeach
@@ -166,9 +159,9 @@
             <div class="info mx-auto grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-center relative">
                 <div class="logofooter flex flex-col items-center lg:items-start justify-center
                     hover:opacity-50">
-                    <a href="#publicidade"
+                    <a href="#home"
                         class="flex justify-center lg:justify-start w-full"
-                        data-target="publicidade"
+                        data-target="home"
                         aria-label="318 Produtora">
                         @include('partials.logo-static')
                     </a>

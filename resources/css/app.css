@@ -308,6 +308,11 @@ body.landing-is-loading #landing-root {
 /* ============================================================
    5. FRAMES (VÍDEOS E TEXTOS)
    ============================================================ */
+.frame-content {
+    padding-left: clamp(1rem, 2vw, 10rem);
+    padding-bottom: 8rem;
+}
+
 .frame-title {
     font-size: clamp(2.5rem, 5vw, 16rem);
 }
@@ -327,15 +332,7 @@ body.landing-is-loading #landing-root {
 
    .gallery-bg {
     position: relative;
-    background-color: #000000;
-}
-
-.layer1 {
-    position: absolute;
-    inset: 0;
-    background-color: rgba(255, 38, 0, 0.082);
-    pointer-events: none;
-    z-index: 1;
+    background-color: #ffffff;
 }
 
 #gallery-grid-section {
@@ -395,20 +392,7 @@ body.landing-is-loading #landing-root {
     opacity: 0;
 }
 
-.gallery-grid-caption {
-    margin-top: clamp(1rem, 2vw, 4rem);
-    font-size: clamp(1rem, 1.5vw, 6rem);
-    text-align: center;
-    color: #ff2600;
-    display: inline-block;
-    background-image: linear-gradient(currentColor, currentColor);
-    background-position: 0 100%;
-    background-repeat: no-repeat;
-    background-size: 0% 1px;
-    transition: background-size 0.4s cubic-bezier(0.77, 0, 0.18, 1);
-}
-
-.gallery-grid-item-wrap:hover .gallery-grid-caption {
+.gallery-grid-item-wrap:hover {
     background-size: 100% 1px;
 }
 
@@ -448,24 +432,24 @@ body.landing-is-loading #landing-root {
 }
 
 /* Ajustes de padding do footer via IDs (para manter compatibilidade com classes Tailwind) */
-#rodape .px-6 {
+#fotos .px-6 {
     padding-left: clamp(1rem, 3vw, 8rem);
     padding-right: clamp(1rem, 3vw, 8rem);
     margin: 3rem;
 }
 
-#rodape .pt-16 {
+#fotos .pt-16 {
     padding-top: clamp(2rem, 5vw, 12rem);
     margin: 2rem;
 }
 
-#rodape {
+#fotos {
     position: relative;
     isolation: isolate;
     overflow: hidden;
 }
 
-#rodape::before {
+#fotos::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -475,9 +459,7 @@ body.landing-is-loading #landing-root {
     will-change: background;
 }
 
-
-#rodape>div:not(.layer1),
-#rodape>section {
+#fotos>section {
     position: relative;
     z-index: 2;
 }
@@ -506,7 +488,7 @@ body.landing-is-loading #landing-root {
 }
 
 .social-icon-wrapper:hover {
-    background-color: #ffffff6e;
+    background-color: #4545456e;
     color: #ff2600;
 }
 
@@ -637,6 +619,11 @@ body.landing-is-loading #landing-root {
 }
 
 @media (min-width: 1024px) {
+
+    .frame-content {
+        padding-bottom: 0;
+    }
+    
     .footer-subtitle {
         margin-bottom: clamp(7rem, 10vw, 10rem);
     }

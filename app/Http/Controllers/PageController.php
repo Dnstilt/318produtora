@@ -35,16 +35,16 @@ class PageController extends Controller
 
         return view('landing.index', [
             'sections' => [
-                Section::SLUG_PUBLICIDADE => $sections->get(Section::SLUG_PUBLICIDADE),
+                Section::SLUG_HOME => $sections->get(Section::SLUG_HOME),
                 Section::SLUG_OOH => $sections->get(Section::SLUG_OOH),
-                Section::SLUG_DOCUMENTARIOS => $sections->get(Section::SLUG_DOCUMENTARIOS),
-                Section::SLUG_NATUREZA => $sections->get(Section::SLUG_NATUREZA),
+                Section::SLUG_EVENTOS => $sections->get(Section::SLUG_EVENTOS),
+                Section::SLUG_OQUEMAISFAZEMOS => $sections->get(Section::SLUG_OQUEMAISFAZEMOS),
             ],
             'photos' => collect($this->photos->allOrdered()),
             'socialLinks' => $this->socialLinks->all(),
-            'rodapeTitulo' => $this->pages->findBySlug(Page::SLUG_RODAPE_TITULO)?->content ?? 'Conheça nosso trabalho',
-            'rodapeSubtitulo' => $this->pages->findBySlug(Page::SLUG_RODAPE_SUBTITULO)?->content ?? 'Entre em contato para mais informações.',
+            'fotosTitulo' => $this->pages->findBySlug(Page::SLUG_FOTOS_TITULO)?->content ?? 'Conheça nosso trabalho',
+            'fotosSubtitulo' => $this->pages->findBySlug(Page::SLUG_FOTOS_SUBTITULO)?->content ?? 'Entre em contato para mais informações.',
             'cloudName' => $cloudName,
-        ]);
+        ]); 
     }
 }
