@@ -47,8 +47,6 @@ class MediaConversionService
         $variants = [
             'video_webm_desktop' => "https://res.cloudinary.com/{$cloudName}/video/upload/w_1920,h_1080,c_fill,vc_vp9,q_auto/{$publicId}.webm",
             'video_mp4_desktop'  => "https://res.cloudinary.com/{$cloudName}/video/upload/w_1920,h_1080,c_fill,vc_h264,q_auto/{$publicId}.mp4",
-            'video_webm_mobile'  => "https://res.cloudinary.com/{$cloudName}/video/upload/w_768,h_1280,c_fill,vc_vp9,q_auto/{$publicId}.webm",
-            'video_mp4_mobile'   => "https://res.cloudinary.com/{$cloudName}/video/upload/w_768,h_1280,c_fill,vc_h264,q_auto/{$publicId}.mp4",
         ];
         $localPaths = [];
         foreach ($variants as $key => $url) {
@@ -56,49 +54,37 @@ class MediaConversionService
             $maxRetries = 5;
             $attempt = 0;
 
-            while ($attempt < $maxRetries) {
-                try {
-                    $res = Http::timeout(300)->withOptions(['stream' => true])->get($url);
+            try {
+                $res = Http::timeout(300)->withOptions(['stream' => true])->get($url);
 
-                    if (in_array($res->status(), [423, 503])) {
-                        $attempt++;
-                        Log::info('Cloudinary ainda processando', ['key' => $key, 'tentativa' => $attempt]);
-                        sleep(15);
-                        continue;
-                    }
-
-                    if (!$res->successful()) {
-                        throw new \RuntimeException("HTTP {$res->status()}");
-                    }
-
-                    $resource = $res->toPsrResponse()->getBody()->detach();
-                    if (!is_resource($resource)) {
-                        throw new \RuntimeException('Resposta sem stream');
-                    }
-
-                    $ok = $disk->writeStream($filename, $resource);
-                    if (is_resource($resource)) fclose($resource);
-
-                    if (!$ok) {
-                        throw new \RuntimeException('Falha ao gravar no storage');
-                    }
-
-                    $localPaths[$key] = $filename;
-                    Log::info('video.downloaded', ['path' => $filename]);
-                    break;
-                } catch (\Throwable $e) {
-                    $attempt++;
-                    Log::warning('video.download_failed', [
-                        'url' => $url,
-                        'tentativa' => $attempt,
-                        'exception' => $e->getMessage(),
-                    ]);
-                    if ($attempt >= $maxRetries) {
-                        $localPaths[$key] = null;
-                        break;
-                    }
-                    sleep(15);
+                if (in_array($res->status(), [423, 503])) {
+                    throw new \RuntimeException("Cloudinary ainda processando vídeo (status: {$res->status()})");
                 }
+
+                if (!$res->successful()) {
+                    throw new \RuntimeException("HTTP {$res->status()}");
+                }
+
+                $resource = $res->toPsrResponse()->getBody()->detach();
+                if (!is_resource($resource)) {
+                    throw new \RuntimeException('Resposta sem stream');
+                }
+
+                $ok = $disk->writeStream($filename, $resource);
+                if (is_resource($resource)) fclose($resource);
+
+                if (!$ok) {
+                    throw new \RuntimeException('Falha ao gravar no storage');
+                }
+
+                $localPaths[$key] = $filename;
+                Log::info('video.downloaded', ['path' => $filename]);
+            } catch (\Throwable $e) {
+                Log::warning('video.download_failed', [
+                    'url' => $url,
+                    'exception' => $e->getMessage(),
+                ]);
+                $localPaths[$key] = null;
             }
         }
 
@@ -106,8 +92,80 @@ class MediaConversionService
             'video_public_id'    => $publicId,
             'video_webm_desktop' => $localPaths['video_webm_desktop'],
             'video_mp4_desktop'  => $localPaths['video_mp4_desktop'],
-            'video_webm_mobile'  => $localPaths['video_webm_mobile'],
-            'video_mp4_mobile'   => $localPaths['video_mp4_mobile'],
+        ];
+    }
+
+    public function convertSectionMobileVideo(string $tempPath, string $baseName): array
+    {
+        $absoluteTempPath = Storage::disk('local')->path($tempPath);
+        if (!file_exists($absoluteTempPath)) {
+            throw new \RuntimeException("Arquivo não encontrado: {$absoluteTempPath}");
+        }
+        Log::info('Cloudinary mobile upload iniciado', ['path' => $absoluteTempPath]);
+
+        $result = $this->cloudinary->uploadApi()->upload($absoluteTempPath, [
+            'resource_type' => 'video',
+            'public_id'     => $baseName,
+            'folder'        => 'videos',
+            'overwrite'     => true,
+            'chunk_size'    => 6000000,
+        ]);
+
+        Storage::disk('local')->delete($tempPath);
+        $publicId = $result['public_id'];
+        $cloudName = config('cloudinary.cloud_url') ? parse_url(config('cloudinary.cloud_url'), PHP_URL_HOST) : env('CLOUDINARY_CLOUD_NAME');
+        Log::info('Cloudinary mobile upload finalizado', ['public_id' => $publicId]);
+
+        $disk = Storage::disk('public');
+        $disk->makeDirectory('videos');
+        $variants = [
+            'video_webm_mobile' => "https://res.cloudinary.com/{$cloudName}/video/upload/w_1080,c_limit,vc_vp9,q_auto/{$publicId}.webm",
+            'video_mp4_mobile'  => "https://res.cloudinary.com/{$cloudName}/video/upload/w_1080,c_limit,vc_h264,q_auto/{$publicId}.mp4",
+        ];
+        $localPaths = [];
+        foreach ($variants as $key => $url) {
+            $filename = "videos/{$baseName}_{$key}." . (str_contains($key, 'webm') ? 'webm' : 'mp4');
+            $maxRetries = 5;
+            $attempt = 0;
+
+            try {
+                $res = Http::timeout(300)->withOptions(['stream' => true])->get($url);
+
+                if (in_array($res->status(), [423, 503])) {
+                    throw new \RuntimeException("Cloudinary ainda processando vídeo mobile (status: {$res->status()})");
+                }
+
+                if (!$res->successful()) {
+                    throw new \RuntimeException("HTTP {$res->status()}");
+                }
+
+                $resource = $res->toPsrResponse()->getBody()->detach();
+                if (!is_resource($resource)) {
+                    throw new \RuntimeException('Resposta sem stream');
+                }
+
+                $ok = $disk->writeStream($filename, $resource);
+                if (is_resource($resource)) fclose($resource);
+
+                if (!$ok) {
+                    throw new \RuntimeException('Falha ao gravar no storage mobile');
+                }
+
+                $localPaths[$key] = $filename;
+                Log::info('mobile_video.downloaded', ['path' => $filename]);
+            } catch (\Throwable $e) {
+                Log::warning('mobile_video.download_failed', [
+                    'url' => $url,
+                    'exception' => $e->getMessage(),
+                ]);
+                $localPaths[$key] = null;
+            }
+        }
+
+        return [
+            'mobile_video_public_id' => $publicId,
+            'video_webm_mobile'      => $localPaths['video_webm_mobile'],
+            'video_mp4_mobile'       => $localPaths['video_mp4_mobile'],
         ];
     }
 

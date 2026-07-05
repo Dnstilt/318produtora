@@ -32,33 +32,48 @@ function initEditors() {
 
 async function pollSectionStatuses(sectionIds) {
     const allStatusEls = Array.from(document.querySelectorAll('.js-section-status'));
-    if (allStatusEls.length === 0) return new Map();
+    const allMobileStatusEls = Array.from(document.querySelectorAll('.js-section-mobile-status'));
+    
+    if (allStatusEls.length === 0 && allMobileStatusEls.length === 0) return new Map();
 
     const byId = new Map(
         allStatusEls
             .map((el) => [Number(el.dataset.sectionId), el])
             .filter(([id]) => Number.isFinite(id) && id > 0)
     );
+    
+    const byIdMobile = new Map(
+        allMobileStatusEls
+            .map((el) => [Number(el.dataset.sectionId), el])
+            .filter(([id]) => Number.isFinite(id) && id > 0)
+    );
 
     const idsToPoll = Array.isArray(sectionIds)
         ? sectionIds.map((n) => Number(n)).filter((n) => Number.isFinite(n) && n > 0)
-        : Array.from(byId.keys());
+        : Array.from(new Set([...byId.keys(), ...byIdMobile.keys()]));
 
     const results = new Map();
 
     await Promise.all(
         idsToPoll.map(async (id) => {
             const el = byId.get(id);
-            if (!el) return;
+            const mobileEl = byIdMobile.get(id);
+            if (!el && !mobileEl) return;
 
             try {
                 const res = await fetch(`/admin/sections/${id}/status`, { headers: { Accept: 'application/json' } });
                 if (!res.ok) return;
                 const json = await res.json();
+                
                 const status = (json?.status || '').toString().trim();
                 const error = (json?.error || '').toString().trim();
-                el.textContent = status;
-                results.set(id, { status, error });
+                if (el) el.textContent = status;
+                
+                const mobile_status = (json?.mobile_status || '').toString().trim();
+                const mobile_error = (json?.mobile_error || '').toString().trim();
+                if (mobileEl) mobileEl.textContent = mobile_status;
+                
+                results.set(id, { status, error, mobile_status, mobile_error });
             } catch (e) { }
         })
     );
@@ -196,15 +211,26 @@ window.addEventListener('DOMContentLoaded', () => {
     const trackedSectionIds = new Set();
     const notifiedSectionIds = new Set();
     const videoBanner = document.getElementById('js-video-processing-banner');
-    const videoUploadForms = Array.from(document.querySelectorAll('form.js-video-upload-form'));
+    const videoUploadForms = Array.from(document.querySelectorAll('form.js-video-upload-form, form.js-video-mobile-upload-form'));
 
     const readStatusesById = () => {
         const statusEls = Array.from(document.querySelectorAll('.js-section-status'));
+        const mobileStatusEls = Array.from(document.querySelectorAll('.js-section-mobile-status'));
+        
         const byId = new Map();
         for (const el of statusEls) {
             const id = Number(el.dataset.sectionId);
             if (!Number.isFinite(id) || id <= 0) continue;
-            byId.set(id, (el.textContent || '').trim());
+            const current = byId.get(id) || {};
+            current.status = (el.textContent || '').trim();
+            byId.set(id, current);
+        }
+        for (const el of mobileStatusEls) {
+            const id = Number(el.dataset.sectionId);
+            if (!Number.isFinite(id) || id <= 0) continue;
+            const current = byId.get(id) || {};
+            current.mobile_status = (el.textContent || '').trim();
+            byId.set(id, current);
         }
         return byId;
     };
@@ -260,16 +286,26 @@ window.addEventListener('DOMContentLoaded', () => {
             for (const [id, info] of statuses.entries()) {
                 const status = info?.status;
                 const error = info?.error;
+                const mobileStatus = info?.mobile_status;
+                const mobileError = info?.mobile_error;
 
-                if (status !== 'pending' && status !== 'processing') {
+                const isDesktopDone = status !== 'pending' && status !== 'processing';
+                const isMobileDone = mobileStatus !== 'pending' && mobileStatus !== 'processing';
+
+                if (isDesktopDone && isMobileDone) {
                     trackedSectionIds.delete(id);
                     if (!notifiedSectionIds.has(id)) {
                         notifiedSectionIds.add(id);
-                        if (status === 'done') {
+                        if (status === 'done' || mobileStatus === 'done') {
                             completedDone += 1;
-                        } else if (status === 'error') {
+                        }
+                        if (status === 'error') {
                             completedError += 1;
                             if (error) lastErrorMessage = error;
+                        }
+                        if (mobileStatus === 'error') {
+                            completedError += 1;
+                            if (mobileError) lastErrorMessage = mobileError;
                         }
                     }
                 }
@@ -304,10 +340,11 @@ window.addEventListener('DOMContentLoaded', () => {
             const action = (form.getAttribute('action') || '').toString();
             const isVideoForm =
                 form.classList.contains('js-video-upload-form') ||
-                (action.includes('/admin/sections/') && action.endsWith('/video'));
+                form.classList.contains('js-video-mobile-upload-form') ||
+                (action.includes('/admin/sections/') && (action.endsWith('/video') || action.endsWith('/mobile-video')));
 
             if (isVideoForm) {
-                const match = action.match(/\/admin\/sections\/(\d+)\/video$/);
+                const match = action.match(/\/admin\/sections\/(\d+)\/(video|mobile-video)$/);
                 if (match) {
                     const id = Number(match[1]);
                     trackedSectionIds.add(id);
@@ -320,16 +357,16 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 
     const initialStatusesById = readStatusesById();
-    for (const [id, status] of initialStatusesById.entries()) {
-        if (status === 'processing') {
+    for (const [id, info] of initialStatusesById.entries()) {
+        if (info.status === 'processing' || info.mobile_status === 'processing') {
             trackedSectionIds.add(id);
         }
     }
 
     const activeSectionId = Number(sessionStorage.getItem('adminActiveVideoSectionId'));
     if (Number.isFinite(activeSectionId) && activeSectionId > 0) {
-        const status = initialStatusesById.get(activeSectionId);
-        if (status === 'pending' || status === 'processing') {
+        const info = initialStatusesById.get(activeSectionId) || {};
+        if (info.status === 'pending' || info.status === 'processing' || info.mobile_status === 'pending' || info.mobile_status === 'processing') {
             trackedSectionIds.add(activeSectionId);
             setVideoUploadsEnabled(false);
         } else {

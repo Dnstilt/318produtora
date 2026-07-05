@@ -7,6 +7,7 @@ use App\Http\Requests\UpdatePageRequest;
 use App\Http\Requests\UpdateSectionRequest;
 use App\Http\Requests\UpdateSocialLinkRequest;
 use App\Http\Requests\UploadSectionVideoRequest;
+use App\Http\Requests\UploadSectionMobileVideoRequest;
 use App\Models\FooterPhoto;
 use App\Models\Page;
 use App\Models\Section;
@@ -119,7 +120,65 @@ class AdminController extends Controller
             } elseif (str_contains($e->getMessage(), 'mimes')) {
                 $errorMessage .= 'Formato de arquivo não suportado. Use: mp4, webm, mov, mkv, avi.';
             } elseif (str_contains($e->getMessage(), 'max')) {
-                $errorMessage .= 'Arquivo muito grande. Limite: 500MB.';
+                $errorMessage .= 'Arquivo muito grande. Limite: 100MB.';
+            } else {
+                $errorMessage .= 'Verifique o arquivo e tente novamente.';
+            }
+            
+            return back()->with('error', $errorMessage);
+        }
+    }
+
+    public function uploadSectionMobileVideo(UploadSectionMobileVideoRequest $request, int $id): RedirectResponse
+    {
+        // #region debug-point controller-entry
+        Log::debug('DEBUG: mobile-video-upload-start', [
+            'section_id' => $id,
+            'request_size' => $request->file('video')?->getSize(),
+            'timestamp' => now()->toISOString(),
+        ]);
+        // #endregion
+        
+        $file = $request->file('video');
+
+        Log::info('admin.section.mobile_video.request', [
+            'user_id' => $request->user()?->id,
+            'section_id' => $id,
+            'ip' => $request->ip(),
+            'original_name' => $file?->getClientOriginalName(),
+            'mime' => $file?->getClientMimeType(),
+            'size' => $file?->getSize(),
+        ]);
+
+        try {
+            $section = Section::query()->findOrFail($id);
+            $this->authorize('update', $section);
+
+            $this->sections->enqueueMobileVideoProcessing($id, $file);
+
+            Log::info('admin.section.mobile_video.success', [
+                'user_id' => $request->user()?->id,
+                'section_id' => $id,
+            ]);
+
+            return back()->with('success', 'Upload de vídeo mobile recebido. Processamento em background iniciado.');
+        } catch (\Throwable $e) {
+            Log::error('admin.section.mobile_video.error', [
+                'user_id' => $request->user()?->id,
+                'section_id' => $id,
+                'exception' => $e,
+            ]);
+            
+            $errorMessage = 'Não foi possível receber o vídeo mobile. ';
+            
+            if (str_contains($e->getMessage(), 'Já existe um vídeo mobile sendo processado')) {
+                $errorMessage .= 'Já existe um vídeo mobile sendo processado para esta seção. Aguarde a conclusão antes de enviar outro.';
+            } elseif (str_contains($e->getMessage(), 'required')) {
+                $errorMessage .= 'O campo de vídeo é obrigatório.';
+            } elseif (str_contains($e->getMessage(), 'mimes')) {
+                $errorMessage .= 'Formato de arquivo não suportado. Use: mp4, webm, mov, mkv, avi.';
+            } elseif (str_contains($e->getMessage(), 'max')) {
+                $errorMessage .= 'Arquivo muito grande. Limite: 100MB.';
             } else {
                 $errorMessage .= 'Verifique o arquivo e tente novamente.';
             }

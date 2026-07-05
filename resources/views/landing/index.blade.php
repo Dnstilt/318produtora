@@ -60,16 +60,16 @@
                 id="{{ $frame['id'] }}"
                 class="js-frame absolute inset-0 h-screen w-screen overflow-hidden"
                 data-frame="{{ $frame['id'] }}">
-                @if($section?->video_public_id)
+                @if($section?->video_public_id || $section?->mobile_video_public_id)
                 <video
                     autoplay muted loop playsinline
                     class="js-frame-video absolute inset-0 h-full w-full object-cover"
                     style="z-index: 1"
                     data-preload="{{ $frame['preload'] }}"
-                    data-desktop-webm="{{ $section->video_webm_desktop ? asset('storage/'.$section->video_webm_desktop) : 'https://res.cloudinary.com/'.$cloudName.'/video/upload/w_1920,h_1080,c_fill,vc_vp9,q_auto/'.$section->video_public_id.'.webm' }}"
-                    data-desktop-mp4="{{ $section->video_mp4_desktop ? asset('storage/'.$section->video_mp4_desktop) : 'https://res.cloudinary.com/'.$cloudName.'/video/upload/w_1920,h_1080,c_fill,vc_h264,q_auto/'.$section->video_public_id.'.mp4' }}"
-                    data-mobile-webm="{{ $section->video_webm_mobile ? asset('storage/'.$section->video_webm_mobile) : 'https://res.cloudinary.com/'.$cloudName.'/video/upload/w_768,h_1280,c_fill,vc_vp9,q_auto/'.$section->video_public_id.'.webm' }}"
-                    data-mobile-mp4="{{ $section->video_mp4_mobile ? asset('storage/'.$section->video_mp4_mobile) : 'https://res.cloudinary.com/'.$cloudName.'/video/upload/w_768,h_1280,c_fill,vc_h264,q_auto/'.$section->video_public_id.'.mp4' }}">
+                    data-desktop-webm="{{ $section->video_webm_desktop ? asset('storage/'.$section->video_webm_desktop) : ($section->video_public_id ? 'https://res.cloudinary.com/'.$cloudName.'/video/upload/w_1920,h_1080,c_fill,vc_vp9,q_auto/'.$section->video_public_id.'.webm' : '') }}"
+                    data-desktop-mp4="{{ $section->video_mp4_desktop ? asset('storage/'.$section->video_mp4_desktop) : ($section->video_public_id ? 'https://res.cloudinary.com/'.$cloudName.'/video/upload/w_1920,h_1080,c_fill,vc_h264,q_auto/'.$section->video_public_id.'.mp4' : '') }}"
+                    data-mobile-webm="{{ $section->video_webm_mobile ? asset('storage/'.$section->video_webm_mobile) : ($section->mobile_video_public_id ? 'https://res.cloudinary.com/'.$cloudName.'/video/upload/vc_vp9,q_auto/'.$section->mobile_video_public_id.'.webm' : '') }}"
+                    data-mobile-mp4="{{ $section->video_mp4_mobile ? asset('storage/'.$section->video_mp4_mobile) : ($section->mobile_video_public_id ? 'https://res.cloudinary.com/'.$cloudName.'/video/upload/vc_h264,q_auto/'.$section->mobile_video_public_id.'.mp4' : '') }}">
                 </video>
                 @endif
                 <div class="frame-content pointer-events-none absolute  inset-0 flex flex-col justify-end items-center px-6 md:justify-center md:pr-16 lg:pr-24" style="z-index: 2">

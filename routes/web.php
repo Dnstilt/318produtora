@@ -10,6 +10,7 @@ Route::middleware(['auth', 'can:viewAdmin'])->prefix('admin')->group(function ()
     Route::get('/', [AdminController::class, 'index']);
     Route::put('/sections/{id}', [AdminController::class, 'updateSection']);
     Route::post('/sections/{id}/video', [AdminController::class, 'uploadSectionVideo']);
+    Route::post('/sections/{id}/mobile-video', [AdminController::class, 'uploadSectionMobileVideo']);
     Route::get('/sections/{id}/status', [AdminController::class, 'sectionStatus']);
 
     Route::post('/photos', [AdminController::class, 'storePhoto']);

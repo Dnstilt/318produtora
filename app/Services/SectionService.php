@@ -67,7 +67,8 @@ class SectionService
             $publicDisk->makeDirectory($videoDir);
             foreach ($publicDisk->files($videoDir) as $path) {
                 $name = basename((string) $path);
-                if (str_starts_with($name, $section->slug . '_')) {
+                // remove only desktop variants and legacy formats
+                if (str_starts_with($name, 'desktop_' . $section->slug . '_') || str_starts_with($name, $section->slug . '_')) {
                     $publicDisk->delete($path);
                 }
             }
@@ -79,8 +80,8 @@ class SectionService
         }
 
         $extension = $file->guessExtension() ?: $file->getClientOriginalExtension() ?: 'bin';
-        $tmpPath = $file->storeAs('temp', uniqid('video_', true).'.'.$extension, 'local');
-        $baseName = $section->slug . '_' . $section->id;
+        $tmpPath = $file->storeAs('temp', uniqid('desktop_video_', true).'.'.$extension, 'local');
+        $baseName = 'desktop_' . $section->slug . '_' . $section->id;
 
         Log::info('sections.video.enqueue', [
             'section_id' => $id,
@@ -101,6 +102,84 @@ class SectionService
         return $section;
     }
 
+    public function enqueueMobileVideoProcessing(int $id, UploadedFile $file): Section
+    {
+        // #region debug-point service-entry
+        Log::debug('DEBUG: mobile-service-entry', [
+            'section_id' => $id,
+            'file_is_valid' => $file->isValid(),
+            'file_size' => $file->getSize(),
+            'timestamp' => now()->toISOString(),
+        ]);
+        // #endregion
+        
+        $section = $this->requireSection($id);
+
+        if ($section->mobile_processing_status === 'processing' || $section->mobile_processing_status === 'pending') {
+            throw new \Exception('Já existe um vídeo mobile sendo processado para esta seção. Aguarde a conclusão antes de enviar outro.');
+        }
+
+        if (!$file->isValid()) {
+            abort(422);
+        }
+
+        $publicDisk = Storage::disk('public');
+        $videoDir = 'videos';
+        try {
+            $publicDisk->makeDirectory($videoDir);
+            foreach ($publicDisk->files($videoDir) as $path) {
+                $name = basename((string) $path);
+                if (str_starts_with($name, 'mobile_' . $section->slug . '_')) {
+                    $publicDisk->delete($path);
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::warning('sections.mobile_video.cleanup_failed', [
+                'section_id' => $id,
+                'exception' => $e->getMessage(),
+            ]);
+        }
+
+        $extension = $file->guessExtension() ?: $file->getClientOriginalExtension() ?: 'bin';
+        $tmpPath = $file->storeAs('temp', uniqid('mobile_video_', true).'.'.$extension, 'local');
+        
+        // #region debug-point storage-temp
+        Log::debug('DEBUG: mobile-storage-temp', [
+            'tmp_path' => $tmpPath,
+            'store_success' => $tmpPath !== false,
+            'timestamp' => now()->toISOString(),
+        ]);
+        // #endregion
+        
+        $baseName = 'mobile_' . $section->slug . '_' . $section->id;
+
+        Log::info('sections.mobile_video.enqueue', [
+            'section_id' => $id,
+            'slug' => $section->slug,
+            'extension' => $extension,
+            'tmp_path' => $tmpPath,
+            'base_name' => $baseName,
+            'size' => $file->getSize(),
+        ]);
+
+        $section = $this->sections->update($section, [
+            'mobile_processing_status' => 'pending',
+            'mobile_processing_error' => null,
+        ]);
+
+        // #region debug-point job-dispatch
+        Log::debug('DEBUG: mobile-job-dispatch', [
+            'job_class' => \App\Jobs\ProcessMobileVideoJob::class,
+            'section_id' => $section->id,
+            'timestamp' => now()->toISOString(),
+        ]);
+        // #endregion
+        
+        Bus::dispatch(new \App\Jobs\ProcessMobileVideoJob($section->id, $tmpPath, $baseName));
+
+        return $section;
+    }
+
     public function status(int $id): array
     {
         $section = $this->requireSection($id);
@@ -108,6 +187,8 @@ class SectionService
         return [
             'status' => $section->processing_status,
             'error' => $section->processing_error,
+            'mobile_status' => $section->mobile_processing_status,
+            'mobile_error' => $section->mobile_processing_error,
         ];
     }
 

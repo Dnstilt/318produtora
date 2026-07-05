@@ -1,5 +1,7 @@
 # 318 Produtora — Laravel 11
 
+Sistema com landpage e área admin para upload de vídeos e fotos além de suas conversões.
+
 ## Requisitos
 
 - PHP 8.2+
@@ -59,6 +61,8 @@
 - Email: `admin@site.com`
 - Senha: `Admin@1234`
 
+Não sobe o seeder em produção, se subir crie um novo admin para usar no seeder e apague.
+
 ## Fila (processamento de vídeo)
 
 O upload de vídeo dispara o job `ProcessVideoJob` via queue. Use `QUEUE_CONNECTION=database` e execute:
@@ -70,6 +74,8 @@ php artisan queue:work
 ## FFmpeg
 
 Por padrão o app usa:
+
+API do cloudnary para transformações de vídeo tanto para pc como para mobile. Foi escolhida essa arquitetura pois para vps compartilhada não tem acesso a instalar o ffmpeg localmente. Se usar vps própria, pode instalar o ffmpeg e ajustar no `.env`: assim como criar a variável de ambiente `FFMPEG_BINARY` e `FFPROBE_BINARY`. Também modificar controller `AdminControllerController` para direcionar ao service e fazer as conversões.
 
 - `FFMPEG_BINARY=ffmpeg`
 - `FFPROBE_BINARY=ffprobe`

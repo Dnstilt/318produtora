@@ -12,7 +12,7 @@ class UploadSectionVideoRequest extends FormRequest
             'video' => [
                 'required',
                 'file',
-                'max:512000',
+                'max:102400',
                 'mimes:mp4,webm,mov,mkv,avi',
             ],
         ];

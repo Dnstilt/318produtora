@@ -29,9 +29,15 @@
                                 {{ $section->slug }}
                             </div>
                             <div class="text-sm text-gray-600 dark:text-gray-300">
-                                Status:
+                                Status Desktop:
                                 <span class="js-section-status font-semibold" data-section-id="{{ $section->id }}">
                                     {{ $section->processing_status }}
+                                </span>
+                            </div>
+                            <div class="text-sm text-gray-600 dark:text-gray-300">
+                                Status Mobile:
+                                <span class="js-section-mobile-status font-semibold" data-section-id="{{ $section->id }}">
+                                    {{ $section->mobile_processing_status }}
                                 </span>
                             </div>
                         </div>
@@ -40,12 +46,18 @@
                         </div>
                         <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                             Vídeos:
-                            {{ $section->video_public_id ?? '—' }}
+                            {{ $section->video_public_id ?? '—' }} (Desktop) / {{ $section->mobile_video_public_id ?? '—' }} (Mobile)
                         </div>
 
                         @if ($section->processing_status === 'error' && $section->processing_error)
                         <div class="mt-2 text-sm text-red-600">
-                            {{ $section->processing_error }}
+                            Erro Desktop: {{ $section->processing_error }}
+                        </div>
+                        @endif
+
+                        @if ($section->mobile_processing_status === 'error' && $section->mobile_processing_error)
+                        <div class="mt-2 text-sm text-red-600">
+                            Erro Mobile: {{ $section->mobile_processing_error }}
                         </div>
                         @endif
 
@@ -85,17 +97,36 @@
                         <form class="mt-5 space-y-3 js-admin-form js-video-upload-form" method="POST" action="{{ url('/admin/sections/'.$section->id.'/video') }}" enctype="multipart/form-data" data-loading-text="Enviando...">
                             @csrf
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                                Upload do vídeo original
+                                Vídeo Desktop (horizontal, máx 100MB)
                             </label>
                             <input
                                 type="file"
                                 name="video"
+                                accept="video/*"
                                 class="block w-full text-sm text-gray-700 dark:text-gray-200"
                                 required>
                             <button
                                 type="submit"
                                 class="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600">
-                                Enviar e processar
+                                Enviar Desktop
+                            </button>
+                        </form>
+
+                        <form class="mt-5 space-y-3 js-admin-form js-video-mobile-upload-form" method="POST" action="{{ url('/admin/sections/'.$section->id.'/mobile-video') }}" enctype="multipart/form-data" data-loading-text="Enviando...">
+                            @csrf
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                                Vídeo Mobile (vertical, máx 100MB)
+                            </label>
+                            <input
+                                type="file"
+                                name="video"
+                                accept="video/*"
+                                class="block w-full text-sm text-gray-700 dark:text-gray-200"
+                                required>
+                            <button
+                                type="submit"
+                                class="inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600">
+                                Enviar Mobile
                             </button>
                         </form>
                     </div>

@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class ProcessVideoJob implements ShouldQueue
+class ProcessMobileVideoJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -40,7 +40,7 @@ class ProcessVideoJob implements ShouldQueue
     {
         $section = Section::find($this->sectionId);
         if (!$section) {
-            Log::warning('video.process.missing_section', [
+            Log::warning('mobile_video.process.missing_section', [
                 'section_id' => $this->sectionId,
                 'temp_path' => $this->tempPath,
             ]);
@@ -48,25 +48,25 @@ class ProcessVideoJob implements ShouldQueue
         }
 
         Section::where('id', $this->sectionId)->update([
-            'processing_status' => 'processing',
-            'processing_error' => null,
+            'mobile_processing_status' => 'processing',
+            'mobile_processing_error' => null,
             'updated_at' => now(),
         ]);
 
         try {
-            $paths = $mediaService->convertSectionVideo($this->tempPath, $this->baseName);
+            $paths = $mediaService->convertSectionMobileVideo($this->tempPath, $this->baseName);
 
-            $hasDesktop = !empty($paths['video_mp4_desktop']);
+            $hasMobile  = !empty($paths['video_mp4_mobile']);
 
-            if (!$hasDesktop) {
-                throw new \RuntimeException('Nenhuma variante de vídeo foi baixada com sucesso.');
+            if (!$hasMobile) {
+                throw new \RuntimeException('Nenhuma variante de vídeo mobile foi baixada com sucesso.');
             }
             Section::where('id', $this->sectionId)->update([
-                'video_public_id'    => $paths['video_public_id'],
-                'video_webm_desktop' => $paths['video_webm_desktop'],
-                'video_mp4_desktop'  => $paths['video_mp4_desktop'],
-                'processing_status'  => 'done',
-                'processing_error'   => null,
+                'mobile_video_public_id' => $paths['mobile_video_public_id'],
+                'video_webm_mobile'      => $paths['video_webm_mobile'],
+                'video_mp4_mobile'       => $paths['video_mp4_mobile'],
+                'mobile_processing_status'  => 'done',
+                'mobile_processing_error'   => null,
                 'updated_at' => now(),
             ]);
             // Sincronizar vídeos apenas em produção
@@ -75,14 +75,14 @@ class ProcessVideoJob implements ShouldQueue
             }
             
         } catch (\Throwable $e) {
-            Log::error('video.process.error', [
+            Log::error('mobile_video.process.error', [
                 'section_id' => $this->sectionId,
                 'exception' => $e,
             ]);
 
             Section::where('id', $this->sectionId)->update([
-                'processing_status' => 'error',
-                'processing_error' => $e->getMessage(),
+                'mobile_processing_status' => 'error',
+                'mobile_processing_error' => $e->getMessage(),
                 'updated_at' => now(),
             ]);
 
@@ -93,8 +93,8 @@ class ProcessVideoJob implements ShouldQueue
     public function failed(\Throwable $e): void
     {
         Section::where('id', $this->sectionId)->update([
-            'processing_status' => 'error',
-            'processing_error' => 'Falha após ' . $this->tries . ' tentativas: ' . $e->getMessage(),
+            'mobile_processing_status' => 'error',
+            'mobile_processing_error' => 'Falha após ' . $this->tries . ' tentativas: ' . $e->getMessage(),
         ]);
     }
 }

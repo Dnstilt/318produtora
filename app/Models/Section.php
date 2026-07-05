@@ -26,6 +26,9 @@ class Section extends Model
         'video_mp4_mobile',
         'processing_status',
         'processing_error',
+        'mobile_video_public_id',
+        'mobile_processing_status',
+        'mobile_processing_error',
     ];
 
     protected $casts = [
