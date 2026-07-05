@@ -43,4 +43,15 @@ return [
         'threads' => (int) env('FFMPEG_THREADS', 0),
     ],
 
+    'rsync' => [
+        'videos' => [
+            'source' => env('RSYNC_VIDEOS_SOURCE'),
+            'dest' => env('RSYNC_VIDEOS_DEST'),
+        ],
+        'photos' => [
+            'source' => env('RSYNC_PHOTOS_SOURCE'),
+            'dest' => env('RSYNC_PHOTOS_DEST'),
+        ],
+    ],
+
 ];

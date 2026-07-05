@@ -32,11 +32,11 @@ class FooterPhoto extends Model
 
         static::deleting(function (self $model): void {
             // Delete physical files when model is deleted
-            \Illuminate\Support\Facades\Storage::disk('public')->delete([
+            \Illuminate\Support\Facades\Storage::disk('public')->delete(array_filter([
                 $model->photo_avif,
                 $model->photo_webp,
                 $model->photo_jpg,
-            ]);
+            ]));
         });
     }
 }

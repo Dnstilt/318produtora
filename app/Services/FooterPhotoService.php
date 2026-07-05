@@ -47,7 +47,11 @@ class FooterPhotoService
         $paths = $this->mediaConversion->convertFooterPhoto($file, $photo->id);
         $photo = $this->photos->update($photo, $paths);
         
-        shell_exec('rsync -a /home1/faust163/repositories/318produtora/storage/app/public/photos/ /home1/faust163/public_html/storage/photos/');
+        $rsyncSource = config('services.rsync.photos.source');
+        $rsyncDest = config('services.rsync.photos.dest');
+        if (app()->environment('production') && $rsyncSource && $rsyncDest) {
+            shell_exec(sprintf('rsync -a %s %s', escapeshellarg($rsyncSource), escapeshellarg($rsyncDest)));
+        }
 
         return $photo;
     }
@@ -69,11 +73,11 @@ class FooterPhotoService
             ],
         ]);
 
-        Storage::disk('public')->delete([
+        Storage::disk('public')->delete(array_filter([
             $photo->photo_avif,
             $photo->photo_webp,
             $photo->photo_jpg,
-        ]);
+        ]));
 
         $this->photos->delete($photo);
 

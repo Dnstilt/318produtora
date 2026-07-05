@@ -70,8 +70,10 @@ class ProcessMobileVideoJob implements ShouldQueue
                 'updated_at' => now(),
             ]);
             // Sincronizar vídeos apenas em produção
-            if (app()->environment('production')) {
-                shell_exec('rsync -a /home1/faust163/repositories/318produtora/storage/app/public/videos/ /home1/faust163/public_html/storage/videos/');
+            $rsyncSource = config('services.rsync.videos.source');
+            $rsyncDest = config('services.rsync.videos.dest');
+            if (app()->environment('production') && $rsyncSource && $rsyncDest) {
+                shell_exec(sprintf('rsync -a %s %s', escapeshellarg($rsyncSource), escapeshellarg($rsyncDest)));
             }
             
         } catch (\Throwable $e) {
