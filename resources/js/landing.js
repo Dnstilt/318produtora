@@ -679,7 +679,6 @@ function setupFooterTextReveal() {
 
   function resetReveal() {
     [titleEl, subtitleEl].forEach((el) => {
-      F
       if (!el) return;
       el.style.opacity = '0';
       if (el.dataset.original) el.textContent = el.dataset.original;
