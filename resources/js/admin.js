@@ -276,12 +276,10 @@ window.addEventListener('DOMContentLoaded', () => {
             if (ids.length === 0) {
                 clearInterval(pollTimer);
                 pollTimer = null;
+                setVideoUploadsEnabled(true);
                 return;
             }
             const statuses = await pollSectionStatuses(ids);
-            let completedDone = 0;
-            let completedError = 0;
-            let lastErrorMessage = '';
 
             for (const [id, info] of statuses.entries()) {
                 const status = info?.status;
@@ -297,15 +295,11 @@ window.addEventListener('DOMContentLoaded', () => {
                     if (!notifiedSectionIds.has(id)) {
                         notifiedSectionIds.add(id);
                         if (status === 'done' || mobileStatus === 'done') {
-                            completedDone += 1;
-                        }
-                        if (status === 'error') {
-                            completedError += 1;
-                            if (error) lastErrorMessage = error;
-                        }
-                        if (mobileStatus === 'error') {
-                            completedError += 1;
-                            if (mobileError) lastErrorMessage = mobileError;
+                            setVideoBanner('success', 'Conversão concluída com sucesso.');
+                            setTimeout(() => setVideoBanner('success', ''), 6000);
+                        } else if (status === 'error' || mobileStatus === 'error') {
+                            const errMsg = error || mobileError || 'Falha na conversão.';
+                            setVideoBanner('error', `Falha na conversão: ${errMsg}`);
                         }
                     }
                 }
@@ -316,12 +310,6 @@ window.addEventListener('DOMContentLoaded', () => {
                 pollTimer = null;
                 setVideoUploadsEnabled(true);
                 sessionStorage.removeItem('adminActiveVideoSectionId');
-                if (completedDone > 0) {
-                    setVideoBanner('success', completedDone === 1 ? 'Conversão concluída com sucesso.' : `Conversões concluídas com sucesso: ${completedDone}.`);
-                    setTimeout(() => setVideoBanner('success', ''), 6000);
-                } else if (completedError > 0) {
-                    setVideoBanner('error', lastErrorMessage ? `Falha na conversão: ${lastErrorMessage}` : 'Falha na conversão. Verifique o status da seção.');
-                }
             }
         };
 
@@ -358,7 +346,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const initialStatusesById = readStatusesById();
     for (const [id, info] of initialStatusesById.entries()) {
-        if (info.status === 'processing' || info.mobile_status === 'processing') {
+        if (info.status === 'processing' || info.mobile_status === 'processing' || info.status === 'pending' || info.mobile_status === 'pending') {
             trackedSectionIds.add(id);
         }
     }
@@ -371,10 +359,17 @@ window.addEventListener('DOMContentLoaded', () => {
             setVideoUploadsEnabled(false);
         } else {
             sessionStorage.removeItem('adminActiveVideoSectionId');
+            if (info.status === 'done' || info.mobile_status === 'done') {
+                setVideoBanner('success', 'Conversão concluída com sucesso.');
+                setTimeout(() => setVideoBanner('success', ''), 6000);
+            } else if (info.status === 'error' || info.mobile_status === 'error') {
+                setVideoBanner('error', info.error || info.mobile_error || 'Falha na conversão.');
+            }
         }
     }
 
     if (trackedSectionIds.size > 0) {
+        setVideoUploadsEnabled(false);
         startPolling();
     }
 });
