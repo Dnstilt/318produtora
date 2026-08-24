@@ -412,41 +412,19 @@ body.landing-is-loading #landing-root {
     transform: translateY(-20px);
 }
 
-#footer-title .reveal-letter,
-#footer-subtitle .reveal-letter {
-    display: inline-block;
-    opacity: 0;
-    filter: blur(14px);
-    transform: scale(2.4);
-    will-change: opacity, filter;
-}
-
-.footer-title {
-    font-size: clamp(2.5rem, 5vw, 16rem);
-    padding-bottom: clamp(1rem, 3vw, 4rem);
-}
-
-.footer-subtitle {
-    font-size: clamp(1rem, 1.5vw, 6rem);
-    padding-bottom: clamp(1rem, 3vw, 7rem);
-}
-
-/* Ajustes de padding do footer via IDs (para manter compatibilidade com classes Tailwind) */
-#fotos .px-6 {
-    padding-left: clamp(1rem, 3vw, 8rem);
-    padding-right: clamp(1rem, 3vw, 8rem);
-    margin: 3rem;
-}
-
-#fotos .pt-16 {
-    padding-top: clamp(2rem, 5vw, 12rem);
-    margin: 2rem;
-}
-
+/* Ajustes do footer - entrada direta na galeria */
 #fotos {
     position: relative;
     isolation: isolate;
     overflow: hidden;
+}
+
+#fotos .footer-content {
+    padding-top: 0;
+}
+
+#fotos .gallery-grid-wrap {
+    padding-top: 0;
 }
 
 #fotos::before {
@@ -624,10 +602,6 @@ body.landing-is-loading #landing-root {
         padding-bottom: 0;
     }
     
-    .footer-subtitle {
-        margin-bottom: clamp(7rem, 10vw, 10rem);
-    }
-
     .gallery-divider-line {
         display: block;
         position: relative;

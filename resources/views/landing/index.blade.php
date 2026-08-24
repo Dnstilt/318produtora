@@ -91,19 +91,7 @@
         </div>
 
         <footer id="fotos" class="gallery-bg relative min-h-screen w-screen">
-            <div class="footer-content pt-16 sm:pt-24">
-                @if($fotosTitulo)
-                <h1 id="footer-title" class="footer-title font-bold text-[#ff2600] mb-4 mt-16 font-juana text-center opacity-0">
-                    {{ $fotosTitulo }}
-                </h1>
-                @endif
-
-                @if($fotosSubtitulo)
-                <p id="footer-subtitle" class="footer-subtitle font-pragext text-center text-[#000000ea] opacity-0">
-                    {{ $fotosSubtitulo }}
-                </p>
-                @endif
-
+            <div class="footer-content">
                 <section class="w-full" id="gallery-grid-section">
                     <div class="text-[#ff2600] gallery-grid-wrap">
                         <div class="gallery-col gallery-col-left">
@@ -200,9 +188,9 @@
                 </div>
             </div>
             <div class="flex flex-wrap items-center justify-center gap-6">
-                <p class="registro font-pragext text-[#ff2600]">
+                <a href="https://github.com/Dnstilt" target="_blank" rel="noopener noreferrer" class="registro font-pragext text-[#ff2600] hover:underline">
                     ©2026 318 Produtora e Website Urutau®
-                </p>
+                </a>
             </div>
         </footer>
     </main>

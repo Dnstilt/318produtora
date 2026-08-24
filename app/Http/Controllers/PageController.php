@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Page;
 use App\Models\Section;
 use App\Services\FooterPhotoService;
-use App\Services\PageService;
 use App\Services\SectionService;
 use App\Services\SocialLinkService;
 use Illuminate\View\View;
@@ -16,7 +14,6 @@ class PageController extends Controller
         private readonly SectionService $sections,
         private readonly FooterPhotoService $photos,
         private readonly SocialLinkService $socialLinks,
-        private readonly PageService $pages,
     ) {
     }
 
@@ -42,8 +39,6 @@ class PageController extends Controller
             ],
             'photos' => collect($this->photos->allOrdered()),
             'socialLinks' => $this->socialLinks->all(),
-            'fotosTitulo' => $this->pages->findBySlug(Page::SLUG_FOTOS_TITULO)?->content ?? 'Conheça nosso trabalho',
-            'fotosSubtitulo' => $this->pages->findBySlug(Page::SLUG_FOTOS_SUBTITULO)?->content ?? 'Entre em contato para mais informações.',
             'cloudName' => $cloudName,
         ]); 
     }

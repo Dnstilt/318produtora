@@ -596,99 +596,8 @@ function animateFrameText(frameEl) {
 }
 
 /* ============================================================
-   6. FOOTER – REVELAÇÃO DE TEXTOS, LOGO E E-MAIL
+   6. FOOTER – LOGO, E-MAIL E ENTRADA DA GALERIA
    ============================================================ */
-
-/**
- * Configura a revelação das letras do título e subtítulo do footer.
- */
-function setupFooterTextReveal() {
-  const titleEl = document.getElementById('footer-title');
-  const subtitleEl = document.getElementById('footer-subtitle');
-  if (!titleEl && !subtitleEl) return;
-
-  // guarda texto original para poder re-animar ao rolar para cima e voltar
-  if (titleEl) titleEl.dataset.original = titleEl.textContent.trim();
-  if (subtitleEl) subtitleEl.dataset.original = subtitleEl.textContent.trim();
-
-  function splitIntoLetters(el) {
-    const text = el.dataset.original || el.textContent.trim();
-    const order = [...text].map((_, i) => i);
-    for (let i = order.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [order[i], order[j]] = [order[j], order[i]];
-    }
-    const revealRank = new Array(text.length);
-    order.forEach((charIndex, rank) => { revealRank[charIndex] = rank; });
-
-    el.innerHTML = '';
-    const spans = [];
-    [...text].forEach((ch, i) => {
-      const span = document.createElement('span');
-      span.className = 'reveal-letter';
-      span.textContent = ch === ' ' ? '\u00A0' : ch;
-      span.style.transformOrigin = 'center bottom';
-      span.dataset.rank = revealRank[i];
-      el.appendChild(span);
-      spans.push(span);
-    });
-    return spans;
-  }
-
-  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
-  function easeOutQuad(t) { return 1 - (1 - t) * (1 - t); }
-
-  function animateGroup(spans, totalDuration, startTime) {
-    const total = spans.length;
-    if (total === 0) return;
-    function frame(now) {
-      const elapsed = now - startTime;
-      let allDone = true;
-      spans.forEach((span) => {
-        const rank = parseInt(span.dataset.rank, 10);
-        const letterStart = (rank / total) * (totalDuration * 0.6);
-        const letterDuration = totalDuration * 0.55;
-        let t = (elapsed - letterStart) / letterDuration;
-        t = Math.max(0, Math.min(1, t));
-        if (t < 1) allDone = false;
-        const tBlur = Math.min(1, t / 0.45);
-        const easedBlur = easeOutQuad(tBlur);
-        span.style.opacity = easedBlur.toFixed(3);
-        span.style.filter = `blur(${(1 - easedBlur) * 14}px)`;
-        const easedScale = easeOutCubic(t);
-        span.style.transform = `scale(${2.4 - easedScale * 1.4})`;
-      });
-      if (!allDone) requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
-  }
-
-  function playReveal() {
-    const now = performance.now();
-    if (titleEl) {
-      titleEl.style.opacity = '1';
-      const titleSpans = splitIntoLetters(titleEl);
-      animateGroup(titleSpans, 2200, now);
-    }
-    if (subtitleEl) {
-      subtitleEl.style.opacity = '1';
-      const subtitleSpans = splitIntoLetters(subtitleEl);
-      animateGroup(subtitleSpans, 2200, now + 500);
-    }
-  }
-
-  function resetReveal() {
-    [titleEl, subtitleEl].forEach((el) => {
-      if (!el) return;
-      el.style.opacity = '0';
-      if (el.dataset.original) el.textContent = el.dataset.original;
-    });
-  }
-
-  window._revealFooterLines = playReveal;
-  window._resetFooterLines = resetReveal;
-}
-
 /**
  * Faz o clique no logo do footer voltar ao primeiro slide.
  */
@@ -736,10 +645,7 @@ function setupFooterScrollReveal() {
     return Array.from(footer.querySelectorAll('.gallery-grid-item-wrap'));
   }
 
-  let lastScrollTop = 0;
-
   function onFooterScroll() {
-    const st = footer.scrollTop;
     const footerH = footer.clientHeight;
     const wraps = getWraps();
 
@@ -764,7 +670,6 @@ function setupFooterScrollReveal() {
       }
     });
 
-    lastScrollTop = st;
   }
 
   function resetScrollReveal() {
@@ -781,6 +686,7 @@ function setupFooterScrollReveal() {
   window._revealFooterLines = () => {
     if (originalReveal) originalReveal();
     footer.addEventListener('scroll', onFooterScroll);
+    onFooterScroll();
   };
 
   window._resetFooterLines = () => {
@@ -913,7 +819,6 @@ window.addEventListener('DOMContentLoaded', () => {
   setupVideoLazyLoad();
   setupNavActive(0);
   setupScrollAnimations();
-  setupFooterTextReveal();
   setupFooterScrollReveal();
   setupFooterLogoClick();
   initLetterSlide();

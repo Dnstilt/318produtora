@@ -41,8 +41,6 @@ class AdminController extends Controller
             'sections' => $this->sections->all(),
             'photos' => $this->photos->allOrdered(),
             'socialLinks' => $this->socialLinks->all(),
-            'pageFotosTitulo' => $this->pages->findBySlug(Page::SLUG_FOTOS_TITULO),
-            'pageFotosSubtitulo' => $this->pages->findBySlug(Page::SLUG_FOTOS_SUBTITULO),
         ]);
     }
 

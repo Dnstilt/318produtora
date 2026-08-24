@@ -144,32 +144,10 @@
 
             <section class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Fotos do Carrossel e Textos do Rodapé</h3>
-                </div>
-                
-                <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    <form method="POST" action="{{ url('/admin/pages/fotos_titulo') }}" class="rounded-md border border-gray-200 p-4 dark:border-gray-700 js-admin-form" data-loading-text="Salvando...">
-                        @csrf
-                        @method('PUT')
-                        <div class="text-sm font-semibold text-gray-800 dark:text-gray-100">Título do Fotos</div>
-                        <input type="text" class="mt-3 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100" name="content" value="{{ old('content', $pageFotosTitulo?->content) }}">
-                        <button type="submit" class="mt-3 inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500">
-                            Salvar Título
-                        </button>
-                    </form>
-
-                    <form method="POST" action="{{ url('/admin/pages/fotos_subtitulo') }}" class="rounded-md border border-gray-200 p-4 dark:border-gray-700 js-admin-form" data-loading-text="Salvando...">
-                        @csrf
-                        @method('PUT')
-                        <div class="text-sm font-semibold text-gray-800 dark:text-gray-100">Subtítulo do Fotos</div>
-                        <textarea class="mt-3 w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100" name="content" rows="3">{{ old('content', $pageFotosSubtitulo?->content) }}</textarea>
-                        <button type="submit" class="mt-3 inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500">
-                            Salvar Subtítulo
-                        </button>
-                    </form>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Fotos</h3>
                 </div>
 
-                <div class="mt-8 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div class="mt-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <h4 class="text-md font-semibold text-gray-900 dark:text-gray-100">Gerenciar Fotos</h4>
                     <form method="POST" action="{{ url('/admin/photos') }}" enctype="multipart/form-data"
                         class="flex items-center gap-3 js-admin-form" data-loading-text="Adicionando...">

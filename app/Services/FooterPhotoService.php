@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 
 class FooterPhotoService
 {
-    private const MAX_PHOTOS = 8;
+    private const MAX_PHOTOS = 15;
 
     public function __construct(
         private readonly FooterPhotoRepositoryInterface $photos,
@@ -27,7 +27,7 @@ class FooterPhotoService
     {
         $nextOrder = $this->photos->allOrdered()->count();
         if ($nextOrder >= self::MAX_PHOTOS) {
-            throw new \RuntimeException('limite de 8 fotos atingido, subistitua uma das atuais');
+            throw new \RuntimeException('limite de 15 fotos atingido, subistitua uma das atuais');
         }
 
         $photo = $this->photos->create([
